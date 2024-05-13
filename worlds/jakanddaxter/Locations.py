@@ -8,7 +8,6 @@ class JakAndDaxterLocation(Location):
 
 
 # All Locations
-# Because all items in Jak And Daxter are unique and do not regenerate, we can use this same table as our item table.
 # Each Item ID == its corresponding Location ID. While we're here, do all the ID conversions needed.
 location_table = {
     **{Cells.to_ap_id(k): Cells.locGR_cellTable[k] for k in Cells.locGR_cellTable},

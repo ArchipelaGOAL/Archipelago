@@ -1,7 +1,7 @@
 from BaseClasses import MultiWorld, CollectionState
 from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Regions import Jak1Level, Jak1SubLevel, level_table, subLevel_table
-from .Locations import location_table as item_table
+from .Items import item_table
 from .locs import CellLocations as Cells, ScoutLocations as Scouts
 
 
@@ -159,7 +159,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
                     Jak1Level.VOLCANIC_CRATER,
                     Jak1Level.SNOWY_MOUNTAIN,
                     lambda state: has_count_of(pre_sm_cells, 2, player, state)
-                                  or state.count_group("Power Cell", player) >= 71)  # Yeah, this is a weird one.
+                    or state.count_group("Power Cell", player) >= 71)  # Yeah, this is a weird one.
 
     connect_region_to_sub(multiworld, player,
                           Jak1Level.SNOWY_MOUNTAIN,

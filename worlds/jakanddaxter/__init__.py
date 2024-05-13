@@ -5,12 +5,13 @@ from BaseClasses import Item, ItemClassification, Tutorial
 from .GameID import jak1_id, jak1_name
 from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Items import JakAndDaxterItem
-from .Locations import JakAndDaxterLocation, location_table as item_table
+from .Locations import JakAndDaxterLocation, location_table
+from .Items import JakAndDaxterItem, item_table
 from .locs import CellLocations as Cells, ScoutLocations as Scouts, OrbLocations as Orbs
 from .Regions import create_regions
 from .Rules import set_rules
-from ..AutoWorld import World, WebWorld
-from ..LauncherComponents import components, Component, launch_subprocess, Type
+from worlds.AutoWorld import World, WebWorld
+from worlds.LauncherComponents import components, Component, launch_subprocess, Type
 
 
 class JakAndDaxterSettings(settings.Group):
@@ -46,8 +47,7 @@ class JakAndDaxterWorld(World):
     """
     # ID, name, version
     game = jak1_name
-    data_version = 1
-    required_client_version = (0, 4, 5)
+    required_client_version = (0, 4, 6)
 
     # Options
     settings: typing.ClassVar[JakAndDaxterSettings]
@@ -61,7 +61,7 @@ class JakAndDaxterWorld(World):
     # Stored as {ID: Name} pairs, these must now be swapped to {Name: ID} pairs.
     # Remember, the game ID and various offsets for each item type have already been calculated.
     item_name_to_id = {item_table[k]: k for k in item_table}
-    location_name_to_id = {item_table[k]: k for k in item_table}
+    location_name_to_id = {location_table[k]: k for k in location_table}
     item_name_groups = {
         "Power Cell": {item_table[k]: k for k in item_table
                        if k in range(jak1_id, jak1_id + Scouts.fly_offset)},
@@ -95,6 +95,9 @@ class JakAndDaxterWorld(World):
 
         item = JakAndDaxterItem(name, classification, item_id, self.player)
         return item
+
+    def get_filler_item_name(self):
+        return "Power Cell"  # TODO - Precursor Orb once implemented. Until then, enjoy the free progression.
 
 
 def launch_client():
