@@ -1,45 +1,65 @@
 from BaseClasses import Item
 from .GameID import jak1_name
-from .items import CellItems as Cells, ScoutItems as Scouts
+from .locs import CellLocations as Cells, ScoutLocations as Scouts, SpecialLocations as Specials
 
 
 class JakAndDaxterItem(Item):
     game: str = jak1_name
 
 
+# The following are generic, fungible, interchangeable items.
+# One power cell is indistinguishable from every other power cell.
+# Ditto scout flies, minus the fact they are tied to their respective levels.
+#    Take note that their ID is equal to their respective power cell's ID.
+# Ditto Precursor Orbs -- TODO ^^.
+cell_item_table = {
+    0:  "Power Cell",
+}
+
+scout_item_table = {
+    95: "Scout Fly - GR",
+    75: "Scout Fly - SV",
+    7:  "Scout Fly - FJ",
+    20: "Scout Fly - SB",
+    28: "Scout Fly - MI",
+    68: "Scout Fly - FC",
+    76: "Scout Fly - RV",
+    57: "Scout Fly - PB",
+    49: "Scout Fly - LPC",
+    43: "Scout Fly - BS",
+    88: "Scout Fly - MP",
+    77: "Scout Fly - VC",
+    85: "Scout Fly - SC",
+    65: "Scout Fly - SM",
+    90: "Scout Fly - LT",
+    91: "Scout Fly - GMC",
+}
+
+# orb_item_table = {
+#     ???: "Precursor Orb",
+# }
+
+# These are special items representing unique unlocks in the world.
+# They are not tied to their respective tasks or power cells, they are
+# entirely standalone and thus can be added to the item pool as independent items.
+special_item_table = {
+    5: "Fisherman's Boat",
+    4: "Jungle Elevator",
+    2: "Blue Eco Switch",
+    17: "Flut Flut",
+    60: "Yellow Eco Switch",
+    63: "Snowy Fort Gate",
+    71: "Freed Blue Sage",
+    72: "Freed Red Sage",
+    73: "Freed Yellow Sage",
+    70: "Freed Green Sage",
+}
+
 # All Items
-# Each Item ID == its corresponding Location ID. While we're here, do all the ID conversions needed.
+# While we're here, do all the ID conversions needed.
 item_table = {
-    **{Cells.to_ap_id(k): Cells.locGR_cellTable[k] for k in Cells.locGR_cellTable},
-    **{Cells.to_ap_id(k): Cells.locSV_cellTable[k] for k in Cells.locSV_cellTable},
-    **{Cells.to_ap_id(k): Cells.locFJ_cellTable[k] for k in Cells.locFJ_cellTable},
-    **{Cells.to_ap_id(k): Cells.locSB_cellTable[k] for k in Cells.locSB_cellTable},
-    **{Cells.to_ap_id(k): Cells.locMI_cellTable[k] for k in Cells.locMI_cellTable},
-    **{Cells.to_ap_id(k): Cells.locFC_cellTable[k] for k in Cells.locFC_cellTable},
-    **{Cells.to_ap_id(k): Cells.locRV_cellTable[k] for k in Cells.locRV_cellTable},
-    **{Cells.to_ap_id(k): Cells.locPB_cellTable[k] for k in Cells.locPB_cellTable},
-    **{Cells.to_ap_id(k): Cells.locLPC_cellTable[k] for k in Cells.locLPC_cellTable},
-    **{Cells.to_ap_id(k): Cells.locBS_cellTable[k] for k in Cells.locBS_cellTable},
-    **{Cells.to_ap_id(k): Cells.locMP_cellTable[k] for k in Cells.locMP_cellTable},
-    **{Cells.to_ap_id(k): Cells.locVC_cellTable[k] for k in Cells.locVC_cellTable},
-    **{Cells.to_ap_id(k): Cells.locSC_cellTable[k] for k in Cells.locSC_cellTable},
-    **{Cells.to_ap_id(k): Cells.locSM_cellTable[k] for k in Cells.locSM_cellTable},
-    **{Cells.to_ap_id(k): Cells.locLT_cellTable[k] for k in Cells.locLT_cellTable},
-    **{Cells.to_ap_id(k): Cells.locGMC_cellTable[k] for k in Cells.locGMC_cellTable},
-    **{Scouts.to_ap_id(k): Scouts.locGR_scoutTable[k] for k in Scouts.locGR_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locSV_scoutTable[k] for k in Scouts.locSV_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locFJ_scoutTable[k] for k in Scouts.locFJ_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locSB_scoutTable[k] for k in Scouts.locSB_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locMI_scoutTable[k] for k in Scouts.locMI_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locFC_scoutTable[k] for k in Scouts.locFC_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locRV_scoutTable[k] for k in Scouts.locRV_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locPB_scoutTable[k] for k in Scouts.locPB_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locLPC_scoutTable[k] for k in Scouts.locLPC_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locBS_scoutTable[k] for k in Scouts.locBS_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locMP_scoutTable[k] for k in Scouts.locMP_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locVC_scoutTable[k] for k in Scouts.locVC_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locSC_scoutTable[k] for k in Scouts.locSC_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locSM_scoutTable[k] for k in Scouts.locSM_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locLT_scoutTable[k] for k in Scouts.locLT_scoutTable},
-    **{Scouts.to_ap_id(k): Scouts.locGMC_scoutTable[k] for k in Scouts.locGMC_scoutTable}
+    **{Cells.to_ap_id(k): cell_item_table[k] for k in cell_item_table},
+    **{Scouts.to_ap_id(k): scout_item_table[k] for k in scout_item_table},
+    # **{Orbs.to_ap_id(k): orb_item_table[k] for k in orb_item_table},
+    **{Specials.to_ap_id(k): special_item_table[k] for k in special_item_table},
 }

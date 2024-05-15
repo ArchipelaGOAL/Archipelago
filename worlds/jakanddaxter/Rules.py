@@ -2,7 +2,7 @@ from BaseClasses import MultiWorld, CollectionState
 from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Regions import Jak1Level, Jak1SubLevel, level_table, subLevel_table
 from .Items import item_table
-from .locs import CellLocations as Cells, ScoutLocations as Scouts
+from .locs import CellLocations as Cells, SpecialLocations as Specials
 
 
 # Helper function for a handful of special cases
@@ -21,24 +21,14 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     # Setting up some useful variables here because the offset numbers can get confusing
     # for access rules. Feel free to add more variables here to keep the code more readable.
     # You DO need to convert the game ID's to AP ID's here.
-    gr_cells = {Cells.to_ap_id(k) for k in Cells.locGR_cellTable}
-    fj_temple_top = Cells.to_ap_id(4)
-    fj_blue_switch = Cells.to_ap_id(2)
-    fj_plant_boss = Cells.to_ap_id(6)
-    fj_fisherman = Cells.to_ap_id(5)
-    sb_flut_flut = Cells.to_ap_id(17)
-    fc_end = Cells.to_ap_id(69)
-    pb_purple_rings = Cells.to_ap_id(58)
-    lpc_sunken = Cells.to_ap_id(47)
-    lpc_helix = Cells.to_ap_id(50)
-    mp_klaww = Cells.to_ap_id(86)
-    mp_end = Cells.to_ap_id(87)
-    pre_sm_cells = {Cells.to_ap_id(k) for k in {**Cells.locVC_cellTable, **Cells.locSC_cellTable}}
-    sm_yellow_switch = Cells.to_ap_id(60)
-    sm_fort_gate = Cells.to_ap_id(63)
-    lt_end = Cells.to_ap_id(89)
-    gmc_rby_sages = {Cells.to_ap_id(k) for k in {71, 72, 73}}
-    gmc_green_sage = Cells.to_ap_id(70)
+    fj_jungle_elevator = Specials.to_ap_id(4)
+    fj_blue_switch = Specials.to_ap_id(2)
+    fj_fisherman = Specials.to_ap_id(5)
+    sb_flut_flut = Specials.to_ap_id(17)
+    sm_yellow_switch = Specials.to_ap_id(60)
+    sm_fort_gate = Specials.to_ap_id(63)
+    gmc_rby_sages = {Specials.to_ap_id(k) for k in {71, 72, 73}}
+    gmc_green_sage = Specials.to_ap_id(70)
 
     # Start connecting regions and set their access rules.
     connect_start(multiworld, player, Jak1Level.GEYSER_ROCK)
@@ -46,7 +36,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     connect_regions(multiworld, player,
                     Jak1Level.GEYSER_ROCK,
                     Jak1Level.SANDOVER_VILLAGE,
-                    lambda state: has_count_of(gr_cells, 4, player, state))
+                    lambda state: state.count_group("Power Cell", player) >= 4)
 
     connect_regions(multiworld, player,
                     Jak1Level.SANDOVER_VILLAGE,
@@ -55,7 +45,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     connect_region_to_sub(multiworld, player,
                           Jak1Level.FORBIDDEN_JUNGLE,
                           Jak1SubLevel.FORBIDDEN_JUNGLE_SWITCH_ROOM,
-                          lambda state: state.has(item_table[fj_temple_top], player))
+                          lambda state: state.has(item_table[fj_jungle_elevator], player))
 
     connect_subregions(multiworld, player,
                        Jak1SubLevel.FORBIDDEN_JUNGLE_SWITCH_ROOM,
@@ -64,8 +54,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_sub_to_region(multiworld, player,
                           Jak1SubLevel.FORBIDDEN_JUNGLE_PLANT_ROOM,
-                          Jak1Level.FORBIDDEN_JUNGLE,
-                          lambda state: state.has(item_table[fj_plant_boss], player))
+                          Jak1Level.FORBIDDEN_JUNGLE)
 
     connect_regions(multiworld, player,
                     Jak1Level.SANDOVER_VILLAGE,
@@ -88,8 +77,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_regions(multiworld, player,
                     Jak1Level.FIRE_CANYON,
-                    Jak1Level.ROCK_VILLAGE,
-                    lambda state: state.has(item_table[fc_end], player))
+                    Jak1Level.ROCK_VILLAGE)
 
     connect_regions(multiworld, player,
                     Jak1Level.ROCK_VILLAGE,
@@ -97,8 +85,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_region_to_sub(multiworld, player,
                           Jak1Level.PRECURSOR_BASIN,
-                          Jak1SubLevel.PRECURSOR_BASIN_BLUE_RINGS,
-                          lambda state: state.has(item_table[pb_purple_rings], player))
+                          Jak1SubLevel.PRECURSOR_BASIN_BLUE_RINGS)
 
     connect_regions(multiworld, player,
                     Jak1Level.ROCK_VILLAGE,
@@ -114,13 +101,11 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_sub_to_region(multiworld, player,
                           Jak1SubLevel.LOST_PRECURSOR_CITY_HELIX_ROOM,
-                          Jak1Level.LOST_PRECURSOR_CITY,
-                          lambda state: state.has(item_table[lpc_helix], player))
+                          Jak1Level.LOST_PRECURSOR_CITY)
 
     connect_sub_to_region(multiworld, player,
                           Jak1SubLevel.LOST_PRECURSOR_CITY_SUNKEN_ROOM,
-                          Jak1Level.ROCK_VILLAGE,
-                          lambda state: state.has(item_table[lpc_sunken], player))
+                          Jak1Level.ROCK_VILLAGE)
 
     connect_regions(multiworld, player,
                     Jak1Level.ROCK_VILLAGE,
@@ -138,8 +123,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_region_to_sub(multiworld, player,
                           Jak1Level.MOUNTAIN_PASS,
-                          Jak1SubLevel.MOUNTAIN_PASS_RACE,
-                          lambda state: state.has(item_table[mp_klaww], player))
+                          Jak1SubLevel.MOUNTAIN_PASS_RACE)
 
     connect_subregions(multiworld, player,
                        Jak1SubLevel.MOUNTAIN_PASS_RACE,
@@ -148,8 +132,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_sub_to_region(multiworld, player,
                           Jak1SubLevel.MOUNTAIN_PASS_RACE,
-                          Jak1Level.VOLCANIC_CRATER,
-                          lambda state: state.has(item_table[mp_end], player))
+                          Jak1Level.VOLCANIC_CRATER)
 
     connect_regions(multiworld, player,
                     Jak1Level.VOLCANIC_CRATER,
@@ -157,9 +140,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_regions(multiworld, player,
                     Jak1Level.VOLCANIC_CRATER,
-                    Jak1Level.SNOWY_MOUNTAIN,
-                    lambda state: has_count_of(pre_sm_cells, 2, player, state)
-                    or state.count_group("Power Cell", player) >= 71)  # Yeah, this is a weird one.
+                    Jak1Level.SNOWY_MOUNTAIN)  # Yeah, this is a weird one.
 
     connect_region_to_sub(multiworld, player,
                           Jak1Level.SNOWY_MOUNTAIN,
@@ -183,8 +164,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     connect_regions(multiworld, player,
                     Jak1Level.LAVA_TUBE,
-                    Jak1Level.GOL_AND_MAIAS_CITADEL,
-                    lambda state: state.has(item_table[lt_end], player))
+                    Jak1Level.GOL_AND_MAIAS_CITADEL)
 
     connect_region_to_sub(multiworld, player,
                           Jak1Level.GOL_AND_MAIAS_CITADEL,
