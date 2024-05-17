@@ -5,6 +5,7 @@ from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Regions import Jak1Level, Jak1SubLevel, level_table, sub_level_table
 from .Items import item_table
 from .locs import CellLocations as Cells, ScoutLocations as Scouts, SpecialLocations as Specials
+from worlds.jakanddaxter.Locations import location_table
 
 
 def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):
@@ -14,9 +15,10 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     # You DO need to convert the game ID's to AP ID's here.
     power_cell = item_table[Cells.to_ap_id(0)]
 
-    sv_traders = [item_table[Specials.to_ap_id(k)] for k in {11, 12, 13, 14}]
-    rv_traders = [item_table[Specials.to_ap_id(k)] for k in {31, 32, 33, 34, 35}]
-    vc_traders = [item_table[Specials.to_ap_id(k)] for k in {96, 97, 98, 99, 100, 101}]
+    # The int/list structure here is intentional, see `set_trade_requirements` for how we handle these.
+    sv_traders = [11, 12, [13, 14]]
+    rv_traders = [31, 32, 33, [34, 35]]
+    vc_traders = [[96, 97, 98, 99], [100, 101]]
 
     fj_jungle_elevator = item_table[Specials.to_ap_id(4)]
     fj_blue_switch = item_table[Specials.to_ap_id(2)]
@@ -197,9 +199,9 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     connect_region_to_sub(multiworld, player,
                           Jak1Level.GOL_AND_MAIAS_CITADEL,
                           Jak1SubLevel.GOL_AND_MAIAS_CITADEL_ROTATING_TOWER,
-                          lambda state: state.has(gmc_blue_sage) and
-                                        state.has(gmc_red_sage) and
-                                        state.has(gmc_yellow_sage))
+                          lambda state: state.has(gmc_blue_sage, player) and
+                                        state.has(gmc_red_sage, player) and
+                                        state.has(gmc_yellow_sage, player))
 
     # This is the final elevator, only active when you get the Item for freeing the Green Sage.
     connect_subregions(multiworld, player,
@@ -253,7 +255,7 @@ def set_fly_requirements(multiworld: MultiWorld, player: int):
 
 # TODO - Until we come up with a better progressive system for the traders (that avoids hard-locking if you pay the
 #  wrong ones and can't afford the right ones) just make all the traders locked behind the total amount to pay them all.
-def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level, traders: List[int], orb_count: int):
+def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level, traders: List, orb_count: int):
 
     def count_accessible_orbs(state) -> int:
         accessible_orbs = 0
@@ -264,6 +266,23 @@ def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level
         return accessible_orbs
 
     region = multiworld.get_region(level_table[level].name, player)
-    for loc in region.locations:
-        if loc in traders:
-            loc.access_rule = lambda state, orbs=orb_count: count_accessible_orbs(state) >= orbs
+    names_to_index = {region.locations[i].name: i for i in range(0, len(region.locations))}
+    for trader in traders:
+
+        # Singleton integers indicate a trader who has only one Location to check.
+        # (Mayor, Uncle, etc)
+        if type(trader) is int:
+            loc = region.locations[names_to_index[location_table[Cells.to_ap_id(trader)]]]
+            loc.access_rule = lambda state, orbs=orb_count: (
+                    count_accessible_orbs(state) >= orbs)
+
+        # Lists indicate a trader who has sequential Locations to check, each dependent on the last.
+        # (Oracles and Miners)
+        elif type(trader) is list:
+            previous_loc = None
+            for trade in trader:
+                loc = region.locations[names_to_index[location_table[Cells.to_ap_id(trade)]]]
+                loc.access_rule = lambda state, orbs=orb_count, prev=previous_loc: (
+                        count_accessible_orbs(state) >= orbs and
+                        (state.can_reach(prev, player) if prev else True))  # TODO - Can Reach or Has Reached?
+                previous_loc = loc

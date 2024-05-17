@@ -44,7 +44,6 @@ class Jak1Level(int, Enum):
 
 
 class Jak1SubLevel(int, Enum):
-    MAIN_AREA = auto()
     FORBIDDEN_JUNGLE_SWITCH_ROOM = auto()
     FORBIDDEN_JUNGLE_PLANT_ROOM = auto()
     SENTINEL_BEACH_CANNON_TOWER = auto()
@@ -99,8 +98,6 @@ level_table: typing.Dict[Jak1Level, Jak1LevelInfo] = {
 }
 
 sub_level_table: typing.Dict[Jak1SubLevel, Jak1LevelInfo] = {
-    Jak1SubLevel.MAIN_AREA:
-        Jak1LevelInfo("Main Area", 0),
     Jak1SubLevel.FORBIDDEN_JUNGLE_SWITCH_ROOM:
         Jak1LevelInfo("Forbidden Jungle Switch Room", 24),
     Jak1SubLevel.FORBIDDEN_JUNGLE_PLANT_ROOM:
