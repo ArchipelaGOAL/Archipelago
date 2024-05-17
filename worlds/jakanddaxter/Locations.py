@@ -10,6 +10,7 @@ class JakAndDaxterLocation(Location):
 # All Locations
 # Each Item ID == its corresponding Location ID. While we're here, do all the ID conversions needed.
 location_table = {
+    **{Cells.to_ap_id(k): Cells.loc7SF_cellTable[k] for k in Cells.loc7SF_cellTable},
     **{Cells.to_ap_id(k): Cells.locGR_cellTable[k] for k in Cells.locGR_cellTable},
     **{Cells.to_ap_id(k): Cells.locSV_cellTable[k] for k in Cells.locSV_cellTable},
     **{Cells.to_ap_id(k): Cells.locFJ_cellTable[k] for k in Cells.locFJ_cellTable},

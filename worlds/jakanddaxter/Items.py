@@ -7,15 +7,14 @@ class JakAndDaxterItem(Item):
     game: str = jak1_name
 
 
-# The following are generic, fungible, interchangeable items.
-# One power cell is indistinguishable from every other power cell.
-# Ditto scout flies, minus the fact they are tied to their respective levels.
-#    Take note that their ID is equal to their respective power cell's ID.
-# Ditto Precursor Orbs -- TODO ^^.
+# Power Cells are generic, fungible, interchangeable items. Every cell is indistinguishable from every other.
 cell_item_table = {
     0:  "Power Cell",
 }
 
+# Scout flies are interchangeable within their respective sets of 7. Notice the abbreviated level name after each item.
+# Also, notice that their Item ID equals their respective Power Cell's Location ID. This is necessary for
+# game<->archipelago communication.
 scout_item_table = {
     95: "Scout Fly - GR",
     75: "Scout Fly - SV",
@@ -35,13 +34,13 @@ scout_item_table = {
     91: "Scout Fly - GMC",
 }
 
+# TODO - Orbs are also generic and interchangeable.
 # orb_item_table = {
 #     ???: "Precursor Orb",
 # }
 
-# These are special items representing unique unlocks in the world.
-# They are not tied to their respective tasks or power cells, they are
-# entirely standalone and thus can be added to the item pool as independent items.
+# These are special items representing unique unlocks in the world. Notice that their Item ID equals their
+# respective Location ID. Like scout flies, this is necessary for game<->archipelago communication.
 special_item_table = {
     5: "Fisherman's Boat",
     4: "Jungle Elevator",
