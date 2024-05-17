@@ -16,9 +16,9 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     power_cell = item_table[Cells.to_ap_id(0)]
 
     # The int/list structure here is intentional, see `set_trade_requirements` for how we handle these.
-    sv_traders = [11, 12, [13, 14]]
-    rv_traders = [31, 32, 33, [34, 35]]
-    vc_traders = [[96, 97, 98, 99], [100, 101]]
+    sv_traders = [11, 12, [13, 14]]               # Mayor, Uncle, Oracle 1 and 2
+    rv_traders = [31, 32, 33, [34, 35]]           # Geologist, Gambler, Warrior, Oracle 3 and 4
+    vc_traders = [[96, 97, 98, 99], [100, 101]]   # Miners 1-4, Oracle 5 and 6
 
     fj_jungle_elevator = item_table[Specials.to_ap_id(4)]
     fj_blue_switch = item_table[Specials.to_ap_id(2)]
@@ -276,7 +276,7 @@ def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level
             loc.access_rule = lambda state, orbs=orb_count: (
                     count_accessible_orbs(state) >= orbs)
 
-        # Lists indicate a trader who has sequential Locations to check, each dependent on the last.
+        # Lists of integers indicate a trader who has sequential Locations to check, each dependent on the last.
         # (Oracles and Miners)
         elif type(trader) is list:
             previous_loc = None
@@ -286,3 +286,7 @@ def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level
                         count_accessible_orbs(state) >= orbs and
                         (state.can_reach(prev, player) if prev else True))  # TODO - Can Reach or Has Reached?
                 previous_loc = loc
+
+        # Any other type of element in the traders list is wrong.
+        else:
+            raise TypeError(f"Tried to set trade requirements on an unknown type {trader}.")

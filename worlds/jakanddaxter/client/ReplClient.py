@@ -6,12 +6,13 @@ import pymem
 from pymem.exception import ProcessNotFound, ProcessError
 
 from CommonClient import logger
+from worlds.jakanddaxter.GameID import jak1_id
+from worlds.jakanddaxter.Items import item_table
 from worlds.jakanddaxter.locs import (
     CellLocations as Cells,
     ScoutLocations as Flies,
     OrbLocations as Orbs,
     SpecialLocations as Specials)
-from worlds.jakanddaxter.GameID import jak1_id
 
 
 class JakAndDaxterReplClient:
@@ -179,7 +180,7 @@ class JakAndDaxterReplClient:
         elif ap_id in range(jak1_id + Specials.special_offset, jak1_id + Orbs.orb_offset):
             self.receive_special(ap_id)
         # elif ap_id in range(jak1_id + Orbs.orb_offset, ???):
-        #     pass  # TODO -- ^^.
+        #     self.receive_precursor_orb(ap_id)  # TODO -- Ponder the Orbs.
         else:
             raise KeyError(f"Tried to receive item with unknown AP ID {ap_id}.")
 
@@ -190,9 +191,9 @@ class JakAndDaxterReplClient:
                             "(pickup-type fuel-cell) "
                             "(the float " + str(cell_id) + "))")
         if ok:
-            logger.info(f"Received power cell {cell_id}!")
+            logger.info(f"Received a Power Cell!")
         else:
-            logger.error(f"Unable to receive power cell {cell_id}!")
+            logger.error(f"Unable to receive a Power Cell!")
         return ok
 
     def receive_scout_fly(self, ap_id: int) -> bool:
@@ -202,9 +203,9 @@ class JakAndDaxterReplClient:
                             "(pickup-type buzzer) "
                             "(the float " + str(fly_id) + "))")
         if ok:
-            logger.info(f"Received scout fly {fly_id}!")
+            logger.info(f"Received a {item_table[ap_id]}!")
         else:
-            logger.error(f"Unable to receive scout fly {fly_id}!")
+            logger.error(f"Unable to receive a {item_table[ap_id]}!")
         return ok
 
     def receive_special(self, ap_id: int) -> bool:
@@ -214,7 +215,7 @@ class JakAndDaxterReplClient:
                             "(pickup-type ap-special) "
                             "(the float " + str(special_id) + "))")
         if ok:
-            logger.info(f"Received special unlock {special_id}!")
+            logger.info(f"Received special unlock {item_table[ap_id]}!")
         else:
-            logger.error(f"Unable to receive special unlock {special_id}!")
+            logger.error(f"Unable to receive special unlock {item_table[ap_id]}!")
         return ok

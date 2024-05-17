@@ -48,10 +48,10 @@ special_item_table = {
     17: "Flut Flut",
     60: "Yellow Eco Switch",
     63: "Snowy Fort Gate",
-    71: "Freed Blue Sage",
-    72: "Freed Red Sage",
-    73: "Freed Yellow Sage",
-    70: "Freed Green Sage",
+    71: "Freed The Blue Sage",
+    72: "Freed The Red Sage",
+    73: "Freed The Yellow Sage",
+    70: "Freed The Green Sage",
 }
 
 # All Items
