@@ -36,12 +36,13 @@ class JakAndDaxterMemoryReader:
 
     location_outbox = []
     outbox_index = 0
+    finished_game = False
 
     def __init__(self, marker: typing.ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
         self.marker = marker
         self.connect()
 
-    async def main_tick(self, location_callback: typing.Callable):
+    async def main_tick(self, location_callback: typing.Callable, finish_callback: typing.Callable):
         if self.initiated_connect:
             await self.connect()
             self.initiated_connect = False
@@ -63,6 +64,9 @@ class JakAndDaxterMemoryReader:
         if len(self.location_outbox) > self.outbox_index:
             location_callback(self.location_outbox)
             self.outbox_index += 1
+
+        if self.finished_game:
+            finish_callback()
 
     async def connect(self):
         try:
@@ -146,10 +150,19 @@ class JakAndDaxterMemoryReader:
                         sizeof_uint32),
                     byteorder="little",
                     signed=False)
-                special_ap_id = Specials.to_ap_id(next_special)
-                if special_ap_id not in self.location_outbox:
-                    self.location_outbox.append(special_ap_id)
-                    logger.info("Checked special: " + str(next_special))
+
+                # 112 is the game-task ID of `finalboss-movies`, which is written to this array when you grab
+                # the white eco. This is our victory condition, so we need to catch it and act on it.
+                if next_special == 112 and not self.finished_game:
+                    self.finished_game = True
+                    logger.info("Congratulations! You finished the game!")
+                else:
+
+                    # All other special checks handled as normal.
+                    special_ap_id = Specials.to_ap_id(next_special)
+                    if special_ap_id not in self.location_outbox:
+                        self.location_outbox.append(special_ap_id)
+                        logger.info("Checked special: " + str(next_special))
 
         except (ProcessError, MemoryReadError, WinAPIError):
             logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")
