@@ -63,15 +63,15 @@ class JakAndDaxterWorld(World):
     item_name_to_id = {item_table[k]: k for k in item_table}
     location_name_to_id = {location_table[k]: k for k in location_table}
     item_name_groups = {
-        "Power Cell": {item_table[k]: k for k in item_table
-                       if k in range(jak1_id, jak1_id + Scouts.fly_offset)},
-        "Scout Fly": {item_table[k]: k for k in item_table
-                      if k in range(jak1_id + Scouts.fly_offset, jak1_id + Specials.special_offset)},
-        "Special": {item_table[k]: k for k in item_table
-                    if k in range(jak1_id + Specials.special_offset, jak1_id + Orbs.orb_offset)},
+        "Power Cells": {item_table[k]: k for k in item_table
+                        if k in range(jak1_id, jak1_id + Scouts.fly_offset)},
+        "Scout Flies": {item_table[k]: k for k in item_table
+                        if k in range(jak1_id + Scouts.fly_offset, jak1_id + Specials.special_offset)},
+        "Specials": {item_table[k]: k for k in item_table
+                     if k in range(jak1_id + Specials.special_offset, jak1_id + Orbs.orb_offset)},
         # TODO - Make group for Precursor Orbs.
-        # "Precursor Orb": {item_table[k]: k for k in item_table
-        #                   if k in range(jak1_id + Orbs.orb_offset, ???)},
+        # "Precursor Orbs": {item_table[k]: k for k in item_table
+        #                    if k in range(jak1_id + Orbs.orb_offset, ???)},
     }
 
     def create_regions(self):
