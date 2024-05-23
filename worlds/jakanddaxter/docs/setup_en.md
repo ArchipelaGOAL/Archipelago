@@ -3,83 +3,100 @@
 ## Required Software
 
 - A legally purchased copy of *Jak And Daxter: The Precursor Legacy.*
-- Python version 3.10 or higher. Make sure this is added to your PATH environment variable.
-- [Task](https://taskfile.dev/installation/) (This makes it easier to run commands.)
+- [The OpenGOAL Mod Launcher](https://jakmods.dev/)
+- [The Jak and Daxter .APWORLD package](https://github.com/ArchipelaGOAL/Archipelago/releases)
+
+At this time, this method of setup works on Windows only, but Linux support is a strong likelihood in the near future. 
+(OpenGOAL itself supports Linux, and the mod launcher is runnable with Python.)
+
+## Preparations
+
+- Dump your copy of the game as an ISO file to your PC.
+- Install the Mod Launcher.
+- If you are prompted by the Mod Launcher at any time during setup, provide the path to your ISO file.
 
 ## Installation
 
-### Installation via OpenGOAL Mod Launcher
+***OpenGOAL Mod Launcher***
 
-At this time, the only supported method of setup is through Manual Compilation. Aside from the legal copy of the game, all tools required to do this are free.
+- Run the Mod Launcher and click `ArchipelaGOAL` in the mod list.
+- Click `Install` and wait for it to complete.
+  - If you have yet to be prompted for the ISO, click Re-Extract and provide the path to your ISO file.
+- Click `Recompile`. This may take between 30-60 seconds. It should run to 100% completion. If it does not, see the Troubleshooting section.
+- Click `View Folder`. 
+  - In the new file explorer window, take note of the current path. It should contain `gk.exe` and `goalc.exe`.
 
-***Windows Preparations***
+***Archipelago Launcher***
 
-***Linux Preparations***
-
-***Using the Launcher***
-
-### Manual Compilation (Linux/Windows)
-
-***Windows Preparations***
-
-- Dump your copy of the game as an ISO file to your PC.
-- Download a zipped up copy of the Archipelago Server and Client [here.](https://github.com/ArchipelaGOAL/Archipelago)
-- Download a zipped up copy of the modded OpenGOAL game [here.](https://github.com/ArchipelaGOAL/ArchipelaGOAL)
-- Unzip the two projects into easily accessible directories.
-
-
-***Linux Preparations***
-
-***Compiling***
+- Copy the `jakanddaxter.apworld` file into your `Archipelago/lib/worlds` directory.
+  - Reminder: the default installation location for Archipelago is `C:\ProgramData\Archipelago`.
+- Run the Archipelago Launcher.
+- From the left-most list, click `Open host.yaml`. In this file, search for `jakanddaxter_options`.
+  - If the entry exists, modify the value of `root_directory` and replace it with the path 
+    that appeared when you clicked View Folder in the Mod Launcher.
+  - If the entry does not exist, you will need to add it to the bottom of this file. It should look like this:
+```
+jakanddaxter_options:
+  # Path to folder containing the ArchipelaGOAL mod executables (gk.exe and goalc.exe).
+  root_directory: "C:\Users\<YourName>\AppData\Roaming\OpenGOAL-Mods\archipelagoal"
+```
+  - And don't forget you will need to modify the value of `root_directory` as mentioned above!
+  - Save and close the file.
 
 ## Starting a Game
 
-- Open 3 Powershell windows. If you have VSCode, you can run 3 terminals to consolidate this process.
-    - In the first window, navigate to the Archipelago folder using `cd` and run `python ./Launcher.py --update_settings`. Then run it again without the `--update_settings` flag.
-    - In the second window, navigate to the ArchipelaGOAL folder and run `task extract`. This will prompt you to tell the mod where to find your ISO file to dump its contents. When that is done, run `task repl`.
-    - In the third window, navigate to the ArchipelaGOAL folder and run `task boot-game`. At this point, Jak should be standing outside Samos's hut.
-    - Once you confirm all those tasks succeeded, you can now close all these windows.
-- Edit your host.yaml file and ensure these lines exist. And don't forget to specify your ACTUAL install path. If you're on Windows, no backslashes!
+- Run the Archipelago Launcher.
+- From the right-most list, find and click `Jak and Daxter Client`.
+- 4 new windows should appear:
+  - A powershell window will open to run the OpenGOAL compiler. It should take about 30 seconds to compile the game.
+    - As before, it should run to 100% completion, and you should hear a musical cue to indicate it is done. 
+      If it does not run to 100%, or you do not hear the musical cue, see the Troubleshooting section.
+  - Another powershell window will open to run the game.
+  - The game window itself will launch, and Jak will be standing outside Samos's Hut.
+  - Finally, the Archipelago text client will open.
+    - You should see several messages appear after the compiler has run to 100% completion. 
+      If you see `The REPL is ready!` and `The Memory Reader is ready!` then that should indicate a successful startup.
+- You can *minimize* the 2 powershell windows, **BUT DO NOT CLOSE THEM.** 
+  They are required for Archipelago and the game to communicate with each other.
+- Now, like many other Archipelago text clients, you can connect to the Archipelago server and start the game!
+
+## Troubleshooting
+
+***Installation Failure***
+
+- If you encounter errors during extraction or compilation of the game when using the Mod Launcher, you may see errors like this:
 ```
-jakanddaxter_options:
-  # Path to folder containing the ArchipelaGOAL mod.
-  root_directory: "D:/Files/Repositories/ArchipelaGOAL"
-```  
-- In the Launcher, click Generate to create a new random seed. Save the resulting zip file.
-- In the Launcher, click Host to host the Archipelago server. It will prompt you for the location of that zip file.
-- Once the server is running, in the Launcher, find the Jak and Daxter Client and click it. You should see the command window begin to compile the game. 
-- When it completes, you should hear the menu closing sound effect, and you should see the text client indicate that the two agents are ready to communicate with the game.
-- Connect the client to the Archipelago server and enter your slot name. Once this is done, the game should be ready to play. Talk to Samos to trigger the cutscene where he sends you to Geyser Rock, and off you go!
+-- Compilation Error! -- 
+Input file iso_data/jak1/MUS/TWEAKVAL.MUS does not exist.
+```
+  - If this occurs, you may need to copy the extracted data to the mod folder manually.
+    - From a location like this: `C:\Users\<YourName>\AppData\Roaming\OpenGOAL-Mods\_iso_data`
+    - To a location like this: `C:\Users\<YourName>\AppData\Roaming\OpenGOAL-Mods\archipelagoal\iso_data`
+    - Then try clicking `Recompile` in the Mod Launcher (ensure you have selected the right mod first!)
 
-Once you complete the setup steps, you should only need to run the Launcher again to generate a game, host a server, or run the client and connect to a server.
-- You never need to download the zip copies of the projects again (unless there are updates).
-- You never need to dump your ISO again.
-- You never need to extract the ISO assets again.
+***Game Failure***
 
-### Joining a MultiWorld Game
-
-MultiWorld games are untested at this time.
-
-### Playing Offline
-
-Offline play is untested at this time.
-
-## Installation and Setup Troubleshooting
-
-### Compilation Failures
-
-### Runtime Failures
-
-- If the client window appears but no sound plays, you will need to enter the following commands into the client to connect it to the game.
+- If at any point the text client says `The <gk/goalc> process has died`, you will need to restart the appropriate 
+  application:
+  - Open a new powershell window.
+  - Navigating to the directory containing `gk.exe` and `goalc.exe` using `cd`.
+  - Run the command corresponding to the dead process:
+    - `.\gk.exe --game jak1 -- -v -boot -fakeiso -debug`
+    - `.\goalc.exe --game jak1`
+  - Then enter the following commands into the text client to reconnect everything to the game.
     - `/repl connect`
     - `/memr connect`
-- Once these are done, you can enter `/repl status` and `/memr status` to check that everything is connected and ready.
-
-## Gameplay Troubleshooting
+  - Once these are done, you can enter `/repl status` and `/memr status` to verify.
+- If the game freezes by replaying the same two frames over and over, but the music still runs in the background,
+  you may have accidentally interacted with the powershell windows in the background - they halt the game if you:
+  scroll up in them, highlight text in them, etc.
+  - To unfreeze the game, scroll to the very bottom of the log output and right click. That will release powershell from
+    your control and allow the game to continue.
+  - It is recommended to keep these windows minimized and out of your way.
 
 ### Known Issues
 
-- I've streamlined the process of connecting the client's agents to the game, but it comes at the cost of more granular commands useful for troubleshooting.
 - The game needs to run in debug mode in order to allow the repl to connect to it. At some point I want to make sure it can run in retail mode, or at least hide the debug text on screen and play the game's introductory cutscenes properly.
 - The client is currently not very robust and doesn't handle failures gracefully. This may result in items not being delivered to the game, or location checks not being delivered to the server.
-- The game relates tasks and power cells closely but separately. Some issues may result from having to tell the game to check for the power cells you own, rather than the tasks you completed.
+- The game relates tasks and power cells closely but separately. Some issues may result from custom code to add distinct items to the game (like the Fisherman's Boat, the Pontoons, or the Gondola).
+- 
