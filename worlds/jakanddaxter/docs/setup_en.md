@@ -29,6 +29,7 @@ At this time, this method of setup works on Windows only, but Linux support is a
   - `C:\Users\<YourName>\AppData\Roaming\OpenGOAL-Mods\archipelagoal\iso_data` should have *all* the same files as
   - `C:\Users\<YourName>\AppData\Roaming\OpenGOAL-Mods\_iso_data`, if it doesn't, copy those files over manually.
   - And then `Recompile` if you needed to copy the files over.
+- **DO NOT LAUNCH THE GAME FROM THE MOD LAUNCHER.** It will run in retail mode, which is incompatible with Archipelago. We need it to run in debug mode (see below).
 
 ***Archipelago Launcher***
 
@@ -45,6 +46,8 @@ At this time, this method of setup works on Windows only, but Linux support is a
 
 ## Starting a Game
 
+***New Game***
+
 - Run the Archipelago Launcher.
 - From the right-most list, find and click `Jak and Daxter Client`.
 - 4 new windows should appear:
@@ -54,8 +57,17 @@ At this time, this method of setup works on Windows only, but Linux support is a
   - The game window itself will launch, and Jak will be standing outside Samos's Hut.
   - Finally, the Archipelago text client will open.
     - You should see several messages appear after the compiler has run to 100% completion. If you see `The REPL is ready!` and `The Memory Reader is ready!` then that should indicate a successful startup.
+    - The game should then load in the title screen.
 - You can *minimize* the 2 powershell windows, **BUT DO NOT CLOSE THEM.** They are required for Archipelago and the game to communicate with each other.
-- Now, like many other Archipelago text clients, you can connect to the Archipelago server and start the game!
+- Start a new game in the title screen, and play through the cutscenes.
+- Once you reach Geyser Rock, you can connect to the Archipelago server.
+  - Provide your slot/player name and hit Enter, and then start the game!
+  - You can leave Geyser Rock immediately if you so choose - just step on the warp gate button.
+
+***Returning / Async Game***
+
+- One important note is to connect to the Archipelago server **AFTER** you load your save file. This is to allow AP to give you all the items you had previously.
+- Otherwise, the same steps as New Game apply.
 
 ## Troubleshooting
 
