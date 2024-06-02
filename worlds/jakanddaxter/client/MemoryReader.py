@@ -23,7 +23,9 @@ specials_checked_offset = 876    # buzzers_checked_offset + (sizeof uint32 * 112
 buzzers_received_offset = 1004   # specials_checked_offset + (sizeof uint32 * 32 specials)
 specials_received_offset = 1020  # buzzers_received_offset + (sizeof uint8 * 16 levels (for scout fly groups))
 
-end_marker_offset = 1052         # specials_received_offset + (sizeof uint8 * 32 specials)
+died_offset = 1052               # specials_received_offset + (sizeof uint8 * 32 specials)
+
+end_marker_offset = 1053         # died_offset + sizeof uint8
 
 
 class JakAndDaxterMemoryReader:
@@ -38,12 +40,16 @@ class JakAndDaxterMemoryReader:
     location_outbox = []
     outbox_index = 0
     finished_game = False
+    send_deathlink = False
 
     def __init__(self, marker: typing.ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
         self.marker = marker
         self.connect()
 
-    async def main_tick(self, location_callback: typing.Callable, finish_callback: typing.Callable):
+    async def main_tick(self,
+                        location_callback: typing.Callable,
+                        finish_callback: typing.Callable,
+                        deathlink_callback: typing.Callable):
         if self.initiated_connect:
             await self.connect()
             self.initiated_connect = False
@@ -59,7 +65,6 @@ class JakAndDaxterMemoryReader:
 
         # Read the memory address to check the state of the game.
         self.read_memory()
-        # location_callback(self.location_outbox)  # TODO - I forgot why call this here when it's already down below...
 
         # Checked Locations in game. Handle the entire outbox every tick until we're up to speed.
         if len(self.location_outbox) > self.outbox_index:
@@ -68,6 +73,9 @@ class JakAndDaxterMemoryReader:
 
         if self.finished_game:
             finish_callback()
+
+        if self.send_deathlink:
+            deathlink_callback()
 
     async def connect(self):
         try:
@@ -164,6 +172,15 @@ class JakAndDaxterMemoryReader:
                     if special_ap_id not in self.location_outbox:
                         self.location_outbox.append(special_ap_id)
                         logger.debug("Checked special: " + str(next_special))
+
+            died = int.from_bytes(
+                self.gk_process.read_bytes(self.goal_address + died_offset, sizeof_uint8),
+                byteorder="little",
+                signed=False)
+
+            if died == 1:
+                self.send_deathlink = True
+                logger.debug("You Died!")
 
         except (ProcessError, MemoryReadError, WinAPIError):
             logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")

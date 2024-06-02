@@ -115,6 +115,10 @@ class JakAndDaxterContext(CommonContext):
             self.memr.save_data()
             self.repl.save_data()
 
+    def on_deathlink(self, data: dict):
+        self.repl.received_deathlink = True
+        super().on_deathlink(data)
+
     async def ap_inform_location_check(self, location_ids: typing.List[int]):
         message = [{"cmd": "LocationChecks", "locations": location_ids}]
         await self.send_msgs(message)
@@ -128,8 +132,19 @@ class JakAndDaxterContext(CommonContext):
             await self.send_msgs(message)
             self.finished_game = True
 
-    def on_finish(self):
+    def on_finish_check(self):
         create_task_log_exception(self.ap_inform_finished_game())
+
+    async def ap_inform_deathlink(self):
+        if self.memr.send_deathlink:
+            await self.send_death()
+
+            # Reset all flags.
+            self.memr.send_deathlink = False
+            self.repl.reset_deathlink()
+
+    def on_deathlink_check(self):
+        create_task_log_exception(self.ap_inform_deathlink())
 
     async def run_repl_loop(self):
         while True:
@@ -138,7 +153,9 @@ class JakAndDaxterContext(CommonContext):
 
     async def run_memr_loop(self):
         while True:
-            await self.memr.main_tick(self.on_location_check, self.on_finish)
+            await self.memr.main_tick(self.on_location_check,
+                                      self.on_finish_check,
+                                      self.on_deathlink_check)
             await asyncio.sleep(0.1)
 
 
