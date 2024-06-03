@@ -1,3 +1,4 @@
+import random
 import typing
 import pymem
 from pymem import pattern
@@ -12,20 +13,52 @@ sizeof_uint64 = 8
 sizeof_uint32 = 4
 sizeof_uint8 = 1
 
-next_cell_index_offset = 0       # Each of these is an uint64, so 8 bytes.
-next_buzzer_index_offset = 8     # Each of these is an uint64, so 8 bytes.
-next_special_index_offset = 16   # Each of these is an uint64, so 8 bytes.
+next_cell_index_offset = 0  # Each of these is an uint64, so 8 bytes.
+next_buzzer_index_offset = 8  # Each of these is an uint64, so 8 bytes.
+next_special_index_offset = 16  # Each of these is an uint64, so 8 bytes.
 
 cells_checked_offset = 24
-buzzers_checked_offset = 428     # cells_checked_offset + (sizeof uint32 * 101 cells)
-specials_checked_offset = 876    # buzzers_checked_offset + (sizeof uint32 * 112 buzzers)
+buzzers_checked_offset = 428  # cells_checked_offset + (sizeof uint32 * 101 cells)
+specials_checked_offset = 876  # buzzers_checked_offset + (sizeof uint32 * 112 buzzers)
 
-buzzers_received_offset = 1004   # specials_checked_offset + (sizeof uint32 * 32 specials)
+buzzers_received_offset = 1004  # specials_checked_offset + (sizeof uint32 * 32 specials)
 specials_received_offset = 1020  # buzzers_received_offset + (sizeof uint8 * 16 levels (for scout fly groups))
 
-died_offset = 1052               # specials_received_offset + (sizeof uint8 * 32 specials)
+died_offset = 1052  # specials_received_offset + (sizeof uint8 * 32 specials)
 
-end_marker_offset = 1053         # died_offset + sizeof uint8
+end_marker_offset = 1053  # died_offset + sizeof uint8
+
+
+def autopsy(died: int) -> str:
+    if died in [1, 2, 3, 4]:
+        return random.choice(["Jak said goodnight.",
+                              "Jak stepped into the light.",
+                              "Jak gave Daxter his insect collection.",
+                              "Jak did not follow Step 1."])
+    if died == 5:
+        return "Jak fell into an endless pit."
+    if died == 6:
+        return "Jak drowned in the green water."
+    if died == 7:
+        return "Jak tried to tackle a Lurker Shark."
+    if died == 8:
+        return "Jak hit 500 degrees."
+    if died == 9:
+        return "Jak took a bath in a pool of dark eco."
+    if died == 10:
+        return "Jak got bombarded with flaming 30-ton boulders."
+    if died == 11:
+        return "Jak hit 800 degrees."
+    if died == 12:
+        return "Jak ceased to be."
+    if died == 13:
+        return "Jak got eaten by the dark eco plant."
+    if died == 14:
+        return "Jak burned up."
+    if died == 15:
+        return "Jak hit the ground hard."
+
+    return "Jak died."
 
 
 class JakAndDaxterMemoryReader:
@@ -41,6 +74,7 @@ class JakAndDaxterMemoryReader:
     outbox_index = 0
     finished_game = False
     send_deathlink = False
+    cause_of_death = ""
 
     def __init__(self, marker: typing.ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
         self.marker = marker
@@ -178,9 +212,10 @@ class JakAndDaxterMemoryReader:
                 byteorder="little",
                 signed=False)
 
-            if died == 1:
+            if died > 0:
                 self.send_deathlink = True
-                logger.debug("You Died!")
+                self.cause_of_death = autopsy(died)
+                logger.info(self.cause_of_death)
 
         except (ProcessError, MemoryReadError, WinAPIError):
             logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")

@@ -68,7 +68,7 @@ class JakAndDaxterReplClient:
             self.receive_deathlink()
 
             # Reset all flags.
-            # Even a received deathlink will set our own deathlink flag, we should reset it immediately.
+            # As a precaution, we should reset our own deathlink flag as well.
             self.reset_deathlink()
             self.received_deathlink = False
 
@@ -266,7 +266,7 @@ class JakAndDaxterReplClient:
         return ok
 
     def reset_deathlink(self) -> bool:
-        ok = self.send_form("(set! (-> *ap-info-jak1 died) 0)")
+        ok = self.send_form("(set! (-> *ap-info-jak1* died) 0)")
         if ok:
             logger.debug(f"Reset deathlink flag!")
         else:

@@ -136,12 +136,12 @@ class JakAndDaxterContext(CommonContext):
         create_task_log_exception(self.ap_inform_finished_game())
 
     async def ap_inform_deathlink(self):
-        if self.memr.send_deathlink:
-            await self.send_death()
+        await self.send_death(self.memr.cause_of_death)
 
-            # Reset all flags.
-            self.memr.send_deathlink = False
-            self.repl.reset_deathlink()
+        # Reset all flags.
+        self.memr.send_deathlink = False
+        self.memr.cause_of_death = ""
+        self.repl.reset_deathlink()
 
     def on_deathlink_check(self):
         create_task_log_exception(self.ap_inform_deathlink())
