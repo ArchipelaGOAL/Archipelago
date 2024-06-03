@@ -65,7 +65,6 @@ class JakAndDaxterClientCommandProcessor(ClientCommandProcessor):
 
 
 class JakAndDaxterContext(CommonContext):
-    tags = {"AP"}
     game = jak1_name
     items_handling = 0b111  # Full item handling
     command_processor = JakAndDaxterClientCommandProcessor
@@ -116,8 +115,9 @@ class JakAndDaxterContext(CommonContext):
             self.repl.save_data()
 
     def on_deathlink(self, data: dict):
-        self.repl.received_deathlink = True
-        super().on_deathlink(data)
+        if self.memr.deathlink_enabled:
+            self.repl.received_deathlink = True
+            super().on_deathlink(data)
 
     async def ap_inform_location_check(self, location_ids: typing.List[int]):
         message = [{"cmd": "LocationChecks", "locations": location_ids}]
@@ -136,7 +136,8 @@ class JakAndDaxterContext(CommonContext):
         create_task_log_exception(self.ap_inform_finished_game())
 
     async def ap_inform_deathlink(self):
-        await self.send_death(self.memr.cause_of_death)
+        if self.memr.deathlink_enabled:
+            await self.send_death(self.memr.cause_of_death)
 
         # Reset all flags.
         self.memr.send_deathlink = False
@@ -145,6 +146,12 @@ class JakAndDaxterContext(CommonContext):
 
     def on_deathlink_check(self):
         create_task_log_exception(self.ap_inform_deathlink())
+
+    async def ap_inform_deathlink_toggle(self):
+        await self.update_death_link(self.memr.deathlink_enabled)
+
+    def on_deathlink_toggle(self):
+        create_task_log_exception(self.ap_inform_deathlink_toggle())
 
     async def run_repl_loop(self):
         while True:
@@ -155,7 +162,8 @@ class JakAndDaxterContext(CommonContext):
         while True:
             await self.memr.main_tick(self.on_location_check,
                                       self.on_finish_check,
-                                      self.on_deathlink_check)
+                                      self.on_deathlink_check,
+                                      self.on_deathlink_toggle)
             await asyncio.sleep(0.1)
 
 

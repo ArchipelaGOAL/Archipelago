@@ -26,7 +26,9 @@ specials_received_offset = 1020  # buzzers_received_offset + (sizeof uint8 * 16 
 
 died_offset = 1052  # specials_received_offset + (sizeof uint8 * 32 specials)
 
-end_marker_offset = 1053  # died_offset + sizeof uint8
+deathlink_enabled_offset = 1053  # died_offset + sizeof uint8
+
+end_marker_offset = 1054  # deathlink_enabled_offset + sizeof uint8
 
 
 def autopsy(died: int) -> str:
@@ -38,7 +40,7 @@ def autopsy(died: int) -> str:
     if died == 5:
         return "Jak fell into an endless pit."
     if died == 6:
-        return "Jak drowned in the green water."
+        return "Jak drowned in the spicy water."
     if died == 7:
         return "Jak tried to tackle a Lurker Shark."
     if died == 8:
@@ -71,10 +73,13 @@ class JakAndDaxterMemoryReader:
     gk_process: pymem.process = None
 
     location_outbox = []
-    outbox_index = 0
-    finished_game = False
-    send_deathlink = False
-    cause_of_death = ""
+    outbox_index: int = 0
+    finished_game: bool = False
+
+    # Deathlink handling
+    deathlink_enabled: bool = False
+    send_deathlink: bool = False
+    cause_of_death: str = ""
 
     def __init__(self, marker: typing.ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
         self.marker = marker
@@ -83,7 +88,8 @@ class JakAndDaxterMemoryReader:
     async def main_tick(self,
                         location_callback: typing.Callable,
                         finish_callback: typing.Callable,
-                        deathlink_callback: typing.Callable):
+                        deathlink_callback: typing.Callable,
+                        deathlink_toggle: typing.Callable):
         if self.initiated_connect:
             await self.connect()
             self.initiated_connect = False
@@ -97,6 +103,9 @@ class JakAndDaxterMemoryReader:
         else:
             return
 
+        # Save some state variables temporarily.
+        old_deathlink_enabled = self.deathlink_enabled
+
         # Read the memory address to check the state of the game.
         self.read_memory()
 
@@ -107,6 +116,10 @@ class JakAndDaxterMemoryReader:
 
         if self.finished_game:
             finish_callback()
+
+        if old_deathlink_enabled != self.deathlink_enabled:
+            deathlink_toggle()
+            logger.debug("Toggled DeathLink " + ("ON" if self.deathlink_enabled else "OFF"))
 
         if self.send_deathlink:
             deathlink_callback()
@@ -216,6 +229,14 @@ class JakAndDaxterMemoryReader:
                 self.send_deathlink = True
                 self.cause_of_death = autopsy(died)
                 logger.info(self.cause_of_death)
+
+            deathlink_flag = int.from_bytes(
+                self.gk_process.read_bytes(self.goal_address + deathlink_enabled_offset, sizeof_uint8),
+                byteorder="little",
+                signed=False)
+
+            # Listen for any changes to this setting.
+            self.deathlink_enabled = bool(deathlink_flag)
 
         except (ProcessError, MemoryReadError, WinAPIError):
             logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")
