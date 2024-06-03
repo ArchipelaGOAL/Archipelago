@@ -239,16 +239,26 @@ class JakAndDaxterReplClient:
 
     def receive_deathlink(self) -> bool:
 
-        # Because it should at least be funny.
-        death_types = ["\'endlessfall",
-                       "\'drown-death",
+        # Because it should at least be funny sometimes.
+        death_types = ["\'death",
                        "\'death",
+                       "\'death",
+                       "\'death",
+                       "\'endlessfall",
+                       "\'drown-death",
                        "\'melt",
                        "\'dark-eco-pool"]
         chosen_death = random.choice(death_types)
 
-        ok = self.send_form("(when (not (movie?)) "
-                            "(target-attack-up *target* \'attack " + chosen_death + "))")
+        ok = self.send_form("(send-event "
+                            "*target* \'attack #f "
+                            "(static-attack-info "
+                            "  ((deathlink-death #t) "
+                            "  (mode " + chosen_death + ") "
+                            "  (vector (new \'static \'vector :y (meters 1) :w 1.0)) "
+                            "  (angle \'up) "
+                            "  (control 1.0))))")
+
         if ok:
             logger.debug(f"Received deathlink signal!")
         else:
