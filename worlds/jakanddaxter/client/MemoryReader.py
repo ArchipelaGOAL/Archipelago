@@ -31,7 +31,9 @@ deathlink_enabled_offset = 1053  # died_offset + sizeof uint8
 end_marker_offset = 1054  # deathlink_enabled_offset + sizeof uint8
 
 
+# "Jak" to be replaced by player name in the Client.
 def autopsy(died: int) -> str:
+    assert died > 0, f"Tried to find Jak's cause of death, but he's still alive!"
     if died in [1, 2, 3, 4]:
         return random.choice(["Jak said goodnight.",
                               "Jak stepped into the light.",
@@ -59,6 +61,12 @@ def autopsy(died: int) -> str:
         return "Jak burned up."
     if died == 15:
         return "Jak hit the ground hard."
+    if died == 16:
+        return "Jak crashed the zoomer."
+    if died == 17:
+        return "Jak got Flut Flut hurt."
+    if died == 18:
+        return "Jak poisoned the whole darn catch."
 
     return "Jak died."
 

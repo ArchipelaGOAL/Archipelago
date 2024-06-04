@@ -250,15 +250,7 @@ class JakAndDaxterReplClient:
                        "\'dark-eco-pool"]
         chosen_death = random.choice(death_types)
 
-        ok = self.send_form("(send-event "
-                            "*target* \'attack #f "
-                            "(static-attack-info "
-                            "  ((deathlink-death #t) "
-                            "  (mode " + chosen_death + ") "
-                            "  (vector (new \'static \'vector :y (meters 1) :w 1.0)) "
-                            "  (angle \'up) "
-                            "  (control 1.0))))")
-
+        ok = self.send_form("(ap-deathlink-received! " + chosen_death + ")")
         if ok:
             logger.debug(f"Received deathlink signal!")
         else:
