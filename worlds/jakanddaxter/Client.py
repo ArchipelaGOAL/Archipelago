@@ -137,9 +137,9 @@ class JakAndDaxterContext(CommonContext):
 
     async def ap_inform_deathlink(self):
         if self.memr.deathlink_enabled:
-            await self.send_death(self.memr
-                                  .cause_of_death
-                                  .replace("Jak", self.player_names[self.slot]))
+            death_text = self.memr.cause_of_death.replace("Jak", self.player_names[self.slot])
+            await self.send_death(death_text)
+            logger.info(death_text)
 
         # Reset all flags.
         self.memr.send_deathlink = False

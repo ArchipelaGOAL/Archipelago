@@ -236,7 +236,6 @@ class JakAndDaxterMemoryReader:
             if died > 0:
                 self.send_deathlink = True
                 self.cause_of_death = autopsy(died)
-                logger.info(self.cause_of_death)
 
             deathlink_flag = int.from_bytes(
                 self.gk_process.read_bytes(self.goal_address + deathlink_enabled_offset, sizeof_uint8),
