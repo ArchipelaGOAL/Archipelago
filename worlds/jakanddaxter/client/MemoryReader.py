@@ -6,7 +6,7 @@ from pymem.exception import ProcessNotFound, ProcessError, MemoryReadError, WinA
 import json
 
 from CommonClient import logger
-from worlds.jakanddaxter.locs import CellLocations as Cells, ScoutLocations as Flies, SpecialLocations as Specials
+from ..locs import CellLocations as Cells, ScoutLocations as Flies, SpecialLocations as Specials
 
 # Some helpful constants.
 sizeof_uint64 = 8

@@ -10,9 +10,9 @@ from pymem.exception import ProcessNotFound, ProcessError
 
 from CommonClient import logger
 from NetUtils import NetworkItem
-from worlds.jakanddaxter.GameID import jak1_id
-from worlds.jakanddaxter.Items import item_table
-from worlds.jakanddaxter.locs import (
+from ..GameID import jak1_id
+from ..Items import item_table
+from ..locs import (
     CellLocations as Cells,
     ScoutLocations as Flies,
     OrbLocations as Orbs,
@@ -150,8 +150,10 @@ class JakAndDaxterReplClient:
                               "(new-sound-id) 1024 0 0 (sound-group sfx) #t))", print_ok=False):
                 ok_count += 1
 
-            # Disable cheat-mode and debug (close the visual cue).
-            # self.send_form("(set! *debug-segment* #f)")
+            # Disable cheat-mode and debug (close the visual cues).
+            if self.send_form("(set! *debug-segment* #f)", print_ok=False):
+                ok_count += 1
+
             if self.send_form("(set! *cheat-mode* #f)", print_ok=False):
                 ok_count += 1
 
@@ -159,8 +161,8 @@ class JakAndDaxterReplClient:
             if self.send_form("(start \'play (get-continue-by-name *game-info* \"title-start\"))"):
                 ok_count += 1
 
-            # Now wait until we see the success message... 6 times.
-            if ok_count == 7:
+            # Now wait until we see the success message... 8 times.
+            if ok_count == 8:
                 self.connected = True
             else:
                 self.connected = False

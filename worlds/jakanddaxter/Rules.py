@@ -5,7 +5,7 @@ from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Regions import Jak1Level, Jak1SubLevel, level_table, sub_level_table
 from .Items import item_table
 from .locs import CellLocations as Cells, ScoutLocations as Scouts, SpecialLocations as Specials
-from worlds.jakanddaxter.Locations import location_table
+from .Locations import location_table
 
 
 def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):
