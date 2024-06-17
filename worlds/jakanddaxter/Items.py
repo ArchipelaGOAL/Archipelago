@@ -56,6 +56,25 @@ special_item_table = {
     70: "Freed The Green Sage",         # Unlocks the final elevator
 }
 
+# These are the move items for move randomizer. Notice that their Item ID equals some of the Orb Cache Location ID's.
+# This was 100% arbitrary. There's no reason to tie moves to orb caches except that I need a place to put them. ;_;
+move_item_table = {
+    10344: "Crouch",
+    10369: "Crouch Jump",
+    11072: "Crouch Uppercut",
+    12634: "Roll",
+    12635: "Roll Jump",
+    10945: "Double Jump",
+    14507: "Jump Dive",
+    14838: "Jump Kick",
+    23348: "Punch",
+    23349: "Punch Uppercut",
+    23350: "Kick",
+    # 24038: "Orb Cache at End of Blast Furnace",  # TODO - IDK, we didn't need all of the orb caches for move rando.
+    # 24039: "Orb Cache at End of Launch Pad Room",
+    # 24040: "Orb Cache at Start of Launch Pad Room",
+}
+
 # All Items
 # While we're here, do all the ID conversions needed.
 item_table = {
