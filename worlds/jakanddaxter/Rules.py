@@ -1,11 +1,40 @@
-from typing import List
-
+from typing import List, Union, Callable, Optional
 from BaseClasses import MultiWorld, CollectionState
 from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Regions import Jak1Level, Jak1SubLevel, level_table, sub_level_table
 from .Items import item_table
-from .locs import CellLocations as Cells, ScoutLocations as Scouts, SpecialLocations as Specials
+from .locs import (CellLocations as Cells,
+                   ScoutLocations as Scouts,
+                   SpecialLocations as Specials,
+                   OrbCacheLocations as Caches)
 from .Locations import location_table
+
+
+class Jak1Rule:
+    """
+    Holds information on how SubLevels and Locations connect,
+    what you need in order to get from one SubLevel to another,
+    how to access a Location ID etc.
+    """
+    source: Union[Jak1Level, Jak1SubLevel]
+    target: Union[Jak1Level, Jak1SubLevel, int]
+    rule: Optional[Callable[[CollectionState], bool]] = None
+
+    def __init__(self,
+                 source: Union[Jak1Level, Jak1SubLevel],
+                 target: Union[Jak1Level, Jak1SubLevel, int],
+                 rule: Optional[Callable[[CollectionState], bool]] = None):
+        self.source = source
+        self.target = target
+        self.rule = rule
+
+    @staticmethod
+    def can_break_scout_fly_box(state: CollectionState, player: int) -> bool:
+        """
+        A helper function to check if you can break scout fly boxes with your bare hands.
+        """
+        return (state.has("Crouch Uppercut", player)
+                or state.has("Jump Dive", player))
 
 
 def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):

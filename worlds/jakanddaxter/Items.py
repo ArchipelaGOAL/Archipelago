@@ -1,6 +1,9 @@
 from BaseClasses import Item
 from .GameID import jak1_name
-from .locs import CellLocations as Cells, ScoutLocations as Scouts, SpecialLocations as Specials
+from .locs import (CellLocations as Cells,
+                   ScoutLocations as Scouts,
+                   SpecialLocations as Specials,
+                   OrbCacheLocations as Caches)
 
 
 class JakAndDaxterItem(Item):
@@ -82,4 +85,5 @@ item_table = {
     **{Scouts.to_ap_id(k): scout_item_table[k] for k in scout_item_table},
     # **{Orbs.to_ap_id(k): orb_item_table[k] for k in orb_item_table},
     **{Specials.to_ap_id(k): special_item_table[k] for k in special_item_table},
+    **{Caches.to_ap_id(k): move_item_table[k] for k in move_item_table}
 }

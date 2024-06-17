@@ -1,7 +1,6 @@
 from ..Regions import Jak1Level, Jak1SubLevel
 from ..locs import (CellLocations as Cells,
                     ScoutLocations as Scouts,
-                    SpecialLocations as Specials,
                     OrbCacheLocations as Caches)
 
 
