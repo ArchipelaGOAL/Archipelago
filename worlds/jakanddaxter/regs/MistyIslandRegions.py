@@ -1,98 +1,87 @@
-from ..Regions import Jak1Level, Jak1SubLevel
-from ..locs import (CellLocations as Cells,
-                    ScoutLocations as Scouts,
-                    OrbCacheLocations as Caches)
+from BaseClasses import CollectionState, MultiWorld
+from ..Regions import JakAndDaxterRegion
+from ..Rules import can_free_scout_flies, can_trade, can_fight
 
 
-class MistyIsland(Jak1Level):
-    name = "Misty Island"
-    total_orb_count = 150
+def build_regions(level_name: str, player: int, multiworld: MultiWorld):
+    
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
 
-    class MainArea(Jak1SubLevel):
-        name = "Main Area"
-        orb_count = 0
+    muse_course = JakAndDaxterRegion("Muse Course", player, multiworld, level_name, 0)
+    muse_course.add_cell_locations([23])
+    muse_course.add_fly_locations([327708], access_rule=lambda state: can_free_scout_flies(state, player))
 
-        def create_locations(self):
-            pass
+    zoomer = JakAndDaxterRegion("Zoomer", player, multiworld, level_name, 0)
 
-    class MuseCourse(Jak1SubLevel):
-        name = "Muse Course"
-        orb_count = 0
+    # Just hit these things with the zoomer.
+    zoomer.add_cell_locations([27, 29])
+    zoomer.add_fly_locations([393244])
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locMI_cellTable[k] for k in {23}})
-            self.create_fly_locations({k: Scouts.locMI_scoutTable[k] for k in {327708}})
+    ship = JakAndDaxterRegion("Ship", player, multiworld, level_name, 0)
+    ship.add_cell_locations([24])
+    ship.add_fly_locations([131100], access_rule=lambda state: can_free_scout_flies(state, player))
 
-    class Zoomer(Jak1SubLevel):
-        name = "Zoomer"
-        orb_count = 0
+    far_side = JakAndDaxterRegion("Far Side", player, multiworld, level_name, 0)
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locMI_cellTable[k] for k in {27, 29}})
-            self.create_fly_locations({k: Scouts.locMI_scoutTable[k] for k in {393244}})
+    # In order to even reach this fly, you must use the seesaw, which requires Jump Dive.
+    far_side.add_fly_locations([28], access_rule=lambda state: state.has("Jump Dive", player))
 
-    class Ship(Jak1SubLevel):
-        name = "Ship"
-        orb_count = 0
+    # To carry the blue eco fast enough to open this cache, you need to break the bone bridges along the way.
+    far_side.add_cache_locations([11072], access_rule=lambda state: can_fight(state, player))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locMI_cellTable[k] for k in {24}})
-            self.create_fly_locations({k: Scouts.locMI_scoutTable[k] for k in {131100}})
+    barrel_course = JakAndDaxterRegion("Barrel Course", player, multiworld, level_name, 0)
+    barrel_course.add_cell_locations([26], access_rule=lambda state: can_fight(state, player))
+    barrel_course.add_fly_locations([196636], access_rule=lambda state: can_free_scout_flies(state, player))
 
-    class FarSide(Jak1SubLevel):
-        name = "Far Side"
-        orb_count = 0
+    upper_approach = JakAndDaxterRegion("Upper Arena Approach", player, multiworld, level_name, 0)
+    upper_approach.add_fly_locations([65564, 262172], access_rule=lambda state:
+                                     can_free_scout_flies(state, player))
 
-        def create_locations(self):
-            self.create_fly_locations({k: Scouts.locMI_scoutTable[k] for k in {28}})
-            self.create_cache_locations({k: Caches.loc_orbCacheTable[k] for k in {11072}})
+    lower_approach = JakAndDaxterRegion("Lower Arena Approach", player, multiworld, level_name, 0)
+    lower_approach.add_cell_locations([30])
 
-    class BarrelCourse(Jak1SubLevel):
-        name = "Barrel Course"
-        orb_count = 0
+    arena = JakAndDaxterRegion("Arena", player, multiworld, level_name, 0)
+    arena.add_cell_locations([25], access_rule=lambda state: can_fight(state, player))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locMI_cellTable[k] for k in {26}})
-            self.create_fly_locations({k: Scouts.locMI_scoutTable[k] for k in {196636}})
+    main_area.connect(muse_course)             # TODO - What do you need to chase the muse the whole way around?
+    main_area.connect(zoomer)                  # Run and jump down.
+    main_area.connect(ship)                    # Run and jump.
+    main_area.connect(lower_approach)          # Run and jump.
 
-    class UpperArenaApproach(Jak1SubLevel):
-        name = "Upper Arena Approach"
-        orb_count = 0
+    # Need to break the bone bridge to access.
+    main_area.connect(upper_approach, rule=lambda state: can_fight(state, player))
 
-        def create_locations(self):
-            self.create_fly_locations({k: Scouts.locMI_scoutTable[k] for k in {65564, 262172}})
+    muse_course.connect(main_area)             # Run and jump down.
 
-    class LowerArenaApproach(Jak1SubLevel):
-        name = "Lower Arena Approach"
-        orb_count = 0
+    # The zoomer pad is low enough that it requires Crouch Jump specifically.
+    zoomer.connect(main_area, rule=lambda state: state.has("Crouch Jump", player))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locMI_cellTable[k] for k in {30}})
+    ship.connect(main_area)                    # Run and jump down.
+    ship.connect(far_side)                     # Run.
+    ship.connect(barrel_course)                # Run and jump (dodge barrels).
 
-    class Arena(Jak1SubLevel):
-        name = "Arena"
-        orb_count = 0
+    # No connections from far_side to arena because arena is locked from the back until you beat the ambush.
+    far_side.connect(ship)                     # Run (dodge enemies?).
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locMI_cellTable[k] for k in {25}})
+    barrel_course.connect(arena)               # Jump down.
 
-    def create_sub_levels(self):
-        main = self.MainArea()
-        muse = self.MuseCourse()
-        zoom = self.Zoomer()
-        ship = self.Ship()
-        far = self.FarSide()
-        barrel = self.BarrelCourse()
-        upper = self.UpperArenaApproach()
-        lower = self.LowerArenaApproach()
-        arena = self.Arena()
+    upper_approach.connect(lower_approach)     # Jump down.
+    upper_approach.connect(arena)              # Jump down.
 
-        self.sub_levels[main.name] = main
-        self.sub_levels[muse.name] = muse
-        self.sub_levels[zoom.name] = zoom
-        self.sub_levels[ship.name] = ship
-        self.sub_levels[far.name] = far
-        self.sub_levels[barrel.name] = barrel
-        self.sub_levels[upper.name] = upper
-        self.sub_levels[lower.name] = lower
-        self.sub_levels[arena.name] = arena
+    lower_approach.connect(upper_approach)     # TODO - Do you need a way to gain height?
+
+    # Requires breaking bone bridges.
+    lower_approach.connect(arena, rule=lambda state: can_fight(state, player))
+
+    arena.connect(lower_approach)              # Run.
+    arena.connect(far_side)                    # Run.
+
+    multiworld.regions.append(main_area)
+    multiworld.regions.append(muse_course)
+    multiworld.regions.append(zoomer)
+    multiworld.regions.append(ship)
+    multiworld.regions.append(far_side)
+    multiworld.regions.append(barrel_course)
+    multiworld.regions.append(upper_approach)
+    multiworld.regions.append(lower_approach)
+    multiworld.regions.append(arena)

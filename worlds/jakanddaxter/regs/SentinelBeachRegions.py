@@ -1,79 +1,68 @@
-from ..Regions import Jak1Level, Jak1SubLevel
-from ..locs import (CellLocations as Cells,
-                    ScoutLocations as Scouts,
-                    SpecialLocations as Specials,
-                    OrbCacheLocations as Caches)
+from BaseClasses import CollectionState, MultiWorld
+from ..Regions import JakAndDaxterRegion
+from ..Rules import can_free_scout_flies, can_trade, can_fight
 
 
-class SentinelBeach(Jak1Level):
-    name = "Sentinel Beach"
-    total_orb_count = 150
+def build_regions(level_name: str, player: int, multiworld: MultiWorld):
 
-    class MainArea(Jak1SubLevel):
-        name = "Main Area"
-        orb_count = 128
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 128)
+    main_area.add_cell_locations([18, 21, 22])
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locSB_cellTable[k] for k in {18, 21, 22}})
-            self.create_fly_locations({k: Scouts.locSB_scoutTable[k] for k in {327700, 20, 65556, 262164, 393236}})
-            self.create_cache_locations({k: Caches.loc_orbCacheTable[k] for k in {12634, 12635}})
+    # These 3 scout fly boxes can be broken by running with freely accessible blue eco.
+    main_area.add_fly_locations([327700, 20, 65556])
 
-    class Pelican(Jak1SubLevel):
-        name = "Pelican"
-        orb_count = 0
+    # These 2 scout fly boxes can be broken with the locked blue eco vent, or by normal combat tricks.
+    main_area.add_fly_locations([262164, 393236], access_rule=lambda state:
+                                state.has("Blue Eco Switch", player)
+                                or can_free_scout_flies(state, player))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locSB_cellTable[k] for k in {16}})
+    # No need for the blue eco vent for the orb caches.
+    main_area.add_cache_locations([12634, 12635])
 
-    class FlutFlutEgg(Jak1SubLevel):
-        name = "Flut Flut Egg"
-        orb_count = 0
+    pelican = JakAndDaxterRegion("Pelican", player, multiworld, level_name, 0)
+    pelican.add_cell_locations([16], access_rule=lambda state: can_fight(state, player))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locSB_cellTable[k] for k in {17}})
-            self.create_special_locations({k: Specials.loc_specialTable[k] for k in {17}})
+    flut_flut_egg = JakAndDaxterRegion("Flut Flut Egg", player, multiworld, level_name, 0)
+    flut_flut_egg.add_cell_locations([17], access_rule=lambda state: can_fight(state, player))
+    flut_flut_egg.add_special_locations([17], access_rule=lambda state: can_fight(state, player))
 
-    class EcoHarvesters(Jak1SubLevel):
-        name = "Eco Harvesters"
-        orb_count = 0
+    eco_harvesters = JakAndDaxterRegion("Eco Harvesters", player, multiworld, level_name, 0)
+    eco_harvesters.add_cell_locations([15], access_rule=lambda state: can_fight(state, player))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locSB_cellTable[k] for k in {15}})
+    green_ridge = JakAndDaxterRegion("Ridge Near Green Vents", player, multiworld, level_name, 5)
+    green_ridge.add_fly_locations([131092], access_rule=lambda state: can_free_scout_flies(state, player))
 
-    class RidgeNearGreenVents(Jak1SubLevel):
-        name = "Ridge Near Green Vents"
-        orb_count = 5
+    blue_ridge = JakAndDaxterRegion("Ridge Near Blue Vent", player, multiworld, level_name, 5)
+    blue_ridge.add_fly_locations([196628], access_rule=lambda state:
+                                 state.has("Blue Eco Switch", player)
+                                 or can_free_scout_flies(state, player))
 
-        def create_locations(self):
-            self.create_fly_locations({k: Scouts.locSB_scoutTable[k] for k in {131092}})
+    cannon_tower = JakAndDaxterRegion("Cannon Tower", player, multiworld, level_name, 12)
+    cannon_tower.add_cell_locations([19], access_rule=lambda state: can_fight(state, player))
 
-    class RidgeNearBlueVent(Jak1SubLevel):
-        name = "Ridge Near Blue Vent"
-        orb_count = 5
+    main_area.connect(pelican)           # Swim and jump.
+    main_area.connect(flut_flut_egg)     # Run and jump.
+    main_area.connect(eco_harvesters)    # Run.
 
-        def create_locations(self):
-            self.create_fly_locations({k: Scouts.locSB_scoutTable[k] for k in {196628}})
+    # You don't need any kind of uppercut to reach this place, just a high jump from a convenient nearby ledge.
+    main_area.connect(green_ridge, rule=lambda state:
+                      state.has("Crouch Jump", player)
+                      or state.has("Double Jump", player))
 
-    class CannonTower(Jak1SubLevel):
-        name = "Cannon Tower"
-        orb_count = 12
+    # Can either uppercut the log and jump from it, or use the blue eco jump pad.
+    main_area.connect(blue_ridge, rule=lambda state:
+                      state.has("Blue Eco Switch", player)
+                      or (state.has("Double Jump", player)
+                          and (state.has("Crouch Uppercut", player)
+                               or state.has("Punch Uppercut", player))))
 
-        def create_locations(self):
-            self.create_cell_locations({k: Cells.locSB_cellTable[k] for k in {19}})
+    main_area.connect(cannon_tower, rule=lambda state: state.has("Blue Eco Switch", player))
 
-    def create_sub_levels(self):
-        main = self.MainArea()
-        pelican = self.Pelican()
-        flut = self.FlutFlutEgg()
-        harvesters = self.EcoHarvesters()
-        green_ridge = self.RidgeNearGreenVents()
-        blue_ridge = self.RidgeNearBlueVent()
-        cannon = self.CannonTower()
+    multiworld.regions.append(main_area)
+    multiworld.regions.append(pelican)
+    multiworld.regions.append(flut_flut_egg)
+    multiworld.regions.append(eco_harvesters)
+    multiworld.regions.append(green_ridge)
+    multiworld.regions.append(blue_ridge)
+    multiworld.regions.append(cannon_tower)
 
-        self.sub_levels[main.name] = main
-        self.sub_levels[pelican.name] = pelican
-        self.sub_levels[flut.name] = flut
-        self.sub_levels[harvesters.name] = harvesters
-        self.sub_levels[green_ridge.name] = green_ridge
-        self.sub_levels[blue_ridge.name] = blue_ridge
-        self.sub_levels[cannon.name] = cannon

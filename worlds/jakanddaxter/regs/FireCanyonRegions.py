@@ -1,20 +1,13 @@
-from ..Regions import Jak1Level, Jak1SubLevel
+from BaseClasses import CollectionState, MultiWorld
+from ..Regions import JakAndDaxterRegion
+from ..Rules import can_free_scout_flies, can_trade, can_fight
 from ..locs import CellLocations as Cells, ScoutLocations as Scouts
 
 
-class FireCanyon(Jak1Level):
-    name = "Fire Canyon"
-    total_orb_count = 50
+def build_regions(level_name: str, player: int, multiworld: MultiWorld):
 
-    class MainArea(Jak1SubLevel):
-        name = ""
-        orb_count = 50
+    fire_canyon = JakAndDaxterRegion("Fire Canyon", player, multiworld, level_name, 50)
 
-        def create_locations(self):
-            self.create_cell_locations(Cells.locFC_cellTable)
-            self.create_fly_locations(Scouts.locFC_scoutTable)
-
-    def create_sub_levels(self):
-        main = self.MainArea()
-
-        self.sub_levels[main.name] = main
+    # Everything is accessible by making contact with the zoomer.
+    fire_canyon.add_cell_locations(Cells.locFC_cellTable.keys())
+    fire_canyon.add_fly_locations(Scouts.locFC_scoutTable.keys())

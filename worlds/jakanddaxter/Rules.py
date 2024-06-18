@@ -1,40 +1,14 @@
+import typing
 from typing import List, Union, Callable, Optional
 from BaseClasses import MultiWorld, CollectionState
 from .JakAndDaxterOptions import JakAndDaxterOptions
-from .Regions import Jak1Level, Jak1SubLevel, level_table, sub_level_table
 from .Items import item_table
 from .locs import (CellLocations as Cells,
                    ScoutLocations as Scouts,
                    SpecialLocations as Specials,
                    OrbCacheLocations as Caches)
 from .Locations import location_table
-
-
-class Jak1Rule:
-    """
-    Holds information on how SubLevels and Locations connect,
-    what you need in order to get from one SubLevel to another,
-    how to access a Location ID etc.
-    """
-    source: Union[Jak1Level, Jak1SubLevel]
-    target: Union[Jak1Level, Jak1SubLevel, int]
-    rule: Optional[Callable[[CollectionState], bool]] = None
-
-    def __init__(self,
-                 source: Union[Jak1Level, Jak1SubLevel],
-                 target: Union[Jak1Level, Jak1SubLevel, int],
-                 rule: Optional[Callable[[CollectionState], bool]] = None):
-        self.source = source
-        self.target = target
-        self.rule = rule
-
-    @staticmethod
-    def can_break_scout_fly_box(state: CollectionState, player: int) -> bool:
-        """
-        A helper function to check if you can break scout fly boxes with your bare hands.
-        """
-        return (state.has("Crouch Uppercut", player)
-                or state.has("Jump Dive", player))
+from .Regions import JakAndDaxterRegion
 
 
 def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):
@@ -73,7 +47,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
 
     # You start the game in front of Green Sage's Hut, so you don't get stuck on Geyser Rock in the first 5 minutes.
     connect_start(multiworld, player, Jak1Level.SANDOVER_VILLAGE)
-    set_trade_requirements(multiworld, player, Jak1Level.SANDOVER_VILLAGE, sv_traders, 1530)
+    can_trade(multiworld, player, Jak1Level.SANDOVER_VILLAGE, sv_traders, 1530)
 
     # Geyser Rock is accessible at any time, just check the 3 naked cell Locations to return.
     connect_regions(multiworld, player,
@@ -122,7 +96,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     connect_regions(multiworld, player,
                     Jak1Level.FIRE_CANYON,
                     Jak1Level.ROCK_VILLAGE)
-    set_trade_requirements(multiworld, player, Jak1Level.ROCK_VILLAGE, rv_traders, 1530)
+    can_trade(multiworld, player, Jak1Level.ROCK_VILLAGE, rv_traders, 1530)
 
     connect_regions(multiworld, player,
                     Jak1Level.ROCK_VILLAGE,
@@ -163,7 +137,7 @@ def set_rules(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int)
     connect_regions(multiworld, player,
                     Jak1Level.MOUNTAIN_PASS,
                     Jak1Level.VOLCANIC_CRATER)
-    set_trade_requirements(multiworld, player, Jak1Level.VOLCANIC_CRATER, vc_traders, 1530)
+    can_trade(multiworld, player, Jak1Level.VOLCANIC_CRATER, vc_traders, 1530)
 
     connect_regions(multiworld, player,
                     Jak1Level.VOLCANIC_CRATER,
@@ -262,17 +236,19 @@ def set_fly_requirements(multiworld: MultiWorld, player: int):
 
 # TODO - Until we come up with a better progressive system for the traders (that avoids hard-locking if you pay the
 #  wrong ones and can't afford the right ones) just make all the traders locked behind the total amount to pay them all.
-def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level, traders: List, orb_count: int):
+def can_trade(multiworld: MultiWorld,
+              player: int,
+              region: JakAndDaxterRegion,
+              traders: List[Union[List[int], int]],
+              orb_count: int):
 
     def count_accessible_orbs(state) -> int:
         accessible_orbs = 0
-        for level_info in [*level_table.values(), *sub_level_table.values()]:
-            reg = multiworld.get_region(level_info.name, player)
+        for reg in multiworld.get_regions(player):
             if reg.can_reach(state):
-                accessible_orbs += level_info.orb_count
+                accessible_orbs += typing.cast(JakAndDaxterRegion, reg).orb_count
         return accessible_orbs
 
-    region = multiworld.get_region(level_table[level].name, player)
     names_to_index = {region.locations[i].name: i for i in range(0, len(region.locations))}
     for trader in traders:
 
@@ -297,3 +273,16 @@ def set_trade_requirements(multiworld: MultiWorld, player: int, level: Jak1Level
         # Any other type of element in the traders list is wrong.
         else:
             raise TypeError(f"Tried to set trade requirements on an unknown type {trader}.")
+
+
+def can_free_scout_flies(state: CollectionState, player: int) -> bool:
+    return (state.has("Crouch Uppercut", player)
+            or state.has("Jump Dive", player))
+
+
+def can_fight(state: CollectionState, player: int) -> bool:
+    return (state.has("Jump Dive", player)
+            or state.has("Jump Kick", player)
+            or state.has("Punch", player)
+            or state.has("Punch Uppercut", player)
+            or state.has("Kick", player))
