@@ -1,9 +1,10 @@
+from typing import List
 from BaseClasses import CollectionState, MultiWorld
 from ..Regions import JakAndDaxterRegion
 from ..Rules import can_free_scout_flies, can_trade, can_fight
 
 
-def build_regions(level_name: str, player: int, multiworld: MultiWorld):
+def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[JakAndDaxterRegion]:
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 128)
     main_area.add_cell_locations([18, 21, 22])
@@ -65,4 +66,6 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld):
     multiworld.regions.append(green_ridge)
     multiworld.regions.append(blue_ridge)
     multiworld.regions.append(cannon_tower)
+
+    return [main_area]
 

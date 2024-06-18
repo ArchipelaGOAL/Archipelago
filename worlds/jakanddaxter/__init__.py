@@ -8,9 +8,12 @@ from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Items import JakAndDaxterItem
 from .Locations import JakAndDaxterLocation, location_table
 from .Items import JakAndDaxterItem, item_table
-from .locs import CellLocations as Cells, ScoutLocations as Scouts, OrbLocations as Orbs, SpecialLocations as Specials
+from .locs import (CellLocations as Cells,
+                   ScoutLocations as Scouts,
+                   SpecialLocations as Specials,
+                   OrbCacheLocations as Caches,
+                   OrbLocations as Orbs)
 from .Regions import create_regions
-from .Rules import set_rules
 from worlds.AutoWorld import World, WebWorld
 from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 
@@ -34,7 +37,7 @@ class JakAndDaxterSettings(settings.Group):
         """Path to folder containing the ArchipelaGOAL mod executables (gk.exe and goalc.exe)."""
         description = "ArchipelaGOAL Root Directory"
 
-    root_directory:  RootDirectory = RootDirectory("D:/Files/Repositories/ArchipelaGOAL/out/build/Release/bin")
+    root_directory: RootDirectory = RootDirectory("D:/Files/Repositories/ArchipelaGOAL/out/build/Release/bin")
 
 
 class JakAndDaxterWebWorld(WebWorld):
@@ -83,17 +86,18 @@ class JakAndDaxterWorld(World):
         "Scout Flies": {item_table[k]: k for k in item_table
                         if k in range(jak1_id + Scouts.fly_offset, jak1_id + Specials.special_offset)},
         "Specials": {item_table[k]: k for k in item_table
-                     if k in range(jak1_id + Specials.special_offset, jak1_id + Orbs.orb_offset)},
+                     if k in range(jak1_id + Specials.special_offset, jak1_id + Caches.orb_cache_offset)},
+        "Moves": {item_table[k]: k for k in item_table
+                  if k in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset)},
         # TODO - Make group for Precursor Orbs.
         # "Precursor Orbs": {item_table[k]: k for k in item_table
         #                    if k in range(jak1_id + Orbs.orb_offset, ???)},
     }
 
+    # Regions and Rules
+    # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
-
-    def set_rules(self):
-        set_rules(self.multiworld, self.options, self.player)
 
     # Helper function to reuse some nasty if/else trees.
     @staticmethod
@@ -109,7 +113,12 @@ class JakAndDaxterWorld(World):
             count = 7
 
         # Make only 1 of each Special Item.
-        elif item in range(jak1_id + Specials.special_offset, jak1_id + Orbs.orb_offset):
+        elif item in range(jak1_id + Specials.special_offset, jak1_id + Caches.orb_cache_offset):
+            classification = ItemClassification.progression
+            count = 1
+
+        # Make only 1 of each Move Item.
+        elif item in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset):
             classification = ItemClassification.progression
             count = 1
 

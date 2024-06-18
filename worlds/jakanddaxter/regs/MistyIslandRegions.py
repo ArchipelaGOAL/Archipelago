@@ -1,9 +1,11 @@
+from typing import List
 from BaseClasses import CollectionState, MultiWorld
 from ..Regions import JakAndDaxterRegion
 from ..Rules import can_free_scout_flies, can_trade, can_fight
 
 
-def build_regions(level_name: str, player: int, multiworld: MultiWorld):
+# TODO - Map out Precursor Orbs on Misty Island!!!
+def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[JakAndDaxterRegion]:
     
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
 
@@ -85,3 +87,5 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld):
     multiworld.regions.append(upper_approach)
     multiworld.regions.append(lower_approach)
     multiworld.regions.append(arena)
+
+    return [main_area]
