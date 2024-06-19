@@ -1,7 +1,5 @@
-import typing
-from typing import Dict, Optional, Type
-
-from BaseClasses import MultiWorld, Region, Location
+from typing import List, Callable, cast
+from BaseClasses import MultiWorld, Region
 from .Items import item_table
 from .GameID import jak1_name
 from .JakAndDaxterOptions import JakAndDaxterOptions
@@ -44,7 +42,7 @@ class JakAndDaxterRegion(Region):
         self.level_name = level_name
         self.orb_count = orb_count
 
-    def add_cell_locations(self, locations: typing.List[int], access_rule=None):
+    def add_cell_locations(self, locations: List[int], access_rule: Callable = None):
         """
         Adds a Power Cell Location to this region with the given access rule.
         Converts Game ID's to AP ID's for you.
@@ -52,7 +50,7 @@ class JakAndDaxterRegion(Region):
         for loc in locations:
             self.add_jak_locations(Cells.to_ap_id(loc), access_rule)
 
-    def add_fly_locations(self, locations: typing.List[int], access_rule=None):
+    def add_fly_locations(self, locations: List[int], access_rule: Callable = None):
         """
         Adds a Scout Fly Location to this region with the given access rule.
         Converts Game ID's to AP ID's for you.
@@ -60,7 +58,7 @@ class JakAndDaxterRegion(Region):
         for loc in locations:
             self.add_jak_locations(Scouts.to_ap_id(loc), access_rule)
 
-    def add_special_locations(self, locations: typing.List[int], access_rule=None):
+    def add_special_locations(self, locations: List[int], access_rule: Callable = None):
         """
         Adds a Special Location to this region with the given access rule.
         Converts Game ID's to AP ID's for you.
@@ -70,7 +68,7 @@ class JakAndDaxterRegion(Region):
         for loc in locations:
             self.add_jak_locations(Specials.to_ap_id(loc), access_rule)
 
-    def add_cache_locations(self, locations: typing.List[int], access_rule=None):
+    def add_cache_locations(self, locations: List[int], access_rule: Callable = None):
         """
         Adds an Orb Cache Location to this region with the given access rule.
         Converts Game ID's to AP ID's for you.
@@ -78,7 +76,7 @@ class JakAndDaxterRegion(Region):
         for loc in locations:
             self.add_jak_locations(Caches.to_ap_id(loc), access_rule)
 
-    def add_jak_locations(self, ap_id: int, access_rule=None):
+    def add_jak_locations(self, ap_id: int, access_rule: Callable = None):
         """
         Helper function to add Locations. Not to be used directly.
         """
@@ -145,6 +143,6 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
 
     # As a safety precaution, confirm that the total number of orbs in all regions is 2000.
-    regs = [typing.cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
+    regs = [cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
     total_orbs = sum([reg.orb_count for reg in regs])
     assert total_orbs == 2000, f"The entire game has 2000 orbs, but we've only accounted for {total_orbs}!"

@@ -10,8 +10,8 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     # Yakows requires no combat.
     main_area.add_cell_locations([10])
-    main_area.add_cell_locations([11, 12], access_rule=lambda state:
-                                 can_trade(multiworld, player, main_area, [11, 12], 1530))
+    main_area.add_cell_locations([11], access_rule=lambda state: can_trade(state, player, multiworld, 1530))
+    main_area.add_cell_locations([12], access_rule=lambda state: can_trade(state, player, multiworld, 1530))
 
     # These 4 scout fly boxes can be broken by running with all the blue eco from Sentinel Beach.
     main_area.add_fly_locations([262219, 327755, 131147, 65611])
@@ -29,10 +29,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     yakow_cliff.add_fly_locations([75], access_rule=lambda state: can_free_scout_flies(state, player))
 
     oracle_platforms = JakAndDaxterRegion("Oracle Platforms", player, multiworld, level_name, 6)
-    oracle_platforms.add_cell_locations([13, 14], access_rule=lambda state:
-                                        can_trade(multiworld, player, main_area, [13, 14], 1530))
-    oracle_platforms.add_fly_locations([393291], access_rule=lambda state:
-                                       can_free_scout_flies(state, player))
+    oracle_platforms.add_cell_locations([13], access_rule=lambda state: can_trade(state, player, multiworld, 1530))
+    oracle_platforms.add_cell_locations([14], access_rule=lambda state: can_trade(state, player, multiworld, 1530, 13))
+    oracle_platforms.add_fly_locations([393291], access_rule=lambda state: can_free_scout_flies(state, player))
 
     main_area.connect(orb_cache_cliff, rule=lambda state:
                       state.has("Crouch Jump", player)

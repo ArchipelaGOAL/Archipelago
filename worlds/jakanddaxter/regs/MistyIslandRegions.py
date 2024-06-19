@@ -1,7 +1,7 @@
 from typing import List
 from BaseClasses import CollectionState, MultiWorld
 from ..Regions import JakAndDaxterRegion
-from ..Rules import can_free_scout_flies, can_trade, can_fight
+from ..Rules import can_free_scout_flies, can_fight
 
 
 # TODO - Map out Precursor Orbs on Misty Island!!!

@@ -122,7 +122,7 @@ class JakAndDaxterWorld(World):
             classification = ItemClassification.progression
             count = 1
 
-        # TODO - Make ??? Precursor Orbs.
+        # TODO - Make 2000 Precursor Orbs.
         # elif item in range(jak1_id + Orbs.orb_offset, ???):
         #     classification = ItemClassification.filler
         #     count = ???
