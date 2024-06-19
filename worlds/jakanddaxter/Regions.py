@@ -2,7 +2,7 @@ import typing
 from typing import Dict, Optional, Type
 
 from BaseClasses import MultiWorld, Region, Location
-from . import item_table
+from .Items import item_table
 from .GameID import jak1_name
 from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Locations import JakAndDaxterLocation, location_table
@@ -89,6 +89,7 @@ class JakAndDaxterRegion(Region):
 
 
 def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):
+
     # Always start with Menu.
     menu = JakAndDaxterRegion("Menu", player, multiworld)
     multiworld.regions.append(menu)
@@ -103,14 +104,14 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
         scout_fly_id = Scouts.to_ap_id(Cells.to_game_id(scout_fly_cell.address))
         scout_fly_cell.access_rule = lambda state, flies=scout_fly_id: state.has(item_table[flies], player, 7)
 
-    # Build all regions. Include their intra-connecting rules, their locations, and their locations access rules.
+    # Build all regions. Include their intra-connecting Rules, their Locations, and their Location access rules.
     [gr] = GeyserRock.build_regions("Geyser Rock", player, multiworld)
     [sv] = SandoverVillage.build_regions("Sandover Village", player, multiworld)
     [fj] = ForbiddenJungle.build_regions("Forbidden Jungle", player, multiworld)
     [sb] = SentinelBeach.build_regions("Sentinel Beach", player, multiworld)
     [mi] = MistyIsland.build_regions("Misty Island", player, multiworld)
     [fc] = FireCanyon.build_regions("Fire Canyon", player, multiworld)
-    [rv, rvp] = RockVillage.build_regions("Rock Village", player, multiworld)
+    [rv, rvc] = RockVillage.build_regions("Rock Village", player, multiworld)
     [pb] = PrecursorBasin.build_regions("Precursor Basin", player, multiworld)
     [lpc] = LostPrecursorCity.build_regions("Lost Precursor City", player, multiworld)
     [bs] = BoggySwamp.build_regions("Boggy Swamp", player, multiworld)
@@ -124,7 +125,7 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     # Define the interconnecting rules.
     menu.connect(free7)
     menu.connect(gr)
-    gr.connect(sv)
+    gr.connect(sv)  # Geyser Rock modified to let you leave at any time.
     sv.connect(fj)
     sv.connect(sb)
     sv.connect(mi, rule=lambda state: state.has("Fisherman's Boat", player))
@@ -132,8 +133,8 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     fc.connect(rv)
     rv.connect(pb)
     rv.connect(lpc)
-    rvp.connect(bs)  # rv->rvp connection defined internally by RockVillageRegions.
-    rvp.connect(mp, rule=lambda state: state.has("Power Cell", player, 45))
+    rvc.connect(bs)  # rv->rvc connection defined internally by RockVillageRegions.
+    rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, 45))
     mpr.connect(vc)  # mp->mpr connection defined internally by MountainPassRegions.
     vc.connect(sc)
     vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))
@@ -142,3 +143,8 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
 
     # Finally, set the completion condition.
     multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
+
+    # As a safety precaution, confirm that the total number of orbs in all regions is 2000.
+    regs = [typing.cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
+    total_orbs = sum([reg.orb_count for reg in regs])
+    assert total_orbs == 2000, f"The entire game has 2000 orbs, but we've only accounted for {total_orbs}!"

@@ -68,4 +68,3 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     multiworld.regions.append(cannon_tower)
 
     return [main_area]
-
