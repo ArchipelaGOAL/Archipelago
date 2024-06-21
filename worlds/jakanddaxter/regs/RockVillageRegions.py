@@ -1,6 +1,6 @@
 from typing import List
 from BaseClasses import CollectionState, MultiWorld
-from ..Regions import JakAndDaxterRegion
+from .RegionBase import JakAndDaxterRegion
 from ..Rules import can_free_scout_flies, can_trade
 
 

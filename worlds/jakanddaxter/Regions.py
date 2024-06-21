@@ -1,13 +1,10 @@
-from typing import List, Callable, cast
-from BaseClasses import MultiWorld, Region
+import typing
+from BaseClasses import MultiWorld
 from .Items import item_table
-from .GameID import jak1_name
 from .JakAndDaxterOptions import JakAndDaxterOptions
-from .Locations import JakAndDaxterLocation, location_table
 from .locs import (CellLocations as Cells,
-                   ScoutLocations as Scouts,
-                   SpecialLocations as Specials,
-                   OrbCacheLocations as Caches)
+                   ScoutLocations as Scouts)
+from .regs.RegionBase import JakAndDaxterRegion
 from .regs import (GeyserRockRegions as GeyserRock,
                    SandoverVillageRegions as SandoverVillage,
                    ForbiddenJungleRegions as ForbiddenJungle,
@@ -23,67 +20,8 @@ from .regs import (GeyserRockRegions as GeyserRock,
                    SpiderCaveRegions as SpiderCave,
                    SnowyMountainRegions as SnowyMountain,
                    LavaTubeRegions as LavaTube,
-                   GolAndMaiasCitadelRegions as GolAndMaiasCitadel)
-
-
-class JakAndDaxterRegion(Region):
-    """
-    Holds region information such as name, level name, number of orbs available, etc.
-    We especially need orb counts to be tracked because we need to know when you can
-    afford the 90-orb and 120-orb payments for more checks.
-    """
-    game: str = jak1_name
-    level_name: str
-    orb_count: int
-
-    def __init__(self, name: str, player: int, multiworld: MultiWorld, level_name: str = None, orb_count: int = 0):
-        formatted_name = f"{level_name} {name}".strip()
-        super().__init__(formatted_name, player, multiworld)
-        self.level_name = level_name
-        self.orb_count = orb_count
-
-    def add_cell_locations(self, locations: List[int], access_rule: Callable = None):
-        """
-        Adds a Power Cell Location to this region with the given access rule.
-        Converts Game ID's to AP ID's for you.
-        """
-        for loc in locations:
-            self.add_jak_locations(Cells.to_ap_id(loc), access_rule)
-
-    def add_fly_locations(self, locations: List[int], access_rule: Callable = None):
-        """
-        Adds a Scout Fly Location to this region with the given access rule.
-        Converts Game ID's to AP ID's for you.
-        """
-        for loc in locations:
-            self.add_jak_locations(Scouts.to_ap_id(loc), access_rule)
-
-    def add_special_locations(self, locations: List[int], access_rule: Callable = None):
-        """
-        Adds a Special Location to this region with the given access rule.
-        Converts Game ID's to AP ID's for you.
-        Special Locations should be matched alongside their respective
-        Power Cell Locations, so you get 2 unlocks for these rather than 1.
-        """
-        for loc in locations:
-            self.add_jak_locations(Specials.to_ap_id(loc), access_rule)
-
-    def add_cache_locations(self, locations: List[int], access_rule: Callable = None):
-        """
-        Adds an Orb Cache Location to this region with the given access rule.
-        Converts Game ID's to AP ID's for you.
-        """
-        for loc in locations:
-            self.add_jak_locations(Caches.to_ap_id(loc), access_rule)
-
-    def add_jak_locations(self, ap_id: int, access_rule: Callable = None):
-        """
-        Helper function to add Locations. Not to be used directly.
-        """
-        location = JakAndDaxterLocation(self.player, location_table[ap_id], ap_id, self)
-        if access_rule:
-            location.access_rule = access_rule
-        self.locations.append(location)
+                   # GolAndMaiasCitadelRegions as GolAndMaiasCitadel
+                   )
 
 
 def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):
@@ -118,7 +56,7 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     [sc] = SpiderCave.build_regions("Spider Cave", player, multiworld)
     [sm] = SnowyMountain.build_regions("Snowy Mountain", player, multiworld)
     [lt] = LavaTube.build_regions("Lava Tube", player, multiworld)
-    [gmc, fb] = GolAndMaiasCitadel.build_regions("Gol and Maia's Citadel", player, multiworld)
+    # [gmc, fb] = GolAndMaiasCitadel.build_regions("Gol and Maia's Citadel", player, multiworld)
 
     # Define the interconnecting rules.
     menu.connect(free7)
@@ -137,12 +75,47 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     vc.connect(sc)
     vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, 72))
-    lt.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
+    # lt.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
 
     # Finally, set the completion condition.
-    multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
+    # multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
 
-    # As a safety precaution, confirm that the total number of orbs in all regions is 2000.
-    regs = [cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
-    total_orbs = sum([reg.orb_count for reg in regs])
-    assert total_orbs == 2000, f"The entire game has 2000 orbs, but we've accounted for {total_orbs}!"
+    # Confirm the total number of orbs in each level.
+    level_orbs = {
+        "Geyser Rock": 50,
+        "Sandover Village": 50,
+        "Forbidden Jungle": 150,
+        "Sentinel Beach": 150,
+        "Misty Island": 150,
+        "Fire Canyon": 50,
+        "Rock Village": 50,
+        "Precursor Basin": 200,
+        "Lost Precursor City": 200,
+        "Boggy Swamp": 200,
+        "Mountain Pass": 50,
+        "Volcanic Crater": 50,
+        "Spider Cave": 200,
+        "Snowy Mountain": 200,
+        "Lava Tube": 50,
+        # "Gol and Maia's Citadel": 200,
+    }
+    for level in level_orbs:
+        assert_orbs(multiworld, options, player, level_orbs[level], level)
+
+    # As a final safety precaution, confirm the total number of orbs in the entire game.
+    assert_orbs(multiworld, options, player, 2000)
+
+
+def assert_orbs(multiworld: MultiWorld,
+                options: JakAndDaxterOptions,
+                player: int,
+                total_orbs: int,
+                level_name: str = None):
+    regs = [typing.cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
+    if level_name:
+        where = level_name
+        regs = [reg for reg in regs if reg.level_name == level_name]
+    else:
+        where = "All of Jak and Daxter"
+    orb_count = sum([reg.orb_count for reg in regs])
+    assert orb_count == total_orbs, f"{where} has {total_orbs} orbs, but we've accounted for {orb_count}!"

@@ -1,6 +1,6 @@
 from typing import List
 from BaseClasses import CollectionState, MultiWorld
-from ..Regions import JakAndDaxterRegion
+from .RegionBase import JakAndDaxterRegion
 from ..Rules import can_free_scout_flies, can_fight
 
 
@@ -34,7 +34,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     barrel_course.add_fly_locations([196636], access_rule=lambda state: can_free_scout_flies(state, player))
 
     # 14 orbs for the boxes you can only break with the cannon.
-    cannon = JakAndDaxterRegion("Barrel Course", player, multiworld, level_name, 14)
+    cannon = JakAndDaxterRegion("Cannon", player, multiworld, level_name, 14)
     cannon.add_cell_locations([26], access_rule=lambda state: can_fight(state, player))
 
     upper_approach = JakAndDaxterRegion("Upper Arena Approach", player, multiworld, level_name, 6)
@@ -73,7 +73,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
                      or state.has("Jump Dive", player))
 
     # Only if you can break the bone bridges to carry blue eco over the mud pit.
-    far_side.connect(far_side_cliff, rule=lambda state: can_fight(state, player))
+    far_side.connect(far_side_cache, rule=lambda state: can_fight(state, player))
 
     far_side_cliff.connect(far_side)           # Run and jump down.
 

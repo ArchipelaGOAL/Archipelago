@@ -1,6 +1,6 @@
 from typing import List
 from BaseClasses import CollectionState, MultiWorld
-from ..Regions import JakAndDaxterRegion
+from .RegionBase import JakAndDaxterRegion
 from ..locs import ScoutLocations as Scouts
 
 

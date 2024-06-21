@@ -1,6 +1,6 @@
 from typing import List
 from BaseClasses import CollectionState, MultiWorld
-from ..Regions import JakAndDaxterRegion
+from .RegionBase import JakAndDaxterRegion
 from ..Rules import can_free_scout_flies, can_fight
 
 
@@ -14,7 +14,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     first_room_lower = JakAndDaxterRegion("First Chamber (Lower)", player, multiworld, level_name, 0)
     first_room_lower.add_fly_locations([262193], access_rule=lambda state: can_free_scout_flies(state, player))
 
-    first_room_orb_cache = JakAndDaxterRegion("First Chamber (Lower)", player, multiworld, level_name, 22)
+    first_room_orb_cache = JakAndDaxterRegion("First Chamber Orb Cache", player, multiworld, level_name, 22)
 
     # Need jump dive to activate button, double jump to reach blue eco to unlock cache.
     first_room_orb_cache.add_cache_locations([14507], access_rule=lambda state:
@@ -59,9 +59,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     capsule_room.add_cell_locations([47], access_rule=lambda state: state.has("Jump Dive", player))
     capsule_room.add_fly_locations([327729])
 
-    second_slide = JakAndDaxterRegion("Second Slide", player, multiworld, level_name, 22)
+    second_slide = JakAndDaxterRegion("Second Slide", player, multiworld, level_name, 31)
 
-    helix_room = JakAndDaxterRegion("Helix Chamber", player, multiworld, level_name, 22)
+    helix_room = JakAndDaxterRegion("Helix Chamber", player, multiworld, level_name, 30)
     helix_room.add_cell_locations([46], access_rule=lambda state:
                                   state.has("Double Jump", player)
                                   or state.has("Jump Kick", player)
