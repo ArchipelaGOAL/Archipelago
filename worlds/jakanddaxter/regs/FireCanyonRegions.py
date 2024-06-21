@@ -12,4 +12,6 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     main_area.add_cell_locations(Cells.locFC_cellTable.keys())
     main_area.add_fly_locations(Scouts.locFC_scoutTable.keys())
 
+    multiworld.regions.append(main_area)
+
     return [main_area]

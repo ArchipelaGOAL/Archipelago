@@ -145,4 +145,4 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     # As a safety precaution, confirm that the total number of orbs in all regions is 2000.
     regs = [cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
     total_orbs = sum([reg.orb_count for reg in regs])
-    assert total_orbs == 2000, f"The entire game has 2000 orbs, but we've only accounted for {total_orbs}!"
+    assert total_orbs == 2000, f"The entire game has 2000 orbs, but we've accounted for {total_orbs}!"
