@@ -84,6 +84,8 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     first_bats.connect(first_jump_pad)
     first_bats.connect(first_tether)
 
+    first_jump_pad.connect(first_bats)
+
     first_tether.connect(first_bats)
     first_tether.connect(first_tether_rat_colony, rule=lambda state:
                          state.has("Roll Jump", player)
@@ -91,6 +93,10 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
                              and state.has("Jump Kick", player)))
     first_tether.connect(second_jump_pad)
     first_tether.connect(first_pole_course)
+
+    first_tether_rat_colony.connect(first_tether)
+
+    second_jump_pad.connect(first_tether)
 
     first_pole_course.connect(first_tether)
     first_pole_course.connect(second_tether)
@@ -103,9 +109,14 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     second_bats.connect(fourth_jump_pad)
     second_bats.connect(flut_flut_pad)
 
+    third_jump_pad.connect(second_bats)
+    fourth_jump_pad.connect(second_bats)
+
     flut_flut_pad.connect(second_bats)
     flut_flut_pad.connect(flut_flut_course, rule=lambda state: state.has("Flut Flut", player))  # Naturally.
     flut_flut_pad.connect(farthy_snacks)
+
+    flut_flut_course.connect(flut_flut_pad)
 
     farthy_snacks.connect(flut_flut_pad)
     farthy_snacks.connect(box_field, rule=lambda state: can_jump_higher(state, player))

@@ -19,7 +19,7 @@ class JakAndDaxterRegion(Region):
     level_name: str
     orb_count: int
 
-    def __init__(self, name: str, player: int, multiworld: MultiWorld, level_name: str = None, orb_count: int = 0):
+    def __init__(self, name: str, player: int, multiworld: MultiWorld, level_name: str = "", orb_count: int = 0):
         formatted_name = f"{level_name} {name}".strip()
         super().__init__(formatted_name, player, multiworld)
         self.level_name = level_name

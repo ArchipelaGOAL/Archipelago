@@ -20,8 +20,7 @@ from .regs import (GeyserRockRegions as GeyserRock,
                    SpiderCaveRegions as SpiderCave,
                    SnowyMountainRegions as SnowyMountain,
                    LavaTubeRegions as LavaTube,
-                   # GolAndMaiasCitadelRegions as GolAndMaiasCitadel
-                   )
+                   GolAndMaiasCitadelRegions as GolAndMaiasCitadel)
 
 
 def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player: int):
@@ -47,7 +46,7 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     [sb] = SentinelBeach.build_regions("Sentinel Beach", player, multiworld)
     [mi] = MistyIsland.build_regions("Misty Island", player, multiworld)
     [fc] = FireCanyon.build_regions("Fire Canyon", player, multiworld)
-    [rv, rvc] = RockVillage.build_regions("Rock Village", player, multiworld)
+    [rv, rvp, rvc] = RockVillage.build_regions("Rock Village", player, multiworld)
     [pb] = PrecursorBasin.build_regions("Precursor Basin", player, multiworld)
     [lpc] = LostPrecursorCity.build_regions("Lost Precursor City", player, multiworld)
     [bs] = BoggySwamp.build_regions("Boggy Swamp", player, multiworld)
@@ -56,7 +55,7 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     [sc] = SpiderCave.build_regions("Spider Cave", player, multiworld)
     [sm] = SnowyMountain.build_regions("Snowy Mountain", player, multiworld)
     [lt] = LavaTube.build_regions("Lava Tube", player, multiworld)
-    # [gmc, fb] = GolAndMaiasCitadel.build_regions("Gol and Maia's Citadel", player, multiworld)
+    [gmc, fb] = GolAndMaiasCitadel.build_regions("Gol and Maia's Citadel", player, multiworld)
 
     # Define the interconnecting rules.
     menu.connect(free7)
@@ -69,16 +68,16 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
     fc.connect(rv)
     rv.connect(pb)
     rv.connect(lpc)
-    rvc.connect(bs)  # rv->rvc connection defined internally by RockVillageRegions.
+    rvp.connect(bs)  # rv->rvp/rvc connections defined internally by RockVillageRegions.
     rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, 45))
     mpr.connect(vc)  # mp->mpr connection defined internally by MountainPassRegions.
     vc.connect(sc)
     vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, 72))
-    # lt.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
+    lt.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
 
     # Finally, set the completion condition.
-    # multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
+    multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
 
     # Confirm the total number of orbs in each level.
     level_orbs = {
@@ -97,7 +96,7 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
         "Spider Cave": 200,
         "Snowy Mountain": 200,
         "Lava Tube": 50,
-        # "Gol and Maia's Citadel": 200,
+        "Gol and Maia's Citadel": 200,
     }
     for level in level_orbs:
         assert_orbs(multiworld, options, player, level_orbs[level], level)
@@ -111,11 +110,13 @@ def assert_orbs(multiworld: MultiWorld,
                 player: int,
                 total_orbs: int,
                 level_name: str = None):
+
     regs = [typing.cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
     if level_name:
         where = level_name
         regs = [reg for reg in regs if reg.level_name == level_name]
     else:
         where = "All of Jak and Daxter"
+
     orb_count = sum([reg.orb_count for reg in regs])
-    assert orb_count == total_orbs, f"{where} has {total_orbs} orbs, but we've accounted for {orb_count}!"
+    assert orb_count == total_orbs, f"{where} should have {total_orbs} orbs, but we counted {orb_count} orbs!"

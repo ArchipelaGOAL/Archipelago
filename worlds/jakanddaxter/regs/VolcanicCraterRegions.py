@@ -30,6 +30,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     main_area.add_fly_locations(Scouts.locVC_scoutTable.keys(), access_rule=lambda state:
                                 can_free_scout_flies(state, player))
 
+    # Approach the gondola to get this check.
+    main_area.add_special_locations([105])
+
     multiworld.regions.append(main_area)
 
     return [main_area]

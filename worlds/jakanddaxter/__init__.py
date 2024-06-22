@@ -1,7 +1,7 @@
 import typing
 import settings
 
-from Utils import local_path
+from Utils import local_path, visualize_regions
 from BaseClasses import Item, ItemClassification, Tutorial
 from .GameID import jak1_id, jak1_name
 from .JakAndDaxterOptions import JakAndDaxterOptions
@@ -98,6 +98,7 @@ class JakAndDaxterWorld(World):
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
+        visualize_regions(self.multiworld.get_region("Menu", self.player), "jak.puml")
 
     # Helper function to reuse some nasty if/else trees.
     @staticmethod

@@ -49,6 +49,11 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
                       or (state.has("Double Jump", player)
                           and state.has("Jump Kick", player)))
 
+    # All these can go back to main_area immediately.
+    orb_cache_cliff.connect(main_area)
+    yakow_cliff.connect(main_area)
+    oracle_platforms.connect(main_area)
+
     multiworld.regions.append(main_area)
     multiworld.regions.append(orb_cache_cliff)
     multiworld.regions.append(yakow_cliff)

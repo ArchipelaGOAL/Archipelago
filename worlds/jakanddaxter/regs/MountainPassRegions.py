@@ -20,10 +20,11 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     shortcut.add_cell_locations([110])
 
     main_area.connect(race)
+
+    # You cannot go backwards from Klaww.
     race.connect(shortcut, rule=lambda state: state.has("Yellow Eco Switch", player))
 
-    # TODO - This might not be required, but you can in fact NOT go backwards from Klaww.
-    race.connect(main_area, rule=lambda state: False)
+    shortcut.connect(race)
 
     multiworld.regions.append(main_area)
     multiworld.regions.append(race)

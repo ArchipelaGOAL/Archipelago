@@ -71,8 +71,8 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
                                   or can_fight(state, player))
 
     main_area.connect(first_room_upper)                   # Run.
-    main_area.connect(first_room_lower)                   # Run and jump down.
 
+    first_room_upper.connect(main_area)                   # Run.
     first_room_upper.connect(first_hallway)               # Run and jump (floating platforms).
     first_room_upper.connect(first_room_lower)            # Run and jump down.
 
@@ -86,17 +86,22 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
                                  state.has("Jump Dive", player)
                                  and state.has("Double Jump", player))
 
+    first_hallway.connect(first_room_upper)                         # Run and jump down.
     first_hallway.connect(second_room)                              # Run and jump (floating platforms).
+
+    second_room.connect(first_hallway)                              # Run and jump.
     second_room.connect(center_complex)                             # Run and jump down.
 
+    center_complex.connect(second_room)                             # Run and jump (swim).
     center_complex.connect(color_platforms)                         # Run and jump (swim).
     center_complex.connect(quick_platforms)                         # Run and jump (swim).
 
+    color_platforms.connect(center_complex)                         # Run and jump (swim).
+
+    quick_platforms.connect(center_complex)                         # Run and jump (swim).
     quick_platforms.connect(first_slide)                            # Slide.
 
     first_slide.connect(capsule_room)                               # Slide.
-    first_slide.connect(quick_platforms, rule=lambda state:         # No going back.
-                        False)
 
     capsule_room.connect(second_slide)                              # Slide.
     capsule_room.connect(main_area, rule=lambda state:              # Chamber goes back to surface.

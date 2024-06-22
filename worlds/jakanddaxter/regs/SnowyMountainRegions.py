@@ -112,6 +112,8 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     frozen_box_cave.connect(ice_skating_rink, rule=lambda state:                # Same movement to go forward.
                             can_move_fancy(state, player))
 
+    frozen_box_cave_crates.connect(frozen_box_cave)                             # Semi-virtual region, no moves req'd.
+
     ice_skating_rink.connect(frozen_box_cave, rule=lambda state:                # Same movement to go back.
                              can_move_fancy(state, player))
     ice_skating_rink.connect(flut_flut_course, rule=lambda state:               # Duh.

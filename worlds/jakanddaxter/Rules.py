@@ -15,13 +15,14 @@ def can_trade(state: CollectionState,
               required_previous_trade: int = None) -> bool:
 
     accessible_orbs = 0
-    for reg in multiworld.get_regions(player):
-        if reg.can_reach(state):
-            accessible_orbs += typing.cast(JakAndDaxterRegion, reg).orb_count
+    for region in multiworld.get_regions(player):
+        if state.can_reach(region, "Region", player):
+            accessible_orbs += typing.cast(JakAndDaxterRegion, region).orb_count
 
     if required_previous_trade:
         name_of_previous_trade = location_table[Cells.to_ap_id(required_previous_trade)]
-        return accessible_orbs >= required_orbs and state.can_reach(name_of_previous_trade, player=player)
+        return (accessible_orbs >= required_orbs
+                and state.can_reach(name_of_previous_trade, "Location", player=player))
     else:
         return accessible_orbs >= required_orbs
 

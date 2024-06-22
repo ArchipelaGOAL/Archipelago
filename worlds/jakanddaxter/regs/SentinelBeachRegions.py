@@ -59,6 +59,14 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     main_area.connect(cannon_tower, rule=lambda state: state.has("Blue Eco Switch", player))
 
+    # All these can go back to main_area immediately.
+    pelican.connect(main_area)
+    flut_flut_egg.connect(main_area)
+    eco_harvesters.connect(main_area)
+    green_ridge.connect(main_area)
+    blue_ridge.connect(main_area)
+    cannon_tower.connect(main_area)
+
     multiworld.regions.append(main_area)
     multiworld.regions.append(pelican)
     multiworld.regions.append(flut_flut_egg)

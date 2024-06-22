@@ -35,15 +35,21 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     main_area.connect(orb_cache, rule=lambda state: state.has("Roll Jump", player))
     main_area.connect(pontoon_bridge, rule=lambda state: state.has("Warrior's Pontoons", player))
 
+    orb_cache.connect(main_area)
+
+    pontoon_bridge.connect(main_area, rule=lambda state: state.has("Warrior's Pontoons", player))
     pontoon_bridge.connect(klaww_cliff, rule=lambda state:
                            state.has("Crouch Jump", player)
                            or state.has("Double Jump", player)
                            or (state.has("Crouch Uppercut", player)
                                and state.has("Jump Kick", player)))
 
+    klaww_cliff.connect(pontoon_bridge)  # Just jump back down.
+
     multiworld.regions.append(main_area)
     multiworld.regions.append(orb_cache)
     multiworld.regions.append(pontoon_bridge)
+    multiworld.regions.append(klaww_cliff)
 
     # Return klaww_cliff required for inter-level connections.
-    return [main_area, klaww_cliff]
+    return [main_area, pontoon_bridge, klaww_cliff]
