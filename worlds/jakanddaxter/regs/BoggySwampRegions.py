@@ -11,13 +11,13 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     def can_jump_farther(state: CollectionState, p: int) -> bool:
         return (state.has("Double Jump", p)
                 or state.has("Jump Kick", p)
-                or state.has("Punch Uppercut", p))
+                or (state.has("Punch", p) and state.has("Punch Uppercut", p)))
 
     def can_jump_higher(state: CollectionState, p: int) -> bool:
         return (state.has("Double Jump", p)
-                or state.has("Crouch Jump", p)
-                or state.has("Crouch Uppercut", p)
-                or state.has("Punch Uppercut", p))
+                or (state.has("Crouch", p) and state.has("Crouch Jump", p))
+                or (state.has("Crouch", p) and state.has("Crouch Uppercut", p))
+                or (state.has("Punch", p) and state.has("Punch Uppercut", p)))
 
     # Orb crates and fly box in this area can be gotten with yellow eco and goggles.
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 23)
@@ -88,7 +88,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     first_tether.connect(first_bats)
     first_tether.connect(first_tether_rat_colony, rule=lambda state:
-                         state.has("Roll Jump", player)
+                         (state.has("Roll", player) and state.has("Roll Jump", player))
                          or (state.has("Double Jump", player)
                              and state.has("Jump Kick", player)))
     first_tether.connect(second_jump_pad)

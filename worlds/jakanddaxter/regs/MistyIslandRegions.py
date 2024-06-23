@@ -58,7 +58,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     muse_course.connect(main_area)             # Run and jump down.
 
     # The zoomer pad is low enough that it requires Crouch Jump specifically.
-    zoomer.connect(main_area, rule=lambda state: state.has("Crouch Jump", player))
+    zoomer.connect(main_area, rule=lambda state:
+                   (state.has("Crouch", player)
+                    and state.has("Crouch Jump", player)))
 
     ship.connect(main_area)                    # Run and jump down.
     ship.connect(far_side)                     # Run and jump down.
@@ -69,7 +71,8 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     # Only if you can use the seesaw or Crouch Jump from the seesaw's edge.
     far_side.connect(far_side_cliff, rule=lambda state:
-                     state.has("Crouch Jump", player)
+                     (state.has("Crouch", player)
+                      and state.has("Crouch Jump", player))
                      or state.has("Jump Dive", player))
 
     # Only if you can break the bone bridges to carry blue eco over the mud pit.
@@ -87,7 +90,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     upper_approach.connect(arena)              # Jump down.
 
     # One cliff is accessible, but only via Crouch Jump.
-    lower_approach.connect(upper_approach, rule=lambda state: state.has("Crouch Jump", player))
+    lower_approach.connect(upper_approach, rule=lambda state:
+                           (state.has("Crouch", player)
+                            and state.has("Crouch Jump", player)))
 
     # Requires breaking bone bridges.
     lower_approach.connect(arena, rule=lambda state: can_fight(state, player))

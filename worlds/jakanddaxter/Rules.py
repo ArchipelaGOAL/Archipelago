@@ -28,13 +28,13 @@ def can_trade(state: CollectionState,
 
 
 def can_free_scout_flies(state: CollectionState, player: int) -> bool:
-    return (state.has("Crouch Uppercut", player)
-            or state.has("Jump Dive", player))
+    return (state.has("Jump Dive", player)
+            or (state.has("Crouch", player)
+                and state.has("Crouch Uppercut", player)))
 
 
 def can_fight(state: CollectionState, player: int) -> bool:
     return (state.has("Jump Dive", player)
             or state.has("Jump Kick", player)
             or state.has("Punch", player)
-            or state.has("Punch Uppercut", player)
             or state.has("Kick", player))

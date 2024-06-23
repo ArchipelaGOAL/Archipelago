@@ -65,7 +65,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     helix_room.add_cell_locations([46], access_rule=lambda state:
                                   state.has("Double Jump", player)
                                   or state.has("Jump Kick", player)
-                                  or state.has("Punch Uppercut", player))
+                                  or (state.has("Punch", player) and state.has("Punch Uppercut", player)))
     helix_room.add_cell_locations([50], access_rule=lambda state:
                                   state.has("Double Jump", player)
                                   or can_fight(state, player))
@@ -111,9 +111,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     helix_room.connect(quick_platforms, rule=lambda state:          # Escape to get back to here.
                        state.has("Double Jump", player)             # Capsule is a convenient exit to the level.
-                       and (state.has("Jump Kick", player)
-                            or state.has("Punch Uppercut", player)
-                            or can_fight(state, player)))
+                       or can_fight(state, player))
 
     multiworld.regions.append(main_area)
     multiworld.regions.append(first_room_upper)

@@ -9,7 +9,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     # We need a few helper functions.
     def can_uppercut_spin(state: CollectionState, p: int) -> bool:
-        return state.has("Punch Uppercut", p) and state.has("Jump Kick", p)
+        return (state.has("Punch", p)
+                and state.has("Punch Uppercut", p)
+                and state.has("Jump Kick", p))
 
     def can_triple_jump(state: CollectionState, p: int) -> bool:
         return state.has("Double Jump", p) and state.has("Jump Kick", p)
@@ -20,9 +22,9 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     def can_jump_blockers(state: CollectionState, p: int) -> bool:
         return (state.has("Double Jump", p)
-                or state.has("Crouch Jump", p)
-                or state.has("Crouch Uppercut", p)
-                or state.has("Punch Uppercut", p)
+                or (state.has("Crouch", p) and state.has("Crouch Jump", p))
+                or (state.has("Crouch", p) and state.has("Crouch Uppercut", p))
+                or (state.has("Punch", p) and state.has("Punch Uppercut", p))
                 or state.has("Jump Dive", p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
@@ -95,7 +97,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     # Yes, the only way into the rest of the level requires advanced movement.
     main_area.connect(snowball_canyon, rule=lambda state:
-                      state.has("Roll Jump", player)
+                      (state.has("Roll", player) and state.has("Roll Jump", player))
                       or can_move_fancy(state, player))
 
     snowball_canyon.connect(main_area)                              # But you can just jump down and run up the ramp.
@@ -131,13 +133,16 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
                           can_jump_blockers(state, player))
 
     fort_interior.connect(fort_interior_caches, rule=lambda state:              # Just need a little height.
-                          state.has("Crouch Jump", player)
+                          (state.has("Crouch", player)
+                           and state.has("Crouch Jump", player))
                           or state.has("Double Jump", player))
     fort_interior.connect(fort_interior_base, rule=lambda state:                # Just need a little height.
-                          state.has("Crouch Jump", player)
+                          (state.has("Crouch", player)
+                           and state.has("Crouch Jump", player))
                           or state.has("Double Jump", player))
     fort_interior.connect(fort_interior_course_end, rule=lambda state:          # Just need a little distance.
-                          state.has("Punch Uppercut", player)
+                          (state.has("Punch", player)
+                           and state.has("Punch Uppercut", player))
                           or state.has("Double Jump", player))
 
     flut_flut_course.connect(fort_exterior)                                     # Ride the elevator.
@@ -145,7 +150,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     # Must fight way through cave, but there is also a grab-less ledge we must jump over.
     bunny_cave_start.connect(bunny_cave_end, rule=lambda state:
                              can_fight(state, player)
-                             and (state.has("Crouch Jump", player)
+                             and ((state.has("Crouch", player) and state.has("Crouch Jump", player))
                                   or state.has("Double Jump", player)))
 
     # All jump down.
