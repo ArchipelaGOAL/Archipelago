@@ -1,6 +1,7 @@
 from BaseClasses import Item
 from .GameID import jak1_name
-from .locs import (CellLocations as Cells,
+from .locs import (OrbLocations as Orbs,
+                   CellLocations as Cells,
                    ScoutLocations as Scouts,
                    SpecialLocations as Specials,
                    OrbCacheLocations as Caches)
@@ -37,13 +38,14 @@ scout_item_table = {
     91: "Scout Fly - GMC",
 }
 
-# TODO - Orbs are also generic and interchangeable.
-# orb_item_table = {
-#     ???: "Precursor Orb",
-# }
+# Orbs are also generic and interchangeable.
+orb_item_table = {
+    1: "Precursor Orb",
+}
 
 # These are special items representing unique unlocks in the world. Notice that their Item ID equals their
 # respective Location ID. Like scout flies, this is necessary for game<->archipelago communication.
+# TODO - These numbers of checks may be inaccurate post-region refactor.
 special_item_table = {
     5: "Fisherman's Boat",              # Unlocks 14 checks in Misty Island
     4: "Jungle Elevator",               # Unlocks 2 checks in Forbidden Jungle
@@ -83,7 +85,7 @@ move_item_table = {
 item_table = {
     **{Cells.to_ap_id(k): cell_item_table[k] for k in cell_item_table},
     **{Scouts.to_ap_id(k): scout_item_table[k] for k in scout_item_table},
-    # **{Orbs.to_ap_id(k): orb_item_table[k] for k in orb_item_table},
+    **{Orbs.to_ap_id(k): orb_item_table[k] for k in orb_item_table},
     **{Specials.to_ap_id(k): special_item_table[k] for k in special_item_table},
     **{Caches.to_ap_id(k): move_item_table[k] for k in move_item_table}
 }

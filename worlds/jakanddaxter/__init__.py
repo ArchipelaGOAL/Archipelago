@@ -5,7 +5,6 @@ from Utils import local_path, visualize_regions
 from BaseClasses import Item, ItemClassification, Tutorial
 from .GameID import jak1_id, jak1_name
 from .JakAndDaxterOptions import JakAndDaxterOptions
-from .Items import JakAndDaxterItem
 from .Locations import JakAndDaxterLocation, location_table
 from .Items import JakAndDaxterItem, item_table
 from .locs import (CellLocations as Cells,
@@ -89,16 +88,16 @@ class JakAndDaxterWorld(World):
                      if k in range(jak1_id + Specials.special_offset, jak1_id + Caches.orb_cache_offset)},
         "Moves": {item_table[k]: k for k in item_table
                   if k in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset)},
-        # TODO - Make group for Precursor Orbs.
-        # "Precursor Orbs": {item_table[k]: k for k in item_table
-        #                    if k in range(jak1_id + Orbs.orb_offset, ???)},
+        "Precursor Orbs": {item_table[k]: k for k in item_table
+                           if k in range(jak1_id + Orbs.orb_offset, jak1_id + Orbs.orb_offset + 24433)},
+        # TODO - Figure out a proper upper bound on ID's.
     }
 
     # Regions and Rules
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
-        visualize_regions(self.multiworld.get_region("Menu", self.player), "jak.puml")
+        # visualize_regions(self.multiworld.get_region("Menu", self.player), "jak.puml")
 
     # Helper function to reuse some nasty if/else trees.
     @staticmethod
@@ -123,10 +122,10 @@ class JakAndDaxterWorld(World):
             classification = ItemClassification.progression
             count = 1
 
-        # TODO - Make 2000 Precursor Orbs.
-        # elif item in range(jak1_id + Orbs.orb_offset, ???):
-        #     classification = ItemClassification.filler
-        #     count = ???
+        # TODO - Make 2000 Precursor Orbs, ONLY IF Orbsanity is enabled.
+        elif item in range(jak1_id + Orbs.orb_offset, jak1_id + Orbs.orb_offset + 24433):
+            classification = ItemClassification.filler
+            count = 0
 
         # If we try to make items with ID's higher than we've defined, something has gone wrong.
         else:
@@ -136,8 +135,17 @@ class JakAndDaxterWorld(World):
 
     def create_items(self):
         for item_id in item_table:
-            count, _ = self.item_type_helper(item_id)
-            self.multiworld.itempool += [self.create_item(item_table[item_id]) for k in range(0, count)]
+
+            # Handle Move Randomizer option.
+            # If it is OFF, put all moves in your starting inventory instead of the item pool,
+            # then fill the item pool with a corresponding amount of filler items.
+            if not self.options.enable_move_randomizer and item_table[item_id] in self.item_name_groups["Moves"]:
+                self.multiworld.push_precollected(self.create_item(item_table[item_id]))
+                self.multiworld.itempool += [self.create_item(self.get_filler_item_name())]
+            else:
+                count, classification = self.item_type_helper(item_id)
+                self.multiworld.itempool += [JakAndDaxterItem(item_table[item_id], classification, item_id, self.player)
+                                             for _ in range(count)]
 
     def create_item(self, name: str) -> Item:
         item_id = self.item_name_to_id[name]
@@ -145,7 +153,7 @@ class JakAndDaxterWorld(World):
         return JakAndDaxterItem(name, classification, item_id, self.player)
 
     def get_filler_item_name(self) -> str:
-        return "Power Cell"  # TODO - Make Precursor Orb the filler item. Until then, enjoy the free progression.
+        return "Precursor Orb"  # TODO - Actually, make this 1 health instead of an Orb.
 
 
 def launch_client():
