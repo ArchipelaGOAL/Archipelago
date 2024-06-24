@@ -6,29 +6,40 @@ from pymem.exception import ProcessNotFound, ProcessError, MemoryReadError, WinA
 import json
 
 from CommonClient import logger
-from ..locs import CellLocations as Cells, ScoutLocations as Flies, SpecialLocations as Specials
+from ..locs import (CellLocations as Cells,
+                    ScoutLocations as Flies,
+                    SpecialLocations as Specials,
+                    OrbCacheLocations as Caches)
 
 # Some helpful constants.
 sizeof_uint64 = 8
 sizeof_uint32 = 4
 sizeof_uint8 = 1
 
-next_cell_index_offset = 0  # Each of these is an uint64, so 8 bytes.
-next_buzzer_index_offset = 8  # Each of these is an uint64, so 8 bytes.
-next_special_index_offset = 16  # Each of these is an uint64, so 8 bytes.
+# Cell, Buzzer, and Special information.
+next_cell_index_offset = 0        # Each of these is an uint64, so 8 bytes.
+next_buzzer_index_offset = 8      # Each of these is an uint64, so 8 bytes.
+next_special_index_offset = 16    # Each of these is an uint64, so 8 bytes.
 
 cells_checked_offset = 24
-buzzers_checked_offset = 428  # cells_checked_offset + (sizeof uint32 * 101 cells)
-specials_checked_offset = 876  # buzzers_checked_offset + (sizeof uint32 * 112 buzzers)
+buzzers_checked_offset = 428      # cells_checked_offset + (sizeof uint32 * 101 cells)
+specials_checked_offset = 876     # buzzers_checked_offset + (sizeof uint32 * 112 buzzers)
 
-buzzers_received_offset = 1004  # specials_checked_offset + (sizeof uint32 * 32 specials)
-specials_received_offset = 1020  # buzzers_received_offset + (sizeof uint8 * 16 levels (for scout fly groups))
+buzzers_received_offset = 1004    # specials_checked_offset + (sizeof uint32 * 32 specials)
+specials_received_offset = 1020   # buzzers_received_offset + (sizeof uint8 * 16 levels (for scout fly groups))
 
-died_offset = 1052  # specials_received_offset + (sizeof uint8 * 32 specials)
+# Deathlink information.
+died_offset = 1052                # specials_received_offset + (sizeof uint8 * 32 specials)
+deathlink_enabled_offset = 1053   # died_offset + sizeof uint8
 
-deathlink_enabled_offset = 1053  # died_offset + sizeof uint8
+# Move Rando information.
+next_orb_cache_index_offset = 1054   # deathlink_enabled_offset + sizeof uint8
+orb_caches_checked_offset = 1062     # next_orb_cache_index_offset + sizeof uint64
+moves_received_offset = 1126         # orb_caches_checked_offset + (sizeof uint32 * 16 orb caches)
+moverando_enabled_offset = 1142      # moves_received_offset + (sizeof uint8 * 16 moves)
 
-end_marker_offset = 1054  # deathlink_enabled_offset + sizeof uint8
+# The End.
+end_marker_offset = 1143             # moverando_enabled_offset + sizeof uint8
 
 
 # "Jak" to be replaced by player name in the Client.
@@ -244,6 +255,31 @@ class JakAndDaxterMemoryReader:
 
             # Listen for any changes to this setting.
             self.deathlink_enabled = bool(deathlink_flag)
+
+            next_cache_index = int.from_bytes(
+                self.gk_process.read_bytes(self.goal_address, sizeof_uint64),
+                byteorder="little",
+                signed=False)
+
+            for k in range(0, next_cache_index):
+                next_cache = int.from_bytes(
+                    self.gk_process.read_bytes(
+                        self.goal_address + orb_caches_checked_offset + (k * sizeof_uint32),
+                        sizeof_uint32),
+                    byteorder="little",
+                    signed=False)
+                cache_ap_id = Caches.to_ap_id(next_cache)
+                if cache_ap_id not in self.location_outbox:
+                    self.location_outbox.append(cache_ap_id)
+                    logger.debug("Checked orb cache: " + str(next_cache))
+
+            moverando_flag = int.from_bytes(
+                self.gk_process.read_bytes(self.goal_address + moverando_enabled_offset, sizeof_uint8),
+                byteorder="little",
+                signed=False)
+
+            # Listen for any changes to this setting.
+            self.moverando_enabled = bool(moverando_flag)
 
         except (ProcessError, MemoryReadError, WinAPIError):
             logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")

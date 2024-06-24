@@ -13,10 +13,11 @@ from NetUtils import NetworkItem
 from ..GameID import jak1_id
 from ..Items import item_table
 from ..locs import (
+    OrbLocations as Orbs,
     CellLocations as Cells,
     ScoutLocations as Flies,
-    OrbLocations as Orbs,
-    SpecialLocations as Specials)
+    SpecialLocations as Specials,
+    OrbCacheLocations as Caches)
 
 
 class JakAndDaxterReplClient:
@@ -196,10 +197,12 @@ class JakAndDaxterReplClient:
             self.receive_power_cell(ap_id)
         elif ap_id in range(jak1_id + Flies.fly_offset, jak1_id + Specials.special_offset):
             self.receive_scout_fly(ap_id)
-        elif ap_id in range(jak1_id + Specials.special_offset, jak1_id + Orbs.orb_offset):
+        elif ap_id in range(jak1_id + Specials.special_offset, jak1_id + Caches.orb_cache_offset):
             self.receive_special(ap_id)
-        # elif ap_id in range(jak1_id + Orbs.orb_offset, ???):
-        #     self.receive_precursor_orb(ap_id)  # TODO -- Ponder the Orbs.
+        elif ap_id in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset):
+            self.receive_move(ap_id)
+        elif ap_id in range(jak1_id + Orbs.orb_offset, jak1_id + Orbs.orb_offset + 24433):
+            self.receive_precursor_orb(ap_id)  # Ponder the Orbs.
         else:
             raise KeyError(f"Tried to receive item with unknown AP ID {ap_id}.")
 
@@ -238,6 +241,22 @@ class JakAndDaxterReplClient:
         else:
             logger.error(f"Unable to receive special unlock {item_table[ap_id]}!")
         return ok
+
+    def receive_move(self, ap_id: int) -> bool:
+        move_id = Caches.to_game_id(ap_id)
+        ok = self.send_form("(send-event "
+                            "*target* \'get-archipelago "
+                            "(pickup-type ap-move) "
+                            "(the float " + str(move_id) + "))")
+        if ok:
+            logger.debug(f"Received the ability to {item_table[ap_id]}!")
+        else:
+            logger.error(f"Unable to receive the ability to {item_table[ap_id]}!")
+        return ok
+
+    def receive_precursor_orb(self, ap_id: int) -> bool:
+        orb_id = Orbs.to_game_id(ap_id)
+        return orb_id == 0  # TODO Implement this!
 
     def receive_deathlink(self) -> bool:
 
