@@ -21,7 +21,7 @@ next_cell_index_offset = 0        # Each of these is an uint64, so 8 bytes.
 next_buzzer_index_offset = 8      # Each of these is an uint64, so 8 bytes.
 next_special_index_offset = 16    # Each of these is an uint64, so 8 bytes.
 
-cells_checked_offset = 24
+cells_checked_offset = 24         # next_special_index_offset + sizeof uint64
 buzzers_checked_offset = 428      # cells_checked_offset + (sizeof uint32 * 101 cells)
 specials_checked_offset = 876     # buzzers_checked_offset + (sizeof uint32 * 112 buzzers)
 
@@ -33,13 +33,14 @@ died_offset = 1052                # specials_received_offset + (sizeof uint8 * 3
 deathlink_enabled_offset = 1053   # died_offset + sizeof uint8
 
 # Move Rando information.
-next_orb_cache_index_offset = 1054   # deathlink_enabled_offset + sizeof uint8
-orb_caches_checked_offset = 1062     # next_orb_cache_index_offset + sizeof uint64
-moves_received_offset = 1126         # orb_caches_checked_offset + (sizeof uint32 * 16 orb caches)
-moverando_enabled_offset = 1142      # moves_received_offset + (sizeof uint8 * 16 moves)
+# TODO - Write some sort of align function that defines ALL of these constants and handles ALL of this math for you.
+next_orb_cache_index_offset = 1056   # deathlink_enabled_offset + sizeof uint8 + 16 bits for alignment.
+orb_caches_checked_offset = 1064     # next_orb_cache_index_offset + sizeof uint64
+moves_received_offset = 1128         # orb_caches_checked_offset + (sizeof uint32 * 16 orb caches)
+moverando_enabled_offset = 1144      # moves_received_offset + (sizeof uint8 * 16 moves)
 
 # The End.
-end_marker_offset = 1143             # moverando_enabled_offset + sizeof uint8
+end_marker_offset = 1145             # moverando_enabled_offset + sizeof uint8
 
 
 # "Jak" to be replaced by player name in the Client.
@@ -257,7 +258,7 @@ class JakAndDaxterMemoryReader:
             self.deathlink_enabled = bool(deathlink_flag)
 
             next_cache_index = int.from_bytes(
-                self.gk_process.read_bytes(self.goal_address, sizeof_uint64),
+                self.gk_process.read_bytes(self.goal_address + next_orb_cache_index_offset, sizeof_uint64),
                 byteorder="little",
                 signed=False)
 
