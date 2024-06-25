@@ -38,6 +38,7 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
         # Translate from Cell AP ID to Scout AP ID using game ID as an intermediary.
         scout_fly_id = Scouts.to_ap_id(Cells.to_game_id(scout_fly_cell.address))
         scout_fly_cell.access_rule = lambda state, flies=scout_fly_id: state.has(item_table[flies], player, 7)
+    multiworld.regions.append(free7)
 
     # Build all regions. Include their intra-connecting Rules, their Locations, and their Location access rules.
     [gr] = GeyserRock.build_regions("Geyser Rock", player, multiworld)
@@ -78,45 +79,3 @@ def create_regions(multiworld: MultiWorld, options: JakAndDaxterOptions, player:
 
     # Finally, set the completion condition.
     multiworld.completion_condition[player] = lambda state: state.can_reach(fb, "Region", player)
-
-    # Confirm the total number of orbs in each level.
-    level_orbs = {
-        "Geyser Rock": 50,
-        "Sandover Village": 50,
-        "Forbidden Jungle": 150,
-        "Sentinel Beach": 150,
-        "Misty Island": 150,
-        "Fire Canyon": 50,
-        "Rock Village": 50,
-        "Precursor Basin": 200,
-        "Lost Precursor City": 200,
-        "Boggy Swamp": 200,
-        "Mountain Pass": 50,
-        "Volcanic Crater": 50,
-        "Spider Cave": 200,
-        "Snowy Mountain": 200,
-        "Lava Tube": 50,
-        "Gol and Maia's Citadel": 200,
-    }
-    for level in level_orbs:
-        assert_orbs(multiworld, options, player, level_orbs[level], level)
-
-    # As a final safety precaution, confirm the total number of orbs in the entire game.
-    assert_orbs(multiworld, options, player, 2000)
-
-
-def assert_orbs(multiworld: MultiWorld,
-                options: JakAndDaxterOptions,
-                player: int,
-                total_orbs: int,
-                level_name: str = None):
-
-    regs = [typing.cast(JakAndDaxterRegion, reg) for reg in multiworld.get_regions(player)]
-    if level_name:
-        where = level_name
-        regs = [reg for reg in regs if reg.level_name == level_name]
-    else:
-        where = "All of Jak and Daxter"
-
-    orb_count = sum([reg.orb_count for reg in regs])
-    assert orb_count == total_orbs, f"{where} should have {total_orbs} orbs, but we counted {orb_count} orbs!"

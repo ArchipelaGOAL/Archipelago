@@ -1,9 +1,10 @@
 import random
 import typing
+import json
 import pymem
 from pymem import pattern
 from pymem.exception import ProcessNotFound, ProcessError, MemoryReadError, WinAPIError
-import json
+from dataclasses import dataclass
 
 from CommonClient import logger
 from ..locs import (CellLocations as Cells,
@@ -16,55 +17,56 @@ sizeof_uint64 = 8
 sizeof_uint32 = 4
 sizeof_uint8 = 1
 
-# DON'T TOUCH ME. DON'T EVEN F---ING LOOK AT ME.
-CURRENT_OFFSET = 0
 
 # IMPORTANT: OpenGOAL memory structures are particular about the alignment, in memory, of member elements according to
-# their size in bits. The address for an N-bit field must be divisible by N.
+# their size in bits. The address for an N-bit field must be divisible by N. Use this class to define the memory offsets
+# of important values in the struct. It will also do the byte alignment properly for you.
 # See https://opengoal.dev/docs/reference/type_system/#arrays
+@dataclass
+class OffsetFactory:
+    current_offset: int = 0
 
+    def define(self, size: int, length: int = 1) -> int:
 
-# Use this function to define the memory offsets of important values in the struct.
-# It will align the memory offsets properly for you.
-def align(size: int, length: int = 1) -> int:
-    global CURRENT_OFFSET
+        # If necessary, align current_offset to the current size first.
+        bytes_to_alignment = self.current_offset % size
+        if bytes_to_alignment != 0:
+            self.current_offset += (size - bytes_to_alignment)
 
-    bytes_to_alignment = CURRENT_OFFSET % size
-    if bytes_to_alignment != 0:
-        CURRENT_OFFSET += (size - bytes_to_alignment)  # If necessary, align CURRENT_OFFSET to the current size first.
+        # Increment current_offset so the next definition can be made.
+        offset_to_use = self.current_offset
+        self.current_offset += (size * length)
+        return offset_to_use
 
-    offset_to_use = CURRENT_OFFSET
-    CURRENT_OFFSET += (size * length)  # Increment CURRENT_OFFSET so the next definition can be made.
-    return offset_to_use
 
 # Start defining important memory address offsets here. They must be in the same order, have the same sizes, and have
 # the same lengths, as defined in `ap-info-jak1`.
-
+offsets = OffsetFactory()
 
 # Cell, Buzzer, and Special information.
-next_cell_index_offset = align(sizeof_uint64)
-next_buzzer_index_offset = align(sizeof_uint64)
-next_special_index_offset = align(sizeof_uint64)
+next_cell_index_offset = offsets.define(sizeof_uint64)
+next_buzzer_index_offset = offsets.define(sizeof_uint64)
+next_special_index_offset = offsets.define(sizeof_uint64)
 
-cells_checked_offset = align(sizeof_uint32, 101)
-buzzers_checked_offset = align(sizeof_uint32, 112)
-specials_checked_offset = align(sizeof_uint32, 32)
+cells_checked_offset = offsets.define(sizeof_uint32, 101)
+buzzers_checked_offset = offsets.define(sizeof_uint32, 112)
+specials_checked_offset = offsets.define(sizeof_uint32, 32)
 
-buzzers_received_offset = align(sizeof_uint8, 16)
-specials_received_offset = align(sizeof_uint8, 32)
+buzzers_received_offset = offsets.define(sizeof_uint8, 16)
+specials_received_offset = offsets.define(sizeof_uint8, 32)
 
 # Deathlink information.
-died_offset = align(sizeof_uint8)
-deathlink_enabled_offset = align(sizeof_uint8)
+died_offset = offsets.define(sizeof_uint8)
+deathlink_enabled_offset = offsets.define(sizeof_uint8)
 
 # Move Rando information.
-next_orb_cache_index_offset = align(sizeof_uint64)
-orb_caches_checked_offset = align(sizeof_uint32, 16)
-moves_received_offset = align(sizeof_uint8, 16)
-moverando_enabled_offset = align(sizeof_uint8)
+next_orb_cache_index_offset = offsets.define(sizeof_uint64)
+orb_caches_checked_offset = offsets.define(sizeof_uint32, 16)
+moves_received_offset = offsets.define(sizeof_uint8, 16)
+moverando_enabled_offset = offsets.define(sizeof_uint8)
 
 # The End.
-end_marker_offset = align(sizeof_uint8, 4)
+end_marker_offset = offsets.define(sizeof_uint8, 4)
 
 
 # "Jak" to be replaced by player name in the Client.
