@@ -29,9 +29,12 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     first_jump_pad = JakAndDaxterRegion("First Jump Pad", player, multiworld, level_name, 0)
     first_jump_pad.add_fly_locations([393259])
 
+    # The tethers in this level are all out of order... a casual playthrough has the following order for the cell ID's:
+    # 42, 39, 40, 41. So that is the order we're calling "first, second, third, fourth".
+
     # First tether cell is collectable with yellow eco and goggles.
     first_tether = JakAndDaxterRegion("First Tether", player, multiworld, level_name, 7)
-    first_tether.add_cell_locations([39])
+    first_tether.add_cell_locations([42])
 
     # This rat colony has 3 orbs on top of it, requires special movement.
     first_tether_rat_colony = JakAndDaxterRegion("First Tether Rat Colony", player, multiworld, level_name, 3)
@@ -45,7 +48,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     # You can break this tether with a yellow eco vent and goggles,
     # but you can't reach the platform unless you can jump high.
     second_tether = JakAndDaxterRegion("Second Tether", player, multiworld, level_name, 0)
-    second_tether.add_cell_locations([40], access_rule=lambda state: can_jump_higher(state, player))
+    second_tether.add_cell_locations([39], access_rule=lambda state: can_jump_higher(state, player))
 
     # Fly and orbs are collectable with nearby blue eco cluster.
     second_bats = JakAndDaxterRegion("Second Bats Area", player, multiworld, level_name, 27)
@@ -56,7 +59,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
 
     # The platform for the third tether might look high, but you can get a boost from the yellow eco vent.
     fourth_jump_pad = JakAndDaxterRegion("Fourth Jump Pad (Third Tether)", player, multiworld, level_name, 9)
-    fourth_jump_pad.add_cell_locations([41])
+    fourth_jump_pad.add_cell_locations([40])
 
     # Orbs collectable here with yellow eco and goggles.
     flut_flut_pad = JakAndDaxterRegion("Flut Flut Pad", player, multiworld, level_name, 36)
@@ -76,7 +79,7 @@ def build_regions(level_name: str, player: int, multiworld: MultiWorld) -> List[
     last_tar_pit = JakAndDaxterRegion("Last Tar Pit", player, multiworld, level_name, 12)
 
     fourth_tether = JakAndDaxterRegion("Fourth Tether", player, multiworld, level_name, 11)
-    fourth_tether.add_cell_locations([42], access_rule=lambda state: can_jump_higher(state, player))
+    fourth_tether.add_cell_locations([41], access_rule=lambda state: can_jump_higher(state, player))
 
     main_area.connect(first_bats, rule=lambda state: can_jump_farther(state, player))
 

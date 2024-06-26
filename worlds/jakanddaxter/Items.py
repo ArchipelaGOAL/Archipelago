@@ -1,5 +1,5 @@
 from BaseClasses import Item
-from .GameID import jak1_name
+from .GameID import jak1_name, jak1_max
 from .locs import (OrbLocations as Orbs,
                    CellLocations as Cells,
                    ScoutLocations as Scouts,
@@ -87,5 +87,6 @@ item_table = {
     **{Scouts.to_ap_id(k): scout_item_table[k] for k in scout_item_table},
     **{Orbs.to_ap_id(k): orb_item_table[k] for k in orb_item_table},
     **{Specials.to_ap_id(k): special_item_table[k] for k in special_item_table},
-    **{Caches.to_ap_id(k): move_item_table[k] for k in move_item_table}
+    **{Caches.to_ap_id(k): move_item_table[k] for k in move_item_table},
+    jak1_max: "Green Eco Pill"  # Filler item.
 }

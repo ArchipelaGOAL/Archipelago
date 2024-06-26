@@ -10,7 +10,7 @@ from pymem.exception import ProcessNotFound, ProcessError
 
 from CommonClient import logger
 from NetUtils import NetworkItem
-from ..GameID import jak1_id
+from ..GameID import jak1_id, jak1_max
 from ..Items import item_table
 from ..locs import (
     OrbLocations as Orbs,
@@ -201,8 +201,10 @@ class JakAndDaxterReplClient:
             self.receive_special(ap_id)
         elif ap_id in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset):
             self.receive_move(ap_id)
-        elif ap_id in range(jak1_id + Orbs.orb_offset, jak1_id + Orbs.orb_offset + 24433):
+        elif ap_id in range(jak1_id + Orbs.orb_offset, jak1_max):
             self.receive_precursor_orb(ap_id)  # Ponder the Orbs.
+        elif ap_id == jak1_max:
+            self.receive_green_eco()  # Ponder why I chose to do ID's this way.
         else:
             raise KeyError(f"Tried to receive item with unknown AP ID {ap_id}.")
 
@@ -256,7 +258,27 @@ class JakAndDaxterReplClient:
 
     def receive_precursor_orb(self, ap_id: int) -> bool:
         orb_id = Orbs.to_game_id(ap_id)
-        return orb_id == 0  # TODO Implement this!
+        ok = self.send_form("(send-event "
+                            "*target* \'get-archipelago "
+                            "(pickup-type money) "
+                            "(the float " + str(orb_id) + "))")
+        if ok:
+            logger.debug(f"Received a Precursor Orb!")
+        else:
+            logger.error(f"Unable to receive a Precursor Orb!")
+        return ok
+
+    # Green eco pills are our filler item. Use the get-pickup event instead to handle being full health.
+    def receive_green_eco(self) -> bool:
+        ok = self.send_form("(send-event "
+                            "*target* \'get-pickup "
+                            "(pickup-type eco-pill) "
+                            "(the float 1))")
+        if ok:
+            logger.debug(f"Received a green eco pill!")
+        else:
+            logger.error(f"Unable to receive a green eco pill!")
+        return ok
 
     def receive_deathlink(self) -> bool:
 

@@ -3,7 +3,7 @@ import settings
 
 from Utils import local_path, visualize_regions
 from BaseClasses import Item, ItemClassification, Tutorial
-from .GameID import jak1_id, jak1_name
+from .GameID import jak1_id, jak1_name, jak1_max
 from .JakAndDaxterOptions import JakAndDaxterOptions
 from .Locations import JakAndDaxterLocation, location_table
 from .Items import JakAndDaxterItem, item_table
@@ -89,8 +89,7 @@ class JakAndDaxterWorld(World):
         "Moves": {item_table[k]: k for k in item_table
                   if k in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset)},
         "Precursor Orbs": {item_table[k]: k for k in item_table
-                           if k in range(jak1_id + Orbs.orb_offset, jak1_id + Orbs.orb_offset + 24433)},
-        # TODO - Figure out a proper upper bound on ID's.
+                           if k in range(jak1_id + Orbs.orb_offset, jak1_max)},
     }
 
     # Regions and Rules
@@ -123,7 +122,13 @@ class JakAndDaxterWorld(World):
             count = 1
 
         # TODO - Make 2000 Precursor Orbs, ONLY IF Orbsanity is enabled.
-        elif item in range(jak1_id + Orbs.orb_offset, jak1_id + Orbs.orb_offset + 24433):
+        elif item in range(jak1_id + Orbs.orb_offset, jak1_max):
+            classification = ItemClassification.progression_skip_balancing
+            count = 0
+
+        # Under normal circumstances, we will create 0 filler items.
+        # We will manually create filler items as needed.
+        elif item == jak1_max:
             classification = ItemClassification.filler
             count = 0
 
@@ -153,7 +158,7 @@ class JakAndDaxterWorld(World):
         return JakAndDaxterItem(name, classification, item_id, self.player)
 
     def get_filler_item_name(self) -> str:
-        return "Precursor Orb"  # TODO - Actually, make this 1 health instead of an Orb.
+        return "Green Eco Pill"
 
 
 def launch_client():
