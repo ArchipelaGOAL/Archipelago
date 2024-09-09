@@ -89,7 +89,8 @@ class JakAndDaxterReplClient:
             self.received_deathlink = False
 
         # Progressively empty the queue during each tick
-        # if text messages happen to be too slow we could pool dequeuing here, but it'd slow down the ItemReceived message during release
+        # if text messages happen to be too slow we could pool dequeuing here, 
+        # but it'd slow down the ItemReceived message during release
         if not self.json_message_queue.empty():
             json_txt_data = self.json_message_queue.get_nowait()
             await self.write_game_text(json_txt_data)
