@@ -225,7 +225,7 @@ class JakAndDaxterReplClient:
     # OpenGOAL can handle both its own string datatype and C-like character pointers (charp).
     # So for the game to constantly display this information in the HUD, we have to write it
     # to a memory address as a char*.
-    async def write_game_text(self, data:JsonMessageData):
+    async def write_game_text(self, data: JsonMessageData):
         logger.debug(f"Sending info to in-game display!")
         await self.send_form(f"(begin "
                              f"  (charp<-string (-> *ap-info-jak1* my-item-name) "
