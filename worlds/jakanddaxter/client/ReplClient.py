@@ -25,6 +25,14 @@ from ..locs import (
     OrbCacheLocations as Caches)
 
 
+@dataclass
+class JsonMessageData:
+    my_item_name: Optional[str] = None
+    my_item_finder: Optional[str] = None
+    their_item_name: Optional[str] = None
+    their_item_owner: Optional[str] = None
+
+
 class JakAndDaxterReplClient:
     ip: str
     port: int
@@ -43,14 +51,6 @@ class JakAndDaxterReplClient:
 
     item_inbox: Dict[int, NetworkItem] = {}
     inbox_index = 0
-
-    @dataclass
-    class JsonMessageData:
-        my_item_name: Optional[str] = None
-        my_item_finder: Optional[str] = None
-        their_item_name: Optional[str] = None
-        their_item_owner: Optional[str] = None
-
     json_message_queue: Queue[JsonMessageData] = queue.Queue()
 
     def __init__(self, ip: str = "127.0.0.1", port: int = 8181):
