@@ -95,7 +95,6 @@ class JakAndDaxterReplClient:
             json_txt_data = self.json_message_queue.get_nowait()
             await self.write_game_text(json_txt_data)
 
-
     # This helper function formats and sends `form` as a command to the REPL.
     # ALL commands to the REPL should be sent using this function.
     async def send_form(self, form: str, print_ok: bool = True) -> bool:
