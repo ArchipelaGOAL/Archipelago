@@ -153,8 +153,12 @@ class JakAndDaxterWorld(World):
         elif self.options.enable_orbsanity == EnableOrbsanity.option_global:
             self.orb_bundle_size = self.options.global_orbsanity_bundle_size.value
             self.orb_bundle_item_name = orb_item_table[self.orb_bundle_size]
+        else:
+            self.orb_bundle_size = 0
+            self.orb_bundle_item_name = ""
 
         # Cache the power cell threshold values for quicker reference.
+        self.power_cell_thresholds = []
         self.power_cell_thresholds.append(self.options.fire_canyon_cell_count.value)
         self.power_cell_thresholds.append(self.options.mountain_pass_cell_count.value)
         self.power_cell_thresholds.append(self.options.lava_tube_cell_count.value)
@@ -300,10 +304,10 @@ class JakAndDaxterWorld(World):
             elif item.name in self.item_name_groups["Scout Flies"]:
                 pass
 
-            # Ditto Power Cells, but check count - 1, because we've potentially crossed the threshold
-            # in the opposite direction.
+            # Ditto Power Cells, but check count + 1, because we potentially crossed the threshold in the opposite
+            # direction. E.g. we've removed the 20th power cell, our count is now 19, so we should stale the cache.
             elif (item.name == "Power Cell"
-                  and state.count("Power Cell", self.player) not in self.power_cell_thresholds):
+                  and state.count("Power Cell", self.player) + 1 not in self.power_cell_thresholds):
                 pass
 
             # Ditto everything else.
