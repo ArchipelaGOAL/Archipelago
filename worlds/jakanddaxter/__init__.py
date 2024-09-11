@@ -125,7 +125,7 @@ class JakAndDaxterWorld(World):
     orb_bundle_item_name: str = ""
     orb_bundle_size: int = 0
     total_trade_orbs: int = 0
-    power_cell_thresholds: list[int] = []
+    power_cell_thresholds: List[int] = []
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -186,15 +186,20 @@ class JakAndDaxterWorld(World):
         # Fill routine to handle the amount of cells we need to reach the furthest possible region. Even for early
         # completion goals, all areas in the game must be reachable or generation will fail. TODO - Enormous refactor.
         if item in range(jak1_id, jak1_id + Scouts.fly_offset):
-            prog_count = max(self.power_cell_thresholds[:3])
-            non_prog_count = 101 - prog_count
 
-            if self.options.jak_completion_condition == CompletionCondition.option_open_100_cell_door:
-                counts_and_classes.append((100, ItemClass.progression_skip_balancing))
-                counts_and_classes.append((1, ItemClass.filler))
+            # If for some unholy reason we don't have the list of power cell thresholds, have a fallback plan.
+            if self.power_cell_thresholds:
+                prog_count = max(self.power_cell_thresholds[:3])
+                non_prog_count = 101 - prog_count
+
+                if self.options.jak_completion_condition == CompletionCondition.option_open_100_cell_door:
+                    counts_and_classes.append((100, ItemClass.progression_skip_balancing))
+                    counts_and_classes.append((1, ItemClass.filler))
+                else:
+                    counts_and_classes.append((prog_count, ItemClass.progression_skip_balancing))
+                    counts_and_classes.append((non_prog_count, ItemClass.filler))
             else:
-                counts_and_classes.append((prog_count, ItemClass.progression_skip_balancing))
-                counts_and_classes.append((non_prog_count, ItemClass.filler))
+                counts_and_classes.append((101, ItemClass.progression_skip_balancing))
 
         # Make 7 Scout Flies per level.
         elif item in range(jak1_id + Scouts.fly_offset, jak1_id + Specials.special_offset):
@@ -211,13 +216,18 @@ class JakAndDaxterWorld(World):
         # Make N Precursor Orb bundles, where N is 2000 // bundle size. Like Power Cells, only a fraction of these will
         # be marked as Progression with the remainder as Filler, but they are still entirely fungible.
         elif item in range(jak1_id + Orbs.orb_offset, jak1_max):
-            item_count = 2000 // self.orb_bundle_size if self.orb_bundle_size > 0 else 0  # Don't divide by zero!
 
-            prog_count = -(-self.total_trade_orbs // self.orb_bundle_size)  # Lazy ceil using integer division.
-            non_prog_count = item_count - prog_count
+            # Don't divide by zero!
+            if self.orb_bundle_size > 0:
+                item_count = 2000 // self.orb_bundle_size
 
-            counts_and_classes.append((prog_count, ItemClass.progression_skip_balancing))
-            counts_and_classes.append((non_prog_count, ItemClass.filler))
+                prog_count = -(-self.total_trade_orbs // self.orb_bundle_size)  # Lazy ceil using integer division.
+                non_prog_count = item_count - prog_count
+
+                counts_and_classes.append((prog_count, ItemClass.progression_skip_balancing))
+                counts_and_classes.append((non_prog_count, ItemClass.filler))
+            else:
+                counts_and_classes.append((0, ItemClass.filler))  # No orbs in a bundle means no bundles.
 
         # Under normal circumstances, we create 0 green eco fillers. We will manually create filler items as needed.
         elif item == jak1_max:
