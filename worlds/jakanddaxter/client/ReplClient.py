@@ -219,8 +219,7 @@ class JakAndDaxterReplClient:
 
     # Pushes a JsonMessageData object to the json message queue to be processed during the repl main_tick
     def queue_game_text(self, my_item_name, my_item_finder, their_item_name, their_item_owner):
-        self.json_message_queue.put(self.JsonMessageData(my_item_name, my_item_finder,
-                                                         their_item_name, their_item_owner))
+        self.json_message_queue.put(JsonMessageData(my_item_name, my_item_finder, their_item_name, their_item_owner))
 
     # OpenGOAL can handle both its own string datatype and C-like character pointers (charp).
     # So for the game to constantly display this information in the HUD, we have to write it
