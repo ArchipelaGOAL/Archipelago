@@ -178,7 +178,7 @@ class JakAndDaxterWorld(World):
 
     # Helper function to reuse some nasty if/else trees. This outputs a list of pairs of item count and classification.
     # For instance, not all 101 power cells need to be marked progression if you only need 72 to beat the game. So we
-    # will have 72 Progression Power Cells, and 29 Useful Power Cells.
+    # will have 72 Progression Power Cells, and 29 Filler Power Cells.
     def item_type_helper(self, item) -> List[Tuple[int, ItemClass]]:
         counts_and_classes: List[Tuple[int, ItemClass]] = []
 
