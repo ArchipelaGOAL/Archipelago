@@ -210,9 +210,6 @@ class JakAndDaxterReplClient:
     # I also only allotted 32 bytes to each string in OpenGOAL, so we must truncate.
     @staticmethod
     def sanitize_game_text(text: str) -> str:
-        if text is None:
-            return "\"NONE\""
-
         result = "".join(c for c in text if (c in {"-", " "} or c.isalnum()))
         result = result[:32].upper()
         return f"\"{result}\""
@@ -226,16 +223,20 @@ class JakAndDaxterReplClient:
     # to a memory address as a char*.
     async def write_game_text(self, data: JsonMessageData):
         logger.debug(f"Sending info to in-game display!")
-        await self.send_form(f"(begin "
-                             f"  (charp<-string (-> *ap-info-jak1* my-item-name) "
-                             f"    {self.sanitize_game_text(data.my_item_name)}) "
-                             f"  (charp<-string (-> *ap-info-jak1* my-item-finder) "
-                             f"    {self.sanitize_game_text(data.my_item_finder)}) "
-                             f"  (charp<-string (-> *ap-info-jak1* their-item-name) "
-                             f"    {self.sanitize_game_text(data.their_item_name)}) "
-                             f"  (charp<-string (-> *ap-info-jak1* their-item-owner) "
-                             f"    {self.sanitize_game_text(data.their_item_owner)}) "
-                             f"  (none))", print_ok=False)
+        body = ""
+        if data.my_item_name:
+            body += (f" (charp<-string (-> *ap-info-jak1* my-item-name)"
+                     f" {self.sanitize_game_text(data.my_item_name)})")
+        if data.my_item_finder:
+            body += (f" (charp<-string (-> *ap-info-jak1* my-item-finder)"
+                     f" {self.sanitize_game_text(data.my_item_finder)})")
+        if data.their_item_name:
+            body += (f" (charp<-string (-> *ap-info-jak1* their-item-name)"
+                     f" {self.sanitize_game_text(data.their_item_name)})")
+        if data.their_item_owner:
+            body += (f" (charp<-string (-> *ap-info-jak1* their-item-owner)"
+                     f" {self.sanitize_game_text(data.their_item_owner)})")
+        await self.send_form(f"(begin {body} (none))", print_ok=False)
 
     async def receive_item(self):
         ap_id = getattr(self.item_inbox[self.inbox_index], "item")
