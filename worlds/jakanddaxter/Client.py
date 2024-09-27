@@ -290,9 +290,22 @@ async def run_game(ctx: JakAndDaxterContext):
             return
 
         if gk_path:
-            # Prefixing ampersand and wrapping gk_path in quotes is necessary for paths with spaces in them.
+            # Per-mod saves and settings are stored in a spot that is a little unusual to get to. We have to .. out of
+            # gk.exe and the archipelagoal folder, then traverse down to _settings/archipelagoal. Then we normalize
+            # this path and pass it in as an argument to gk.
+            config_relative_path = "../../_settings/archipelagoal"
+            config_path = os.path.normpath(
+                os.path.join(
+                    os.path.normpath(gk_path),
+                    os.path.normpath(config_relative_path)))
+
+            # Prefixing ampersand and wrapping in quotes is necessary for paths with spaces in them.
             gk_process = subprocess.Popen(
-                ["powershell.exe", f"& \"{gk_path}\"", "--game jak1", "--", "-v", "-boot", "-fakeiso", "-debug"],
+                ["powershell.exe",
+                 f"& \"{gk_path}\"",
+                 f"--config-path \"{config_path}\"",
+                 "--game jak1",
+                 "--", "-v", "-boot", "-fakeiso", "-debug"],
                 creationflags=subprocess.CREATE_NEW_CONSOLE)  # These need to be new consoles for stability.
 
     if not goalc_running:
