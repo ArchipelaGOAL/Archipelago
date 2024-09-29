@@ -304,12 +304,12 @@ async def run_game(ctx: JakAndDaxterContext):
                          f"Please check the OpenGOAL Launcher to verify installation of the ArchipelaGOAL mod.")
             return
 
-        # IMPORTANT: Before we check the existence of the next important piece, we must ask "Are you a developer?"
-        # The OpenGOAL Compiler checks the existence of the "data" folder to determine the location of the game's code.
-        # As a developer, you would be working out of (e.g.) "ArchipelaGOAL/out/build/Release/bin" and there would be
-        # no "data" folder - the repository folder itself IS the data folder. You would have created your "iso_data"
-        # folder here as well, so we can skip the "iso_data" check. HOWEVER, for everyone who is NOT a developer,
-        # we must ensure that they copied the "iso_data" folder INTO the "data" folder per the setup instructions.
+        # IMPORTANT: Before we check the existence of the next piece, we must ask "Are you a developer?"
+        # The OpenGOAL Compiler checks the existence of the "data" folder to determine if you're running from source
+        # or from a built package. As a developer, your repository folder itself IS the data folder and the Compiler
+        # knows this. You would have created your "iso_data" folder here as well, so we can skip the "iso_data" check.
+        # HOWEVER, for everyone who is NOT a developer, we must ensure that they copied the "iso_data" folder INTO
+        # the "data" folder per the setup instructions.
         data_path = os.path.join(root_path, "data")
         if os.path.exists(data_path):
 
@@ -351,7 +351,7 @@ async def run_game(ctx: JakAndDaxterContext):
                 creationflags=subprocess.CREATE_NEW_CONSOLE)  # These need to be new consoles for stability.
 
     except AttributeError as e:
-        logger.error(f"Hosts.yaml does not contain {e.args[0]}, unable to locate game executables.")
+        logger.error(f"Host.yaml does not contain {e.args[0]}, unable to locate game executables.")
         return
 
     # Auto connect the repl and memr agents. Sleep 5 because goalc takes just a little bit of time to load,

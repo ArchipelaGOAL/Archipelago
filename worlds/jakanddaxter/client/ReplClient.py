@@ -174,7 +174,7 @@ class JakAndDaxterReplClient:
             if await self.send_form("(set! *cheat-mode* #f)", print_ok=False):
                 ok_count += 1
 
-            # Run the retail game start sequence (while still in debug).
+            # Run the retail game start sequence (while still connected with REPL).
             if await self.send_form("(start \'play (get-continue-by-name *game-info* \"title-start\"))"):
                 ok_count += 1
 
