@@ -228,7 +228,7 @@ class JakAndDaxterMemoryReader:
     async def connect(self):
         try:
             self.gk_process = pymem.Pymem("gk.exe")  # The GOAL Kernel
-            logger.info("Found the gk process: " + str(self.gk_process.process_id))
+            logger.debug("Found the gk process: " + str(self.gk_process.process_id))
         except ProcessNotFound:
             logger.error("Could not find the gk process.")
             self.connected = False
@@ -245,7 +245,7 @@ class JakAndDaxterMemoryReader:
             self.goal_address = int.from_bytes(self.gk_process.read_bytes(goal_pointer, sizeof_uint64),
                                                byteorder="little",
                                                signed=False)
-            logger.info("Found the archipelago memory address: " + str(self.goal_address))
+            logger.debug("Found the archipelago memory address: " + str(self.goal_address))
             self.connected = True
         else:
             logger.error("Could not find the archipelago memory address!")
@@ -267,7 +267,7 @@ class JakAndDaxterMemoryReader:
                 logger.error("Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
                 self.connected = False
         else:
-            logger.info("The Memory Reader is not connected!")
+            logger.error("The Memory Reader is not connected!")
 
     def print_status(self):
         logger.info("Memory Reader Status:")

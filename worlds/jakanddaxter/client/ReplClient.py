@@ -116,14 +116,14 @@ class JakAndDaxterReplClient:
     async def connect(self):
         try:
             self.gk_process = pymem.Pymem("gk.exe")  # The GOAL Kernel
-            logger.info("Found the gk process: " + str(self.gk_process.process_id))
+            logger.debug("Found the gk process: " + str(self.gk_process.process_id))
         except ProcessNotFound:
             logger.error("Could not find the gk process.")
             return
 
         try:
             self.goalc_process = pymem.Pymem("goalc.exe")  # The GOAL Compiler and REPL
-            logger.info("Found the goalc process: " + str(self.goalc_process.process_id))
+            logger.debug("Found the goalc process: " + str(self.goalc_process.process_id))
         except ProcessNotFound:
             logger.error("Could not find the goalc process.")
             return
@@ -361,6 +361,10 @@ class JakAndDaxterReplClient:
 
         return True
 
+    # OpenGOAL has a limit of 8 parameters per function. We've already hit this limit. We may have to split these
+    # options into two groups, both of which required to be sent successfully, in the future.
+    # TODO - Alternatively, define a new datatype in OpenGOAL that holds all these options, instantiate the type here,
+    #  and rewrite the ap-setup-options! function to take that instance as input.
     async def setup_options(self,
                             os_option: int, os_bundle: int,
                             fc_count: int, mp_count: int,
@@ -378,8 +382,17 @@ class JakAndDaxterReplClient:
                    f"    Oracle Orb Amt {ot_amount}, Completion GOAL {goal_id}... ")
         if ok:
             logger.debug(message + "Success!")
+            status = 1
         else:
             logger.error(message + "Failed!")
+            status = 2
+
+        ok = await self.send_form(f"(ap-set-connection-status! (the uint {status}))")
+        if ok:
+            logger.debug(f"Connection Status {status} set!")
+        else:
+            logger.error(f"Connection Status {status} failed to set!")
+
         return ok
 
     async def save_data(self):
