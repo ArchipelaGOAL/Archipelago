@@ -1,6 +1,6 @@
 import random
 import struct
-from typing import ByteString, List, Callable
+from typing import ByteString, List, Callable, Optional
 import json
 import pymem
 from pymem import pattern
@@ -19,6 +19,12 @@ sizeof_uint64 = 8
 sizeof_uint32 = 4
 sizeof_uint8 = 1
 sizeof_float = 4
+
+
+# *****************************************************************************
+# **** This number must match (-> *ap-info-jak1* version) in ap-struct.gc! ****
+# *****************************************************************************
+expected_memory_version = 2
 
 
 # IMPORTANT: OpenGOAL memory structures are particular about the alignment, in memory, of member elements according to
@@ -88,6 +94,12 @@ their_item_name_offset = offsets.define(sizeof_uint8, 32)
 their_item_owner_offset = offsets.define(sizeof_uint8, 32)
 my_item_name_offset = offsets.define(sizeof_uint8, 32)
 my_item_finder_offset = offsets.define(sizeof_uint8, 32)
+
+# Version of the memory struct, to cut down on mod/apworld version mismatches.
+memory_version_offset = offsets.define(sizeof_uint32)
+
+# Connection status to AP server (not the game!)
+server_connection_offset = offsets.define(sizeof_uint8)
 
 # The End.
 end_marker_offset = offsets.define(sizeof_uint8, 4)
@@ -163,7 +175,6 @@ class JakAndDaxterMemoryReader:
 
     def __init__(self, marker: ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
         self.marker = marker
-        self.connect()
 
     async def main_tick(self,
                         location_callback: Callable,
@@ -173,6 +184,7 @@ class JakAndDaxterMemoryReader:
                         paid_orbs_callback: Callable):
         if self.initiated_connect:
             await self.connect()
+            await self.verify_memory_version()
             self.initiated_connect = False
 
         if self.connected:
@@ -184,31 +196,34 @@ class JakAndDaxterMemoryReader:
         else:
             return
 
-        # Save some state variables temporarily.
-        old_deathlink_enabled = self.deathlink_enabled
+        # TODO - How drastic of a change is this, to wrap all of main_tick in a self.connected check?
+        if self.connected:
 
-        # Read the memory address to check the state of the game.
-        self.read_memory()
+            # Save some state variables temporarily.
+            old_deathlink_enabled = self.deathlink_enabled
 
-        # Checked Locations in game. Handle the entire outbox every tick until we're up to speed.
-        if len(self.location_outbox) > self.outbox_index:
-            location_callback(self.location_outbox)
-            self.save_data()
-            self.outbox_index += 1
+            # Read the memory address to check the state of the game.
+            self.read_memory()
 
-        if self.finished_game:
-            finish_callback()
+            # Checked Locations in game. Handle the entire outbox every tick until we're up to speed.
+            if len(self.location_outbox) > self.outbox_index:
+                location_callback(self.location_outbox)
+                self.save_data()
+                self.outbox_index += 1
 
-        if old_deathlink_enabled != self.deathlink_enabled:
-            deathlink_toggle()
-            logger.debug("Toggled DeathLink " + ("ON" if self.deathlink_enabled else "OFF"))
+            if self.finished_game:
+                finish_callback()
 
-        if self.send_deathlink:
-            deathlink_callback()
+            if old_deathlink_enabled != self.deathlink_enabled:
+                deathlink_toggle()
+                logger.debug("Toggled DeathLink " + ("ON" if self.deathlink_enabled else "OFF"))
 
-        if self.orbs_paid > 0:
-            paid_orbs_callback(self.orbs_paid)
-            self.orbs_paid = 0
+            if self.send_deathlink:
+                deathlink_callback()
+
+            if self.orbs_paid > 0:
+                paid_orbs_callback(self.orbs_paid)
+                self.orbs_paid = 0
 
     async def connect(self):
         try:
@@ -233,11 +248,26 @@ class JakAndDaxterMemoryReader:
             logger.info("Found the archipelago memory address: " + str(self.goal_address))
             self.connected = True
         else:
-            logger.error("Could not find the archipelago memory address.")
+            logger.error("Could not find the archipelago memory address!")
             self.connected = False
 
+    async def verify_memory_version(self):
         if self.connected:
-            logger.info("The Memory Reader is ready!")
+            memory_version: Optional[int] = None
+            try:
+                memory_version = self.read_goal_address(memory_version_offset, sizeof_uint32)
+                if memory_version == expected_memory_version:
+                    logger.info("The Memory Reader is ready!")
+                else:
+                    raise MemoryReadError(memory_version_offset, sizeof_uint32)
+            except (ProcessError, MemoryReadError, WinAPIError):
+                logger.error("OpenGOAL memory structure is incompatible with current AP client!")
+                logger.error("   AP Client Version: " + str(expected_memory_version))
+                logger.error("   OpenGOAL Version: " + str(memory_version))
+                logger.error("Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
+                self.connected = False
+        else:
+            logger.info("The Memory Reader is not connected!")
 
     def print_status(self):
         logger.info("Memory Reader Status:")

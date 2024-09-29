@@ -57,7 +57,6 @@ class JakAndDaxterReplClient:
         self.ip = ip
         self.port = port
         self.lock = asyncio.Lock()
-        self.connect()
 
     async def main_tick(self):
         if self.initiated_connect:

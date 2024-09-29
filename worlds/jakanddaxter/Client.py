@@ -264,6 +264,7 @@ class JakAndDaxterContext(CommonContext):
 async def run_game(ctx: JakAndDaxterContext):
 
     # These may already be running. If they are not running, try to start them.
+    # TODO - Support other OS's. cmd for some reason does not work with goalc. Pymem is Windows-only.
     gk_running = False
     try:
         pymem.Pymem("gk.exe")  # The GOAL Kernel
@@ -278,25 +279,60 @@ async def run_game(ctx: JakAndDaxterContext):
     except ProcessNotFound:
         logger.info("Compiler not running, attempting to start.")
 
-    # Don't mind all the arguments, they are exactly what you get when you run "task boot-game" or "task repl".
-    # TODO - Support other OS's. cmd for some reason does not work with goalc. Pymem is Windows-only.
-    if not gk_running:
-        try:
-            gk_path = Utils.get_settings()["jakanddaxter_options"]["root_directory"]
-            gk_path = os.path.normpath(gk_path)
-            gk_path = os.path.join(gk_path, "gk.exe")
-        except AttributeError as e:
-            logger.error(f"Hosts.yaml does not contain {e.args[0]}, unable to locate game executables.")
+    try:
+        # Validate folder and file structures of the ArchipelaGOAL root directory.
+        root_path = Utils.get_settings()["jakanddaxter_options"]["root_directory"]
+
+        # Always trust your instincts.
+        if "/" not in root_path:
+            logger.error(f"The ArchipelaGOAL root directory contains no path. (Are you missing forward slashes?) "
+                         f"Please check the value of `jakanddaxter_options > root_directory` in your host.yaml file.")
             return
 
-        if gk_path:
+        # Start by checking the existence of the root directory provided in the host.yaml file.
+        root_path = os.path.normpath(root_path)
+        if not os.path.exists(root_path):
+            logger.error(f"The ArchipelaGOAL root directory does not exist, unable to locate game executables. "
+                         f"Please check the value of `jakanddaxter_options > root_directory` in your host.yaml file.")
+            return
+
+        # Now double-check the existence of the two executables we need.
+        gk_path = os.path.join(root_path, "gk.exe")
+        goalc_path = os.path.join(root_path, "goalc.exe")
+        if not os.path.exists(gk_path) or not os.path.exists(goalc_path):
+            logger.error(f"The Game and Compiler executables could not be found in the ArchipelaGOAL root directory. "
+                         f"Please check the OpenGOAL Launcher to verify installation of the ArchipelaGOAL mod.")
+            return
+
+        # IMPORTANT: Before we check the existence of the next important piece, we must ask "Are you a developer?"
+        # The OpenGOAL Compiler checks the existence of the "data" folder to determine the location of the game's code.
+        # As a developer, you would be working out of (e.g.) "ArchipelaGOAL/out/build/Release/bin" and there would be
+        # no "data" folder - the repository folder itself IS the data folder. You would have created your "iso_data"
+        # folder here as well, so we can skip the "iso_data" check. HOWEVER, for everyone who is NOT a developer,
+        # we must ensure that they copied the "iso_data" folder INTO the "data" folder per the setup instructions.
+        data_path = os.path.join(root_path, "data")
+        if os.path.exists(data_path):
+
+            # NOW double-check the existence of the iso_data folder under <root directory>/data. This is necessary
+            # for the compiler to compile the game correctly.
+            # TODO - If the GOALC compiler is updated to take the iso_data folder as a runtime argument,
+            #  we may be able to remove this step.
+            iso_data_path = os.path.join(root_path, "data", "iso_data")
+            if not os.path.exists(iso_data_path):
+                logger.error(f"The iso_data folder could not be found, unable to compile game. "
+                             f"Please copy the iso_data folder from its original location to the mod's data folder. "
+                             f"(See setup guide for more details.)")
+                return
+
+        # Now we can FINALLY attempt to start the programs.
+        if not gk_running:
             # Per-mod saves and settings are stored in a spot that is a little unusual to get to. We have to .. out of
-            # gk.exe and the archipelagoal folder, then traverse down to _settings/archipelagoal. Then we normalize
-            # this path and pass it in as an argument to gk.
-            config_relative_path = "../../_settings/archipelagoal"
+            # ArchipelaGOAL root folder, then traverse down to _settings/archipelagoal. Then we normalize this path
+            # and pass it in as an argument to gk. This folder will be created if it does not exist.
+            config_relative_path = "../_settings/archipelagoal"
             config_path = os.path.normpath(
                 os.path.join(
-                    os.path.normpath(gk_path),
+                    os.path.normpath(root_path),
                     os.path.normpath(config_relative_path)))
 
             # Prefixing ampersand and wrapping in quotes is necessary for paths with spaces in them.
@@ -308,24 +344,19 @@ async def run_game(ctx: JakAndDaxterContext):
                  "--", "-v", "-boot", "-fakeiso", "-debug"],
                 creationflags=subprocess.CREATE_NEW_CONSOLE)  # These need to be new consoles for stability.
 
-    if not goalc_running:
-        try:
-            goalc_path = Utils.get_settings()["jakanddaxter_options"]["root_directory"]
-            goalc_path = os.path.normpath(goalc_path)
-            goalc_path = os.path.join(goalc_path, "goalc.exe")
-        except AttributeError as e:
-            logger.error(f"Hosts.yaml does not contain {e.args[0]}, unable to locate game executables.")
-            return
-
-        if goalc_path:
+        if not goalc_running:
             # Prefixing ampersand and wrapping goalc_path in quotes is necessary for paths with spaces in them.
             goalc_process = subprocess.Popen(
                 ["powershell.exe", f"& \"{goalc_path}\"", "--game jak1"],
                 creationflags=subprocess.CREATE_NEW_CONSOLE)  # These need to be new consoles for stability.
 
+    except AttributeError as e:
+        logger.error(f"Hosts.yaml does not contain {e.args[0]}, unable to locate game executables.")
+        return
+
     # Auto connect the repl and memr agents. Sleep 5 because goalc takes just a little bit of time to load,
     # and it's not something we can await.
-    logger.info("This may take a bit... Wait for the success audio cue before continuing!")
+    logger.info("This may take a bit... Wait for the game's title sequence before continuing!")
     await asyncio.sleep(5)
     ctx.repl.initiated_connect = True
     ctx.memr.initiated_connect = True
@@ -344,7 +375,7 @@ async def main():
     ctx.run_cli()
 
     # Find and run the game (gk) and compiler/repl (goalc).
-    await run_game(ctx)
+    create_task_log_exception(run_game(ctx))
     await ctx.exit_event.wait()
     await ctx.shutdown()
 
