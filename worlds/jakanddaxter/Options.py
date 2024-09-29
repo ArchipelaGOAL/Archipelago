@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle, DeathLink
+from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle
 
 
 class EnableMoveRandomizer(Toggle):
@@ -174,7 +174,6 @@ class CompletionCondition(Choice):
 
 @dataclass
 class JakAndDaxterOptions(PerGameCommonOptions):
-    deathlink: DeathLink
     enable_move_randomizer: EnableMoveRandomizer
     enable_orbsanity: EnableOrbsanity
     global_orbsanity_bundle_size: GlobalOrbsanityBundleSize
