@@ -261,10 +261,11 @@ class JakAndDaxterMemoryReader:
                 else:
                     raise MemoryReadError(memory_version_offset, sizeof_uint32)
             except (ProcessError, MemoryReadError, WinAPIError):
-                logger.error("OpenGOAL memory structure is incompatible with current AP client!")
-                logger.error("   AP Client Version: " + str(expected_memory_version))
-                logger.error("   OpenGOAL Version: " + str(memory_version))
-                logger.error("Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
+                msg = (f"The OpenGOAL memory structure is incompatible with the current AP client!\n"
+                       f"   Expected Version: {str(expected_memory_version)}\n"
+                       f"   Found Version: {str(memory_version)}\n"
+                       f"Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
+                logger.error(msg)
                 self.connected = False
         else:
             logger.error("The Memory Reader is not connected!")
