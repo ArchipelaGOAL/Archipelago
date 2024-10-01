@@ -173,8 +173,24 @@ class JakAndDaxterMemoryReader:
     orbsanity_enabled: bool = False
     orbs_paid: int = 0
 
-    def __init__(self, marker: ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
+    # Logging callbacks
+    log_error: Callable
+    log_warn: Callable
+    log_success: Callable
+    log_info: Callable
+
+    def __init__(self,
+                 log_error_callback: Callable,
+                 log_warn_callback: Callable,
+                 log_success_callback: Callable,
+                 log_info_callback: Callable,
+                 marker: ByteString = b'UnLiStEdStRaTs_JaK1\x00',
+                 ):
         self.marker = marker
+        self.log_error = log_error_callback
+        self.log_warn = log_warn_callback
+        self.log_success = log_success_callback
+        self.log_info = log_info_callback
 
     async def main_tick(self,
                         location_callback: Callable,
@@ -191,7 +207,7 @@ class JakAndDaxterMemoryReader:
             try:
                 self.gk_process.read_bool(self.gk_process.base_address)  # Ping to see if it's alive.
             except (ProcessError, MemoryReadError, WinAPIError):
-                logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")
+                self.log_error("The gk process has died. Restart the game and run \"/memr connect\" again.")
                 self.connected = False
         else:
             return
@@ -230,7 +246,7 @@ class JakAndDaxterMemoryReader:
             self.gk_process = pymem.Pymem("gk.exe")  # The GOAL Kernel
             logger.debug("Found the gk process: " + str(self.gk_process.process_id))
         except ProcessNotFound:
-            logger.error("Could not find the gk process.")
+            self.log_error("Could not find the gk process.")
             self.connected = False
             return
 
@@ -248,34 +264,37 @@ class JakAndDaxterMemoryReader:
             logger.debug("Found the archipelago memory address: " + str(self.goal_address))
             self.connected = True
         else:
-            logger.error("Could not find the archipelago memory address!")
+            self.log_error("Could not find the archipelago memory address!")
             self.connected = False
 
     async def verify_memory_version(self):
-        if self.connected:
-            memory_version: Optional[int] = None
-            try:
-                memory_version = self.read_goal_address(memory_version_offset, sizeof_uint32)
-                if memory_version == expected_memory_version:
-                    logger.info("The Memory Reader is ready!")
-                else:
-                    raise MemoryReadError(memory_version_offset, sizeof_uint32)
-            except (ProcessError, MemoryReadError, WinAPIError):
-                msg = (f"The OpenGOAL memory structure is incompatible with the current AP client!\n"
-                       f"   Expected Version: {str(expected_memory_version)}\n"
-                       f"   Found Version: {str(memory_version)}\n"
-                       f"Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
-                logger.error(msg)
-                self.connected = False
-        else:
-            logger.error("The Memory Reader is not connected!")
+        if not self.connected:
+            self.log_error("The Memory Reader is not connected!")
 
-    def print_status(self):
-        logger.info("Memory Reader Status:")
-        logger.info("   Game process ID: " + (str(self.gk_process.process_id) if self.gk_process else "None"))
-        logger.info("   Game state memory address: " + str(self.goal_address))
-        logger.info("   Last location checked: " + (str(self.location_outbox[self.outbox_index - 1])
-                                                    if self.outbox_index else "None"))
+        memory_version: Optional[int] = None
+        try:
+            memory_version = self.read_goal_address(memory_version_offset, sizeof_uint32)
+            if memory_version == expected_memory_version:
+                self.log_success("The Memory Reader is ready!")
+            else:
+                raise MemoryReadError(memory_version_offset, sizeof_uint32)
+        except (ProcessError, MemoryReadError, WinAPIError):
+            msg = (f"The OpenGOAL memory structure is incompatible with the current AP client!\n"
+                   f"   Expected Version: {str(expected_memory_version)}\n"
+                   f"   Found Version: {str(memory_version)}\n"
+                   f"Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
+            self.log_error(msg)
+            self.connected = False
+
+    async def print_status(self):
+        proc_id = str(self.gk_process.process_id) if self.gk_process else "None"
+        last_loc = str(self.location_outbox[self.outbox_index - 1] if self.outbox_index else "None")
+        msg = (f"Memory Reader Status:\n"
+               f"   Game process ID: {proc_id}\n"
+               f"   Game state memory address: {str(self.goal_address)}\n"
+               f"   Last location checked: {last_loc}")
+        await self.verify_memory_version()
+        self.log_info(msg)
 
     def read_memory(self) -> List[int]:
         try:
@@ -381,10 +400,10 @@ class JakAndDaxterMemoryReader:
             completed = self.read_goal_address(completed_offset, sizeof_uint8)
             if completed > 0 and not self.finished_game:
                 self.finished_game = True
-                logger.info("Congratulations! You finished the game!")
+                self.log_success("Congratulations! You finished the game!")
 
         except (ProcessError, MemoryReadError, WinAPIError):
-            logger.error("The gk process has died. Restart the game and run \"/memr connect\" again.")
+            self.log_error("The gk process has died. Restart the game and run \"/memr connect\" again.")
             self.connected = False
 
         return self.location_outbox

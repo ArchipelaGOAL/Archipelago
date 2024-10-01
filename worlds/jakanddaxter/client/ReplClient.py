@@ -5,7 +5,7 @@ import struct
 import random
 from dataclasses import dataclass
 from queue import Queue
-from typing import Dict, Optional
+from typing import Dict, Optional, Callable
 
 import pymem
 from pymem.exception import ProcessNotFound, ProcessError
@@ -53,10 +53,26 @@ class JakAndDaxterReplClient:
     inbox_index = 0
     json_message_queue: Queue[JsonMessageData] = queue.Queue()
 
-    def __init__(self, ip: str = "127.0.0.1", port: int = 8181):
+    # Logging callbacks
+    log_error: Callable
+    log_warn: Callable
+    log_success: Callable
+    log_info: Callable
+
+    def __init__(self,
+                 log_error_callback: Callable,
+                 log_warn_callback: Callable,
+                 log_success_callback: Callable,
+                 log_info_callback: Callable,
+                 ip: str = "127.0.0.1",
+                 port: int = 8181):
         self.ip = ip
         self.port = port
         self.lock = asyncio.Lock()
+        self.log_error = log_error_callback
+        self.log_warn = log_warn_callback
+        self.log_success = log_success_callback
+        self.log_info = log_info_callback
 
     async def main_tick(self):
         if self.initiated_connect:
@@ -67,12 +83,12 @@ class JakAndDaxterReplClient:
             try:
                 self.gk_process.read_bool(self.gk_process.base_address)  # Ping to see if it's alive.
             except ProcessError:
-                logger.error("The gk process has died. Restart the game and run \"/repl connect\" again.")
+                self.log_error("The gk process has died. Restart the game and run \"/repl connect\" again.")
                 self.connected = False
             try:
                 self.goalc_process.read_bool(self.goalc_process.base_address)  # Ping to see if it's alive.
             except ProcessError:
-                logger.error("The goalc process has died. Restart the compiler and run \"/repl connect\" again.")
+                self.log_error("The goalc process has died. Restart the compiler and run \"/repl connect\" again.")
                 self.connected = False
         else:
             return
@@ -110,7 +126,7 @@ class JakAndDaxterReplClient:
                     logger.debug(response)
                 return True
             else:
-                logger.error(f"Unexpected response from REPL: {response}")
+                self.log_error(f"Unexpected response from REPL: {response}")
                 return False
 
     async def connect(self):
@@ -118,14 +134,14 @@ class JakAndDaxterReplClient:
             self.gk_process = pymem.Pymem("gk.exe")  # The GOAL Kernel
             logger.debug("Found the gk process: " + str(self.gk_process.process_id))
         except ProcessNotFound:
-            logger.error("Could not find the gk process.")
+            self.log_error("Could not find the gk process.")
             return
 
         try:
             self.goalc_process = pymem.Pymem("goalc.exe")  # The GOAL Compiler and REPL
             logger.debug("Found the goalc process: " + str(self.goalc_process.process_id))
         except ProcessNotFound:
-            logger.error("Could not find the goalc process.")
+            self.log_error("Could not find the goalc process.")
             return
 
         try:
@@ -138,9 +154,9 @@ class JakAndDaxterReplClient:
             if "Connected to OpenGOAL" and "nREPL!" in welcome_message:
                 logger.debug(welcome_message)
             else:
-                logger.error(f"Unable to connect to REPL websocket: unexpected welcome message \"{welcome_message}\"")
+                self.log_error(f"Unable to connect to REPL websocket: unexpected welcome message \"{welcome_message}\"")
         except ConnectionRefusedError as e:
-            logger.error(f"Unable to connect to REPL websocket: {e.strerror}")
+            self.log_error(f"Unable to connect to REPL websocket: {e.strerror}")
             return
 
         ok_count = 0
@@ -185,25 +201,29 @@ class JakAndDaxterReplClient:
                 self.connected = False
 
         if self.connected:
-            logger.info("The REPL is ready!")
+            self.log_success("The REPL is ready!")
 
     async def print_status(self):
-        logger.info("REPL Status:")
-        logger.info("  REPL process ID: " + (str(self.goalc_process.process_id) if self.goalc_process else "None"))
-        logger.info("  Game process ID: " + (str(self.gk_process.process_id) if self.gk_process else "None"))
+        gc_proc_id = str(self.goalc_process.process_id) if self.goalc_process else "None"
+        gk_proc_id = str(self.gk_process.process_id) if self.gk_process else "None"
+        msg = (f"REPL Status:\n"
+               f"  REPL process ID: {gc_proc_id}\n"
+               f"  Game process ID: {gk_proc_id}\n")
         try:
             if self.reader and self.writer:
                 addr = self.writer.get_extra_info("peername")
-                logger.info("  Game websocket: " + (str(addr) if addr else "None"))
+                addr = str(addr) if addr else "None"
+                msg += f"  Game websocket: {addr}\n"
                 await self.send_form("(dotimes (i 1) "
                                      "(sound-play-by-name "
                                      "(static-sound-name \"menu-close\") "
                                      "(new-sound-id) 1024 0 0 (sound-group sfx) #t))", print_ok=False)
         except ConnectionResetError:
-            logger.warn("  Connection to the game was lost or reset!")
-        logger.info("  Did you hear the success audio cue?")
-        logger.info("  Last item received: " + (str(getattr(self.item_inbox[self.inbox_index], "item"))
-                                                if self.inbox_index else "None"))
+            msg += "  Connection to the game was lost or reset!"
+        last_item = str(getattr(self.item_inbox[self.inbox_index], "item")) if self.inbox_index else "None"
+        msg += f"  Last item received: {last_item}\n"
+        msg += f"  Did you hear the success audio cue?"
+        self.log_info(msg)
 
     # To properly display in-game text, it must be alphanumeric and uppercase.
     # I also only allotted 32 bytes to each string in OpenGOAL, so we must truncate.
@@ -265,7 +285,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received a Power Cell!")
         else:
-            logger.error(f"Unable to receive a Power Cell!")
+            self.log_error(f"Unable to receive a Power Cell!")
         return ok
 
     async def receive_scout_fly(self, ap_id: int) -> bool:
@@ -277,7 +297,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received a {item_table[ap_id]}!")
         else:
-            logger.error(f"Unable to receive a {item_table[ap_id]}!")
+            self.log_error(f"Unable to receive a {item_table[ap_id]}!")
         return ok
 
     async def receive_special(self, ap_id: int) -> bool:
@@ -289,7 +309,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received special unlock {item_table[ap_id]}!")
         else:
-            logger.error(f"Unable to receive special unlock {item_table[ap_id]}!")
+            self.log_error(f"Unable to receive special unlock {item_table[ap_id]}!")
         return ok
 
     async def receive_move(self, ap_id: int) -> bool:
@@ -301,7 +321,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received the ability to {item_table[ap_id]}!")
         else:
-            logger.error(f"Unable to receive the ability to {item_table[ap_id]}!")
+            self.log_error(f"Unable to receive the ability to {item_table[ap_id]}!")
         return ok
 
     async def receive_precursor_orb(self, ap_id: int) -> bool:
@@ -313,7 +333,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received {orb_amount} Precursor Orbs!")
         else:
-            logger.error(f"Unable to receive {orb_amount} Precursor Orbs!")
+            self.log_error(f"Unable to receive {orb_amount} Precursor Orbs!")
         return ok
 
     # Green eco pills are our filler item. Use the get-pickup event instead to handle being full health.
@@ -322,7 +342,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received a green eco pill!")
         else:
-            logger.error(f"Unable to receive a green eco pill!")
+            self.log_error(f"Unable to receive a green eco pill!")
         return ok
 
     async def receive_deathlink(self) -> bool:
@@ -342,7 +362,7 @@ class JakAndDaxterReplClient:
         if ok:
             logger.debug(f"Received deathlink signal!")
         else:
-            logger.error(f"Unable to receive deathlink signal!")
+            self.log_error(f"Unable to receive deathlink signal!")
         return ok
 
     async def subtract_traded_orbs(self, orb_count: int) -> bool:
@@ -356,7 +376,7 @@ class JakAndDaxterReplClient:
             if ok:
                 logger.debug(f"Subtracting {orb_count} traded orbs!")
             else:
-                logger.error(f"Unable to subtract {orb_count} traded orbs!")
+                self.log_error(f"Unable to subtract {orb_count} traded orbs!")
             return ok
 
         return True
@@ -384,14 +404,14 @@ class JakAndDaxterReplClient:
             logger.debug(message + "Success!")
             status = 1
         else:
-            logger.error(message + "Failed!")
+            self.log_error(message + "Failed!")
             status = 2
 
         ok = await self.send_form(f"(ap-set-connection-status! (the uint {status}))")
         if ok:
             logger.debug(f"Connection Status {status} set!")
         else:
-            logger.error(f"Connection Status {status} failed to set!")
+            self.log_error(f"Connection Status {status} failed to set!")
 
         return ok
 
