@@ -177,31 +177,43 @@ class JakAndDaxterMemoryReader:
     orbsanity_enabled: bool = False
     orbs_paid: int = 0
 
+    # Game-related callbacks
+    location_check: Callable
+    finish_check: Callable
+    deathlink_check: Callable
+    deathlink_toggle: Callable
+    orb_trade: Callable
+
     # Logging callbacks
-    log_error: Callable
-    log_warn: Callable
-    log_success: Callable
-    log_info: Callable
+    # These will write to the provided logger, as well as the Client GUI with color markup.
+    log_error: Callable    # Red
+    log_warn: Callable     # Orange
+    log_success: Callable  # Green
+    log_info: Callable     # White (default)
 
     def __init__(self,
+                 location_check: Callable,
+                 finish_check: Callable,
+                 deathlink_check: Callable,
+                 deathlink_toggle: Callable,
+                 orb_trade: Callable,
                  log_error_callback: Callable,
                  log_warn_callback: Callable,
                  log_success_callback: Callable,
                  log_info_callback: Callable,
-                 marker: ByteString = b'UnLiStEdStRaTs_JaK1\x00',
-                 ):
+                 marker: ByteString = b'UnLiStEdStRaTs_JaK1\x00'):
         self.marker = marker
+        self.location_check = location_check
+        self.finish_check = finish_check
+        self.deathlink_check = deathlink_check
+        self.deathlink_toggle = deathlink_toggle
+        self.orb_trade = orb_trade
         self.log_error = log_error_callback
         self.log_warn = log_warn_callback
         self.log_success = log_success_callback
         self.log_info = log_info_callback
 
-    async def main_tick(self,
-                        location_callback: Callable,
-                        finish_callback: Callable,
-                        deathlink_callback: Callable,
-                        deathlink_toggle: Callable,
-                        paid_orbs_callback: Callable):
+    async def main_tick(self):
         if self.initiated_connect:
             await self.connect()
             await self.verify_memory_version()
@@ -227,22 +239,22 @@ class JakAndDaxterMemoryReader:
 
             # Checked Locations in game. Handle the entire outbox every tick until we're up to speed.
             if len(self.location_outbox) > self.outbox_index:
-                location_callback(self.location_outbox)
+                self.location_check(self.location_outbox)
                 self.save_data()
                 self.outbox_index += 1
 
             if self.finished_game:
-                finish_callback()
+                self.finish_check()
 
             if old_deathlink_enabled != self.deathlink_enabled:
-                deathlink_toggle()
+                self.deathlink_toggle()
                 logger.debug("Toggled DeathLink " + ("ON" if self.deathlink_enabled else "OFF"))
 
             if self.send_deathlink:
-                deathlink_callback()
+                self.deathlink_check()
 
             if self.orbs_paid > 0:
-                paid_orbs_callback(self.orbs_paid)
+                self.orb_trade(self.orbs_paid)
                 self.orbs_paid = 0
 
     async def connect(self):

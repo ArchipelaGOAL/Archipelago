@@ -93,7 +93,12 @@ class JakAndDaxterContext(CommonContext):
                                            self.on_log_warn,
                                            self.on_log_success,
                                            self.on_log_info)
-        self.memr = JakAndDaxterMemoryReader(self.on_log_error,
+        self.memr = JakAndDaxterMemoryReader(self.on_location_check,
+                                             self.on_finish_check,
+                                             self.on_deathlink_check,
+                                             self.on_deathlink_toggle,
+                                             self.on_orb_trade,
+                                             self.on_log_error,
                                              self.on_log_warn,
                                              self.on_log_success,
                                              self.on_log_info)
@@ -290,11 +295,7 @@ class JakAndDaxterContext(CommonContext):
 
     async def run_memr_loop(self):
         while True:
-            await self.memr.main_tick(self.on_location_check,
-                                      self.on_finish_check,
-                                      self.on_deathlink_check,
-                                      self.on_deathlink_toggle,
-                                      self.on_orb_trade)
+            await self.memr.main_tick()
             await asyncio.sleep(0.1)
 
 

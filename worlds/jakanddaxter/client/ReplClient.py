@@ -57,10 +57,11 @@ class JakAndDaxterReplClient:
     json_message_queue: Queue[JsonMessageData] = queue.Queue()
 
     # Logging callbacks
-    log_error: Callable
-    log_warn: Callable
-    log_success: Callable
-    log_info: Callable
+    # These will write to the provided logger, as well as the Client GUI with color markup.
+    log_error: Callable    # Red
+    log_warn: Callable     # Orange
+    log_success: Callable  # Green
+    log_info: Callable     # White (default)
 
     def __init__(self,
                  log_error_callback: Callable,
@@ -91,7 +92,8 @@ class JakAndDaxterReplClient:
             try:
                 self.goalc_process.read_bool(self.goalc_process.base_address)  # Ping to see if it's alive.
             except ProcessError:
-                self.log_error(logger, "The goalc process has died. Restart the compiler and run \"/repl connect\" again.")
+                self.log_error(logger,
+                               "The goalc process has died. Restart the compiler and run \"/repl connect\" again.")
                 self.connected = False
         else:
             return
@@ -157,7 +159,8 @@ class JakAndDaxterReplClient:
             if "Connected to OpenGOAL" and "nREPL!" in welcome_message:
                 logger.debug(welcome_message)
             else:
-                self.log_error(logger, f"Unable to connect to REPL websocket: unexpected welcome message \"{welcome_message}\"")
+                self.log_error(logger,
+                               f"Unable to connect to REPL websocket: unexpected welcome message \"{welcome_message}\"")
         except ConnectionRefusedError as e:
             self.log_error(logger, f"Unable to connect to REPL websocket: {e.strerror}")
             return
@@ -277,7 +280,7 @@ class JakAndDaxterReplClient:
         elif ap_id == jak1_max:
             await self.receive_green_eco()  # Ponder why I chose to do ID's this way.
         else:
-            raise KeyError(f"Tried to receive item with unknown AP ID {ap_id}.")
+            self.log_error(logger, f"Tried to receive item with unknown AP ID {ap_id}!")
 
     async def receive_power_cell(self, ap_id: int) -> bool:
         cell_id = Cells.to_game_id(ap_id)
