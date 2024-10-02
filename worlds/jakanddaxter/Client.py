@@ -1,5 +1,8 @@
+import logging
 import os
 import subprocess
+from logging import Logger
+
 import colorama
 
 import asyncio
@@ -12,7 +15,7 @@ from pymem.exception import ProcessNotFound
 
 import Utils
 from NetUtils import ClientStatus
-from CommonClient import ClientCommandProcessor, CommonContext, logger, server_loop, gui_enabled
+from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
 from .Options import EnableOrbsanity
 
 from .GameID import jak1_name
@@ -23,6 +26,7 @@ import ModuleUpdate
 ModuleUpdate.update()
 
 
+logger = logging.getLogger("JakClient")
 all_tasks: Set[Task] = set()
 
 
@@ -51,7 +55,7 @@ class JakAndDaxterClientCommandProcessor(ClientCommandProcessor):
         - status : check internal status of the REPL."""
         if arguments:
             if arguments[0] == "connect":
-                self.ctx.on_log_info("This may take a bit... Wait for the success audio cue before continuing!")
+                self.ctx.on_log_info(logger, "This may take a bit... Wait for the success audio cue before continuing!")
                 self.ctx.repl.initiated_connect = True
             if arguments[0] == "status":
                 create_task_log_exception(self.ctx.repl.print_status())
@@ -225,7 +229,7 @@ class JakAndDaxterContext(CommonContext):
             player = self.player_names[self.slot] if self.slot is not None else "Jak"
             death_text = self.memr.cause_of_death.replace("Jak", player)
             await self.send_death(death_text)
-            self.on_log_warn(death_text)
+            self.on_log_warn(logger, death_text)
 
         # Reset all flags, but leave the death count alone.
         self.memr.send_deathlink = False
@@ -252,25 +256,29 @@ class JakAndDaxterContext(CommonContext):
     def on_orb_trade(self, orbs_changed: int):
         create_task_log_exception(self.ap_inform_orb_trade(orbs_changed))
 
-    def on_log_error(self, message: str):
+    def on_log_error(self, lg: Logger, message: str):
+        lg.error(message)
         if self.ui:
             color = self.jsontotextparser.color_codes["red"]
             self.ui.log_panels["Archipelago"].on_message_markup(f"[color={color}]{message}[/color]")
             self.ui.log_panels["All"].on_message_markup(f"[color={color}]{message}[/color]")
 
-    def on_log_warn(self, message: str):
+    def on_log_warn(self, lg: Logger, message: str):
+        lg.warning(message)
         if self.ui:
             color = self.jsontotextparser.color_codes["orange"]
             self.ui.log_panels["Archipelago"].on_message_markup(f"[color={color}]{message}[/color]")
             self.ui.log_panels["All"].on_message_markup(f"[color={color}]{message}[/color]")
 
-    def on_log_success(self, message: str):
+    def on_log_success(self, lg: Logger, message: str):
+        lg.info(message)
         if self.ui:
             color = self.jsontotextparser.color_codes["green"]
             self.ui.log_panels["Archipelago"].on_message_markup(f"[color={color}]{message}[/color]")
             self.ui.log_panels["All"].on_message_markup(f"[color={color}]{message}[/color]")
 
-    def on_log_info(self, message: str):
+    def on_log_info(self, lg: Logger, message: str):
+        lg.info(message)
         if self.ui:
             self.ui.log_panels["Archipelago"].on_message_markup(f"{message}")
             self.ui.log_panels["All"].on_message_markup(f"{message}")
@@ -299,14 +307,14 @@ async def run_game(ctx: JakAndDaxterContext):
         pymem.Pymem("gk.exe")  # The GOAL Kernel
         gk_running = True
     except ProcessNotFound:
-        ctx.on_log_warn("Game not running, attempting to start.")
+        ctx.on_log_warn(logger, "Game not running, attempting to start.")
 
     goalc_running = False
     try:
         pymem.Pymem("goalc.exe")  # The GOAL Compiler and REPL
         goalc_running = True
     except ProcessNotFound:
-        ctx.on_log_warn("Compiler not running, attempting to start.")
+        ctx.on_log_warn(logger, "Compiler not running, attempting to start.")
 
     try:
         # Validate folder and file structures of the ArchipelaGOAL root directory.
@@ -316,7 +324,7 @@ async def run_game(ctx: JakAndDaxterContext):
         if "/" not in root_path:
             msg = (f"The ArchipelaGOAL root directory contains no path. (Are you missing forward slashes?)\n"
                    f"Please check the value of `jakanddaxter_options > root_directory` in your host.yaml file.")
-            ctx.on_log_error(msg)
+            ctx.on_log_error(logger, msg)
             return
 
         # Start by checking the existence of the root directory provided in the host.yaml file.
@@ -324,7 +332,7 @@ async def run_game(ctx: JakAndDaxterContext):
         if not os.path.exists(root_path):
             msg = (f"The ArchipelaGOAL root directory does not exist, unable to locate game executables.\n"
                    f"Please check the value of `jakanddaxter_options > root_directory` in your host.yaml file.")
-            ctx.on_log_error(msg)
+            ctx.on_log_error(logger, msg)
             return
 
         # Now double-check the existence of the two executables we need.
@@ -333,7 +341,7 @@ async def run_game(ctx: JakAndDaxterContext):
         if not os.path.exists(gk_path) or not os.path.exists(goalc_path):
             msg = (f"The Game and Compiler executables could not be found in the ArchipelaGOAL root directory.\n"
                    f"Please check the OpenGOAL Launcher to verify installation of the ArchipelaGOAL mod.")
-            ctx.on_log_error(msg)
+            ctx.on_log_error(logger, msg)
             return
 
         # IMPORTANT: Before we check the existence of the next piece, we must ask "Are you a developer?"
@@ -354,7 +362,7 @@ async def run_game(ctx: JakAndDaxterContext):
                 msg = (f"The iso_data folder could not be found, unable to compile game.\n"
                        f"Please copy the iso_data folder from its original location to the mod's data folder.\n"
                        f"(See setup guide for more details.)")
-                ctx.on_log_error(msg)
+                ctx.on_log_error(logger, msg)
                 return
 
         # Now we can FINALLY attempt to start the programs.
@@ -384,12 +392,12 @@ async def run_game(ctx: JakAndDaxterContext):
                 creationflags=subprocess.CREATE_NEW_CONSOLE)  # These need to be new consoles for stability.
 
     except AttributeError as e:
-        ctx.on_log_error(f"Host.yaml does not contain {e.args[0]}, unable to locate game executables.")
+        ctx.on_log_error(logger, f"Host.yaml does not contain {e.args[0]}, unable to locate game executables.")
         return
 
     # Auto connect the repl and memr agents. Sleep 5 because goalc takes just a little bit of time to load,
     # and it's not something we can await.
-    ctx.on_log_info("This may take a bit... Wait for the game's title sequence before continuing!")
+    ctx.on_log_info(logger, "This may take a bit... Wait for the game's title sequence before continuing!")
     await asyncio.sleep(5)
     ctx.repl.initiated_connect = True
     ctx.memr.initiated_connect = True

@@ -1,3 +1,4 @@
+import logging
 import random
 import struct
 from typing import ByteString, List, Callable, Optional
@@ -7,12 +8,15 @@ from pymem import pattern
 from pymem.exception import ProcessNotFound, ProcessError, MemoryReadError, WinAPIError
 from dataclasses import dataclass
 
-from CommonClient import logger
 from ..locs import (OrbLocations as Orbs,
                     CellLocations as Cells,
                     ScoutLocations as Flies,
                     SpecialLocations as Specials,
                     OrbCacheLocations as Caches)
+
+
+logger = logging.getLogger("MemoryReader")
+
 
 # Some helpful constants.
 sizeof_uint64 = 8
@@ -207,7 +211,7 @@ class JakAndDaxterMemoryReader:
             try:
                 self.gk_process.read_bool(self.gk_process.base_address)  # Ping to see if it's alive.
             except (ProcessError, MemoryReadError, WinAPIError):
-                self.log_error("The gk process has died. Restart the game and run \"/memr connect\" again.")
+                self.log_error(logger, "The gk process has died. Restart the game and run \"/memr connect\" again.")
                 self.connected = False
         else:
             return
@@ -246,7 +250,7 @@ class JakAndDaxterMemoryReader:
             self.gk_process = pymem.Pymem("gk.exe")  # The GOAL Kernel
             logger.debug("Found the gk process: " + str(self.gk_process.process_id))
         except ProcessNotFound:
-            self.log_error("Could not find the gk process.")
+            self.log_error(logger, "Could not find the gk process.")
             self.connected = False
             return
 
@@ -264,18 +268,18 @@ class JakAndDaxterMemoryReader:
             logger.debug("Found the archipelago memory address: " + str(self.goal_address))
             self.connected = True
         else:
-            self.log_error("Could not find the archipelago memory address!")
+            self.log_error(logger, "Could not find the archipelago memory address!")
             self.connected = False
 
     async def verify_memory_version(self):
         if not self.connected:
-            self.log_error("The Memory Reader is not connected!")
+            self.log_error(logger, "The Memory Reader is not connected!")
 
         memory_version: Optional[int] = None
         try:
             memory_version = self.read_goal_address(memory_version_offset, sizeof_uint32)
             if memory_version == expected_memory_version:
-                self.log_success("The Memory Reader is ready!")
+                self.log_success(logger, "The Memory Reader is ready!")
             else:
                 raise MemoryReadError(memory_version_offset, sizeof_uint32)
         except (ProcessError, MemoryReadError, WinAPIError):
@@ -283,7 +287,7 @@ class JakAndDaxterMemoryReader:
                    f"   Expected Version: {str(expected_memory_version)}\n"
                    f"   Found Version: {str(memory_version)}\n"
                    f"Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
-            self.log_error(msg)
+            self.log_error(logger, msg)
             self.connected = False
 
     async def print_status(self):
@@ -294,7 +298,7 @@ class JakAndDaxterMemoryReader:
                f"   Game state memory address: {str(self.goal_address)}\n"
                f"   Last location checked: {last_loc}")
         await self.verify_memory_version()
-        self.log_info(msg)
+        self.log_info(logger, msg)
 
     def read_memory(self) -> List[int]:
         try:
@@ -400,10 +404,10 @@ class JakAndDaxterMemoryReader:
             completed = self.read_goal_address(completed_offset, sizeof_uint8)
             if completed > 0 and not self.finished_game:
                 self.finished_game = True
-                self.log_success("Congratulations! You finished the game!")
+                self.log_success(logger, "Congratulations! You finished the game!")
 
         except (ProcessError, MemoryReadError, WinAPIError):
-            self.log_error("The gk process has died. Restart the game and run \"/memr connect\" again.")
+            self.log_error(logger, "The gk process has died. Restart the game and run \"/memr connect\" again.")
             self.connected = False
 
         return self.location_outbox
