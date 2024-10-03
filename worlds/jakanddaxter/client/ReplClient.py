@@ -213,22 +213,22 @@ class JakAndDaxterReplClient:
         gc_proc_id = str(self.goalc_process.process_id) if self.goalc_process else "None"
         gk_proc_id = str(self.gk_process.process_id) if self.gk_process else "None"
         msg = (f"REPL Status:\n"
-               f"  REPL process ID: {gc_proc_id}\n"
-               f"  Game process ID: {gk_proc_id}\n")
+               f"   REPL process ID: {gc_proc_id}\n"
+               f"   Game process ID: {gk_proc_id}\n")
         try:
             if self.reader and self.writer:
                 addr = self.writer.get_extra_info("peername")
                 addr = str(addr) if addr else "None"
-                msg += f"  Game websocket: {addr}\n"
+                msg += f"   Game websocket: {addr}\n"
                 await self.send_form("(dotimes (i 1) "
                                      "(sound-play-by-name "
                                      "(static-sound-name \"menu-close\") "
                                      "(new-sound-id) 1024 0 0 (sound-group sfx) #t))", print_ok=False)
         except ConnectionResetError:
-            msg += "  Connection to the game was lost or reset!"
+            msg += f"   Connection to the game was lost or reset!"
         last_item = str(getattr(self.item_inbox[self.inbox_index], "item")) if self.inbox_index else "None"
-        msg += f"  Last item received: {last_item}\n"
-        msg += f"  Did you hear the success audio cue?"
+        msg += f"   Last item received: {last_item}\n"
+        msg += f"   Did you hear the success audio cue?"
         self.log_info(logger, msg)
 
     # To properly display in-game text, it must be alphanumeric and uppercase.
@@ -402,10 +402,10 @@ class JakAndDaxterReplClient:
                                   f"(the float {lt_count}) (the float {ct_amount}) "
                                   f"(the float {ot_amount}) (the uint {goal_id}))")
         message = (f"Setting options: \n"
-                   f"    Orbsanity Option {os_option}, Orbsanity Bundle {os_bundle}, \n"
-                   f"    FC Cell Count {fc_count}, MP Cell Count {mp_count}, \n"
-                   f"    LT Cell Count {lt_count}, Citizen Orb Amt {ct_amount}, \n"
-                   f"    Oracle Orb Amt {ot_amount}, Completion GOAL {goal_id}... ")
+                   f"   Orbsanity Option {os_option}, Orbsanity Bundle {os_bundle}, \n"
+                   f"   FC Cell Count {fc_count}, MP Cell Count {mp_count}, \n"
+                   f"   LT Cell Count {lt_count}, Citizen Orb Amt {ct_amount}, \n"
+                   f"   Oracle Orb Amt {ot_amount}, Completion GOAL {goal_id}... ")
         if ok:
             logger.debug(message + "Success!")
             status = 1

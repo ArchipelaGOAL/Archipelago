@@ -297,10 +297,15 @@ class JakAndDaxterMemoryReader:
             else:
                 raise MemoryReadError(memory_version_offset, sizeof_uint32)
         except (ProcessError, MemoryReadError, WinAPIError):
-            msg = (f"The OpenGOAL memory structure is incompatible with the current AP client!\n"
+            msg = (f"The OpenGOAL memory structure is incompatible with the current Archipelago client!\n"
                    f"   Expected Version: {str(expected_memory_version)}\n"
                    f"   Found Version: {str(memory_version)}\n"
-                   f"Please verify both the OpenGOAL mod and AP Client are up-to-date, then restart both.")
+                   f"Please follow these steps:\n"
+                   f"   Run the OpenGOAL Launcher, click Jak and Daxter > Features > Mods > ArchipelaGOAL.\n"
+                   f"   Click Update (if one is available).\n"
+                   f"   Click Advanced > Compile. When this is done, click Continue.\n"
+                   f"   Click Versions and verify the latest version is marked 'Active'.\n"
+                   f"   Close all launchers, games, clients, and Powershell windows, then restart Archipelago.")
             self.log_error(logger, msg)
             self.connected = False
 

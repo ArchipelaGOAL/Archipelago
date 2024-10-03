@@ -324,15 +324,17 @@ async def run_game(ctx: JakAndDaxterContext):
         # Always trust your instincts.
         if "/" not in root_path:
             msg = (f"The ArchipelaGOAL root directory contains no path. (Are you missing forward slashes?)\n"
-                   f"Please check the value of `jakanddaxter_options > root_directory` in your host.yaml file.")
+                   f"Please check that the value of 'jakanddaxter_options > root_directory' in your host.yaml file "
+                   f"is a valid existing path, and all backslashes have been replaced with forward slashes.")
             ctx.on_log_error(logger, msg)
             return
 
         # Start by checking the existence of the root directory provided in the host.yaml file.
         root_path = os.path.normpath(root_path)
         if not os.path.exists(root_path):
-            msg = (f"The ArchipelaGOAL root directory does not exist, unable to locate game executables.\n"
-                   f"Please check the value of `jakanddaxter_options > root_directory` in your host.yaml file.")
+            msg = (f"The ArchipelaGOAL root directory does not exist, unable to locate the Game and Compiler.\n"
+                   f"Please check that the value of 'jakanddaxter_options > root_directory' in your host.yaml file "
+                   f"is a valid existing path, and all backslashes have been replaced with forward slashes.")
             ctx.on_log_error(logger, msg)
             return
 
@@ -340,8 +342,9 @@ async def run_game(ctx: JakAndDaxterContext):
         gk_path = os.path.join(root_path, "gk.exe")
         goalc_path = os.path.join(root_path, "goalc.exe")
         if not os.path.exists(gk_path) or not os.path.exists(goalc_path):
-            msg = (f"The Game and Compiler executables could not be found in the ArchipelaGOAL root directory.\n"
-                   f"Please check the OpenGOAL Launcher to verify installation of the ArchipelaGOAL mod.")
+            msg = (f"The Game and Compiler could not be found in the ArchipelaGOAL root directory.\n"
+                   f"Please check the value of 'jakanddaxter_options > root_directory' in your host.yaml file, "
+                   f"and ensure that path contains gk.exe, goalc.exe, and a data folder.")
             ctx.on_log_error(logger, msg)
             return
 
@@ -360,9 +363,15 @@ async def run_game(ctx: JakAndDaxterContext):
             #  we may be able to remove this step.
             iso_data_path = os.path.join(root_path, "data", "iso_data")
             if not os.path.exists(iso_data_path):
-                msg = (f"The iso_data folder could not be found, unable to compile game.\n"
-                       f"Please copy the iso_data folder from its original location to the mod's data folder.\n"
-                       f"(See setup guide for more details.)")
+                msg = (f"The iso_data folder could not be found in the ArchipelaGOAL data directory.\n"
+                       f"Please follow these steps:\n"
+                       f"   Run the OpenGOAL Launcher, click Jak and Daxter > Advanced > Open Game Data Folder.\n"
+                       f"   Copy the iso_data folder from this location.\n"
+                       f"   Click Jak and Daxter > Features > Mods > ArchipelaGOAL > Advanced > Open Game Data Folder.\n"
+                       f"   Paste the iso_data folder in this location.\n"
+                       f"   Click Advanced > Compile. When this is done, click Continue.\n"
+                       f"   Close all launchers, games, clients, and Powershell windows, then restart Archipelago.\n"
+                       f"(See Setup Guide for more details.)")
                 ctx.on_log_error(logger, msg)
                 return
 
@@ -394,6 +403,12 @@ async def run_game(ctx: JakAndDaxterContext):
 
     except AttributeError as e:
         ctx.on_log_error(logger, f"Host.yaml does not contain {e.args[0]}, unable to locate game executables.")
+        return
+    except FileNotFoundError as e:
+        msg = (f"The ArchipelaGOAL root directory path is invalid.\n"
+               f"Please check that the value of 'jakanddaxter_options > root_directory' in your host.yaml file "
+               f"is a valid existing path, and all backslashes have been replaced with forward slashes.")
+        ctx.on_log_error(logger, msg)
         return
 
     # Auto connect the repl and memr agents. Sleep 5 because goalc takes just a little bit of time to load,
