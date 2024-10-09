@@ -28,7 +28,7 @@ sizeof_float = 4
 # *****************************************************************************
 # **** This number must match (-> *ap-info-jak1* version) in ap-struct.gc! ****
 # *****************************************************************************
-expected_memory_version = 2
+expected_memory_version = 3
 
 
 # IMPORTANT: OpenGOAL memory structures are particular about the alignment, in memory, of member elements according to
@@ -305,7 +305,7 @@ class JakAndDaxterMemoryReader:
                    f"   Click Update (if one is available).\n"
                    f"   Click Advanced > Compile. When this is done, click Continue.\n"
                    f"   Click Versions and verify the latest version is marked 'Active'.\n"
-                   f"   Close all launchers, games, clients, and Powershell windows, then restart Archipelago.")
+                   f"   Close all launchers, games, clients, and console windows, then restart Archipelago.")
             self.log_error(logger, msg)
             self.connected = False
 
@@ -404,7 +404,7 @@ class JakAndDaxterMemoryReader:
                             bundle_ap_id = Orbs.to_ap_id(Orbs.find_address(level, bundle, bundle_size))
                             if bundle_ap_id not in self.location_outbox:
                                 self.location_outbox.append(bundle_ap_id)
-                                logger.debug("Checked orb bundle: " + str(bundle_ap_id))
+                                logger.debug(f"Checked orb bundle: L{level} {bundle}")
 
             # Global Orbsanity option. Index 16 refers to all orbs found regardless of level.
             if orbsanity_option == 2:
@@ -418,7 +418,7 @@ class JakAndDaxterMemoryReader:
                         bundle_ap_id = Orbs.to_ap_id(Orbs.find_address(16, bundle, bundle_size))
                         if bundle_ap_id not in self.location_outbox:
                             self.location_outbox.append(bundle_ap_id)
-                            logger.debug("Checked orb bundle: " + str(bundle_ap_id))
+                            logger.debug(f"Checked orb bundle: G {bundle}")
 
             completed = self.read_goal_address(completed_offset, sizeof_uint8)
             if completed > 0 and not self.finished_game:

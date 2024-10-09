@@ -245,7 +245,7 @@ class JakAndDaxterReplClient:
 
     # OpenGOAL can handle both its own string datatype and C-like character pointers (charp).
     async def write_game_text(self, data: JsonMessageData):
-        logger.debug(f"Sending info to in-game display!")
+        logger.debug(f"Sending info to the in-game messenger!")
         body = ""
         if data.my_item_name and data.my_item_finder:
             body += (f" (append-messages (-> *ap-messenger* 0) \'recv "

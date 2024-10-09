@@ -51,7 +51,8 @@ If you are in the middle of an async game, and you do not want to update the mod
 - Under `Installed Mods`, click `ArchipelaGOAL`.
 - Click `Update` to download and install any new updates that have been released.
 - You can verify your version by clicking `Versions`. The version you are using will say `(Active)` next to it.
-- **After the update is installed, you must click `Advanced`, then click `Compile` to make the update take effect.**
+- **After the update is installed, you will need to copy your `iso_data` folder to the mod's data directory, as you did during install.**
+- **Then you must click `Advanced`, then click `Compile` to make the update take effect.**
 
 ## Starting a Game
 
@@ -59,14 +60,14 @@ If you are in the middle of an async game, and you do not want to update the mod
 
 - Run the Archipelago Launcher.
 - From the right-most list, find and click `Jak and Daxter Client`.
-- 4 new windows should appear:
-  - Two powershell windows will open to run the OpenGOAL compiler and the game. They should take about 30 seconds to compile.
+- 3 new windows should appear:
+  - The OpenGOAL compiler will launch and compile the game. They should take about 30 seconds to compile.
       - You should hear a musical cue to indicate the compilation was a success. If you do not, see the Troubleshooting section.
   - The game window itself will launch, and Jak will be standing outside Samos's Hut. 
       - Once compilation is complete, the title intro sequence will start.
   - Finally, the Archipelago text client will open.
       - If you see `The REPL is ready!` and `The Memory Reader is ready!` then that should indicate a successful startup.
-- You can *minimize* the 2 powershell windows, **BUT DO NOT CLOSE THEM.** They are required for Archipelago and the game to communicate with each other.
+- You can *minimize* the Compiler window, **BUT DO NOT CLOSE IT.** It is required for Archipelago and the game to communicate with each other.
 - Use the text client to connect to the Archipelago server while on the title screen. This will communicate your current settings to the game.
 - Start a new game in the title screen, and play through the cutscenes.
 - Once you reach Geyser Rock, you can start the game!
@@ -115,9 +116,9 @@ If at any point the text client says `The <gk/goalc> process has died`, you will
 
 ### The Game Freezes On The Same Two Frames, But The Music Is Still Playing
 
-If the game freezes by replaying the same two frames over and over, but the music still runs in the background, you may have accidentally interacted with the powershell windows in the background. They halt the game if you scroll up in them, highlight text in them, etc.
+If the game freezes by replaying the same two frames over and over, but the music still runs in the background, you may have accidentally interacted with the console windows in the background. They halt the game if you scroll up in them, highlight text in them, etc.
 
-- To unfreeze the game, scroll to the very bottom of the powershell window and right click. That will release powershell from your control and allow the game to continue.
+- To unfreeze the game, scroll to the very bottom of the console window and right click. That will release console from your control and allow the game to continue.
 - It is recommended to keep these windows minimized and out of your way.
 
 ### The Client Cannot Open A REPL Connection
@@ -145,20 +146,20 @@ If you see `-- Compilation Error! --` after pressing `Compile` or Launching the 
     - Back in cmd, run `.\decompiler.exe data\decompiler\config\jak1\jak1_config.jsonc --version "pal" data\iso_data data\decompiler_out`
     - Rename `<archipelagoal directory>\data\iso_data\jak1_pal` back to `jak1`
     - Rename `<archipelagoal directory>\data\decompiler_out\jak1_pal` back to `jak1`
-- Open a **brand new** Powershell window and launch the compiler:
+- Open a **brand new** console window and launch the compiler:
     - `cd <archipelagoal directory>`
     - `.\goalc.exe --user-auto --game jak1`
     - From the compiler (in the same window): `(mi)`. This should compile the game. **Note that the parentheses are important.** 
     - **Don't close this first terminal, you will need it at the end.**
-- Then, open **another brand new** Powershell window and execute the game:
+- Then, open **another brand new** console window and execute the game:
     - `cd <archipelagoal directory>`
     - `.\gk.exe -v --game jak1 -- -boot -fakeiso -debug`
-- Finally, **from the first Powershell still in the GOALC compiler**, connect to the game: `(lt)`.
+- Finally, **from the first console still in the GOALC compiler**, connect to the game: `(lt)`.
 
 ## Known Issues
 
 - The game needs to boot in debug mode in order to allow the REPL to connect to it. We disable debug mode once we connect to the AP server.
-- The REPL Powershell window is orphaned once you close the game - you will have to kill it manually when you stop playing.
-- The powershell windows cannot be run as background processes due to how the REPL works, so the best we can do is minimize them.
+- The REPL console window is orphaned once you close the game - you will have to kill it manually when you stop playing.
+- The console windows cannot be run as background processes due to how the REPL works, so the best we can do is minimize them.
 - Orbsanity checks may show up out of order in the text client.
 - Large item releases may take up to several minutes for the game to process them all. 
