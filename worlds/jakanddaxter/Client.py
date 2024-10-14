@@ -386,17 +386,18 @@ async def run_game(ctx: JakAndDaxterContext):
                     os.path.normpath(root_path),
                     os.path.normpath(config_relative_path)))
 
-            # The game freezes if text is inadvertently selected in the stdout/stderr data streams.
-            # We want to pipe those streams to a file, so we don't have to worry about accidental user interaction.
-            # It also means we don't clutter the screen with another console.
+            # The game freezes if text is inadvertently selected in the stdout/stderr data streams. Let's pipe those
+            # streams to a file, and let's not clutter the screen with another console window.
             log_path = os.path.join(Utils.user_path("logs"), "JakAndDaxterGame.txt")
             log_path = os.path.normpath(log_path)
             with open(log_path, "w") as log_file:
                 gk_process = subprocess.Popen(
                     [gk_path, "--game", "jak1",
-                     "--config-path", config_path, "--", "-v", "-boot", "-fakeiso", "-debug"],
+                     "--config-path", config_path,
+                     "--", "-v", "-boot", "-fakeiso", "-debug"],
                     stdout=log_file,
-                    stderr=log_file)
+                    stderr=log_file,
+                    creationflags=subprocess.CREATE_NO_WINDOW)
 
         if not goalc_running:
             # This needs to be a new console. The REPL console cannot share a window with any other process.
