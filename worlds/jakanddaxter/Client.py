@@ -321,18 +321,22 @@ def find_root_directory(ctx: JakAndDaxterContext):
         ctx.on_log_error(logger, f"Unknown operating system: {sys.platform}!")
         return
 
+    # Boilerplate message that all error messages in this function should add at the end.
+    alt_instructions = (f"Please verify that OpenGOAL and ArchipelaGOAL are installed properly. "
+                        f"If the problem persists, follow these steps:\n"
+                        f"   Run the OpenGOAL Launcher, click Jak and Daxter > Features > Mods > ArchipelaGOAL.\n"
+                        f"   Then click Advanced > Open Game Data Folder.\n"
+                        f"   Go up one folder, then copy this path.\n"
+                        f"   Run the Archipelago Launcher, click Open host.yaml.\n"
+                        f"   Set the value of 'jakanddaxter_options > root_directory' to this path.\n"
+                        f"   Replace all backslashes in the path with forward slashes.\n"
+                        f"   Set the value of 'jakanddaxter_options > auto_detect_root_directory' to false, "
+                        f"then save and close the host.yaml file.\n"
+                        f"   Close all launchers, games, clients, and console windows, then restart Archipelago.")
+
     if not os.path.exists(settings_path):
-        msg = (f"The OpenGOAL settings file does not exist, unable to locate the OpenGOAL install directory.\n"
-               f"Please verify that OpenGOAL is installed properly. If the problem persists, follow these steps:\n"
-               f"   Run the OpenGOAL Launcher, click Jak and Daxter > Features > Mods > ArchipelaGOAL.\n"
-               f"   Then click Advanced > Open Game Data Folder.\n"
-               f"   Go up one folder, then copy this path.\n"
-               f"   Run the Archipelago Launcher, click Open host.yaml.\n"
-               f"   Set the value of 'jakanddaxter_options > root_directory' to this path.\n"
-               f"   Replace all backslashes in the path with forward slashes.\n"
-               f"   Set the value of 'jakanddaxter_options > auto_detect_root_directory' to false, "
-               f"then save and close the host.yaml file.\n"
-               f"   Close all launchers, games, clients, and console windows, then restart Archipelago.")
+        msg = (f"Unable to locate the ArchipelaGOAL install directory: the OpenGOAL settings file does not exist.\n"
+               f"{alt_instructions}")
         ctx.on_log_error(logger, msg)
         return
 
@@ -341,15 +345,17 @@ def find_root_directory(ctx: JakAndDaxterContext):
 
         jak1_installed = load["games"]["Jak 1"]["isInstalled"]
         if not jak1_installed:
-            msg = (f"Jak 1 is not installed in the OpenGOAL Launcher!\n"
-                   f"Please follow the OpenGOAL install instructions before continuing.")
+            msg = (f"Unable to locate the ArchipelaGOAL install directory: "
+                   f"The OpenGOAL Launcher is missing a normal install of Jak 1!\n"
+                   f"{alt_instructions}")
             ctx.on_log_error(logger, msg)
             return
 
         mod_sources = load["games"]["Jak 1"]["modsInstalledVersion"]
         if mod_sources is None:
-            msg = (f"No mod sources have been configured in the OpenGOAL Launcher!\n"
-                   f"Please follow the OpenGOAL mods install instructions before continuing.")
+            msg = (f"Unable to locate the ArchipelaGOAL install directory: "
+                   f"No mod sources have been configured in the OpenGOAL Launcher!\n"
+                   f"{alt_instructions}")
             ctx.on_log_error(logger, msg)
             return
 
@@ -362,8 +368,9 @@ def find_root_directory(ctx: JakAndDaxterContext):
                     archipelagoal_source = src
                     # TODO - We could verify the right version is installed. Do we need to?
         if archipelagoal_source is None:
-            msg = (f"ArchipelaGOAL is not installed in the OpenGOAL Launcher!\n"
-                   f"Please follow the ArchipelaGOAL install instructions before continuing.")
+            msg = (f"Unable to locate the ArchipelaGOAL install directory: "
+                   f"The ArchipelaGOAL mod is not installed in the OpenGOAL Launcher!\n"
+                   f"{alt_instructions}")
             ctx.on_log_error(logger, msg)
             return
 
