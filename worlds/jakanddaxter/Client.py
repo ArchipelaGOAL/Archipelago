@@ -388,7 +388,7 @@ def find_root_directory(ctx: JakAndDaxterContext):
 async def run_game(ctx: JakAndDaxterContext):
 
     # These may already be running. If they are not running, try to start them.
-    # TODO - Support other OS's. Pymem is Windows-only.
+    # TODO - Support other OS's. 1: Pymem is Windows-only. 2: on Linux, there's no ".exe."
     gk_running = False
     try:
         pymem.Pymem("gk.exe")  # The GOAL Kernel
@@ -427,7 +427,7 @@ async def run_game(ctx: JakAndDaxterContext):
                    f"Please check your host.yaml file.\n"
                    f"If the value of 'jakanddaxter_options > auto_detect_root_directory' is true, verify that OpenGOAL "
                    f"is installed properly.\n"
-                   f"If it is false, check the value of 'jakanddaxter_options > root_directory'."
+                   f"If it is false, check the value of 'jakanddaxter_options > root_directory'. "
                    f"Verify it is a valid existing path, and all backslashes have been replaced with forward slashes.")
             ctx.on_log_error(logger, msg)
             return
@@ -440,7 +440,7 @@ async def run_game(ctx: JakAndDaxterContext):
                    f"Please check your host.yaml file.\n"
                    f"If the value of 'jakanddaxter_options > auto_detect_root_directory' is true, verify that OpenGOAL "
                    f"is installed properly.\n"
-                   f"If it is false, check the value of 'jakanddaxter_options > root_directory'."
+                   f"If it is false, check the value of 'jakanddaxter_options > root_directory'. "
                    f"Verify it is a valid existing path, and all backslashes have been replaced with forward slashes.")
             ctx.on_log_error(logger, msg)
             return
