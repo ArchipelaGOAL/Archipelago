@@ -332,11 +332,11 @@ class JakAndDaxterWorld(World):
             counts_and_classes.append((self.total_prog_orb_bundles, ItemClass.progression_skip_balancing))
             counts_and_classes.append((self.total_filler_orb_bundles, ItemClass.filler))
 
-        # Under normal circumstances, we create 0 green eco fillers. We will manually create filler items as needed.
+        # We will manually create trap items as needed.
         elif item in range(jak1_max - max(trap_item_table), jak1_max):
             counts_and_classes.append((0, ItemClass.trap))
 
-        # Under normal circumstances, we create 0 green eco fillers. We will manually create filler items as needed.
+        # We will manually create filler items as needed.
         elif item == jak1_max:
             counts_and_classes.append((0, ItemClass.filler))
 
@@ -469,4 +469,5 @@ class JakAndDaxterWorld(World):
                                     "filler_orb_bundles_replaced_with_traps",
                                     "trap_effect_duration",
                                     "jak_completion_condition",
-                                    "require_punch_for_klaww",)
+                                    "require_punch_for_klaww",
+                                    )

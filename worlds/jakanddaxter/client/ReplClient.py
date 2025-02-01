@@ -16,7 +16,7 @@ from asyncio import StreamReader, StreamWriter, Lock
 
 from NetUtils import NetworkItem
 from ..GameID import jak1_id, jak1_max
-from ..Items import item_table
+from ..Items import item_table, trap_item_table
 from ..locs import (
     OrbLocations as Orbs,
     CellLocations as Cells,
@@ -296,8 +296,10 @@ class JakAndDaxterReplClient:
             await self.receive_special(ap_id)
         elif ap_id in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset):
             await self.receive_move(ap_id)
-        elif ap_id in range(jak1_id + Orbs.orb_offset, jak1_max):
+        elif ap_id in range(jak1_id + Orbs.orb_offset, jak1_max - max(trap_item_table)):
             await self.receive_precursor_orb(ap_id)  # Ponder the Orbs.
+        elif ap_id in range(jak1_max - max(trap_item_table), jak1_max):
+            await self.receive_trap(ap_id)
         elif ap_id == jak1_max:
             await self.receive_green_eco()  # Ponder why I chose to do ID's this way.
         else:
@@ -363,6 +365,18 @@ class JakAndDaxterReplClient:
             self.log_error(logger, f"Unable to receive {orb_amount} Precursor Orbs!")
         return ok
 
+    async def receive_trap(self, ap_id: int) -> bool:
+        trap_id = jak1_max - ap_id
+        ok = await self.send_form("(send-event "
+                                  "*target* \'get-archipelago "
+                                  "(pickup-type ap-trap) "
+                                  "(the float " + str(trap_id) + "))")
+        if ok:
+            logger.debug(f"Received a {item_table[ap_id]}!")
+        else:
+            self.log_error(logger, f"Unable to receive a {item_table[ap_id]}!")
+        return ok
+
     # Green eco pills are our filler item. Use the get-pickup event instead to handle being full health.
     async def receive_green_eco(self) -> bool:
         ok = await self.send_form("(send-event *target* \'get-pickup (pickup-type eco-pill) (the float 1))")
@@ -408,25 +422,31 @@ class JakAndDaxterReplClient:
 
         return True
 
-    # OpenGOAL has a limit of 8 parameters per function. We've already hit this limit. We may have to split these
-    # options into two groups, both of which required to be sent successfully, in the future.
-    # TODO - Alternatively, define a new datatype in OpenGOAL that holds all these options, instantiate the type here,
-    #  and rewrite the ap-setup-options! function to take that instance as input.
+    # OpenGOAL has a limit of 8 parameters per function. We've already hit this limit. So, define a new datatype
+    # in OpenGOAL that holds all these options, instantiate the type here, and have  ap-setup-options! function take
+    # that instance as input.
     async def setup_options(self,
                             os_option: int, os_bundle: int,
                             fc_count: int, mp_count: int,
                             lt_count: int, ct_amount: int,
-                            ot_amount: int, goal_id: int) -> bool:
-        ok = await self.send_form(f"(ap-setup-options! "
-                                  f"(the uint {os_option}) (the uint {os_bundle}) "
-                                  f"(the float {fc_count}) (the float {mp_count}) "
-                                  f"(the float {lt_count}) (the float {ct_amount}) "
-                                  f"(the float {ot_amount}) (the uint {goal_id}))")
+                            ot_amount: int, trap_time: int,
+                            goal_id: int) -> bool:
+        ok = await self.send_form(f"(ap-setup-options! (new 'static 'ap-seed-options "
+                                  f":orbsanity-option (the uint {os_option}) "
+                                  f":orbsanity-bundle (the uint {os_bundle}) "
+                                  f":fire-canyon-unlock (the float {fc_count}) "
+                                  f":mountain-pass-unlock (the float {mp_count}) "
+                                  f":lava-tube-unlock (the float {lt_count}) "
+                                  f":citizen-orb-amount (the float {ct_amount}) "
+                                  f":oracle-orb-amount (the float {ot_amount}) "
+                                  f":trap-duration (the float {trap_time}) "
+                                  f":completion-goal (the uint {goal_id})))")
         message = (f"Setting options: \n"
                    f"   Orbsanity Option {os_option}, Orbsanity Bundle {os_bundle}, \n"
                    f"   FC Cell Count {fc_count}, MP Cell Count {mp_count}, \n"
                    f"   LT Cell Count {lt_count}, Citizen Orb Amt {ct_amount}, \n"
-                   f"   Oracle Orb Amt {ot_amount}, Completion GOAL {goal_id}... ")
+                   f"   Oracle Orb Amt {ot_amount}, Trap Duration {trap_time}, \n"
+                   f"   Completion GOAL {goal_id}... ")
         if ok:
             logger.debug(message + "Success!")
             status = 1
