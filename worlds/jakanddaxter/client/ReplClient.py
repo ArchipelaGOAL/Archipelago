@@ -423,7 +423,7 @@ class JakAndDaxterReplClient:
         return True
 
     # OpenGOAL has a limit of 8 parameters per function. We've already hit this limit. So, define a new datatype
-    # in OpenGOAL that holds all these options, instantiate the type here, and have  ap-setup-options! function take
+    # in OpenGOAL that holds all these options, instantiate the type here, and have ap-setup-options! function take
     # that instance as input.
     async def setup_options(self,
                             os_option: int, os_bundle: int,

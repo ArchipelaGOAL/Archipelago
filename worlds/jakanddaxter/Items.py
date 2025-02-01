@@ -104,15 +104,15 @@ move_item_table = {
 # game locations because they are intended to replace other items that have been marked as filler.
 trap_item_table = {
     1: "Trip Trap",
-    2: "Ice Trap",
+    2: "Slippery Trap",
     3: "Gravity Trap",
     4: "Camera Trap",
-    5: "Dark Trap",
-    6: "Invisible Trap",
+    5: "Darkness Trap",
+    6: "Invisibility Trap",
     7: "Ghost Trap",
     8: "Amnesia Trap",
-    9: "Pacifist Trap",
-    10: "Eco Trap",
+    9: "Pacifism Trap",
+    10: "Ecoless Trap",
 }
 
 # All Items

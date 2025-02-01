@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle
+from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle, OptionSet
+from .Items import trap_item_table
 
 
 class EnableMoveRandomizer(Toggle):
@@ -160,8 +161,9 @@ class OracleOrbTradeAmount(Range):
 class FillerPowerCellsReplacedWithTraps(Range):
     """
     The number of filler power cells that will be replaced with traps. This does not affect the number of progression
-    power cells. If this value is greater than the number of filler power cells, all filler power cells will be
-    replaced with traps.
+    power cells.
+
+    If this value is greater than the number of filler power cells, then they will all be replaced with traps.
     """
     display_name = "Filler Power Cells Replaced With Traps"
     range_start = 0
@@ -172,12 +174,14 @@ class FillerPowerCellsReplacedWithTraps(Range):
 class FillerOrbBundlesReplacedWithTraps(Range):
     """
     The number of filler orb bundles that will be replaced with traps. This does not affect the number of progression
-    orb bundles. If this value is greater than the number of filler orb bundles, all filler orb bundles will be
-    replaced with traps. This only applies if "Enable Orbsanity" is set to "Per Level" or "Global."
+    orb bundles. This only applies if "Enable Orbsanity" is set to "Per Level" or "Global."
+
+    If this value is greater than the number of filler orb bundles, then they will all be replaced with traps.
     """
     display_name = "Filler Orb Bundles Replaced With Traps"
     range_start = 0
     range_end = 2000
+
     default = 0
 
 
@@ -189,6 +193,16 @@ class TrapEffectDuration(Range):
     range_start = 5
     range_end = 60
     default = 30
+
+
+class ChosenTraps(OptionSet):
+    """
+    The types of traps that can be added to the item pool. Traps are chosen randomly from this list. If the list
+    is empty, no traps are created.
+    """
+    display_name = "Chosen Traps"
+    default = {trap for trap in trap_item_table.values()}
+    valid_keys = {trap for trap in trap_item_table.values()}
 
 
 class CompletionCondition(Choice):
@@ -220,5 +234,6 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     filler_power_cells_replaced_with_traps: FillerPowerCellsReplacedWithTraps
     filler_orb_bundles_replaced_with_traps: FillerOrbBundlesReplacedWithTraps
     trap_effect_duration: TrapEffectDuration
+    chosen_traps: ChosenTraps
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool

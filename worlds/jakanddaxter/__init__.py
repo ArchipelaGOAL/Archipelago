@@ -107,6 +107,7 @@ class JakAndDaxterWebWorld(WebWorld):
             Options.FillerPowerCellsReplacedWithTraps,
             Options.FillerOrbBundlesReplacedWithTraps,
             Options.TrapEffectDuration,
+            Options.ChosenTraps,
         ]),
     ]
 
@@ -219,6 +220,7 @@ class JakAndDaxterWorld(World):
     total_trap_cells: int = 0
     total_filler_cells: int = 0
     power_cell_thresholds: list[int] = []
+    chosen_traps: list[str] = []
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -288,6 +290,8 @@ class JakAndDaxterWorld(World):
             self.total_trap_orb_bundles = min(self.options.filler_orb_bundles_replaced_with_traps.value,
                                               non_prog_orb_bundles)
             self.total_filler_orb_bundles = non_prog_orb_bundles - self.total_trap_orb_bundles
+
+        self.chosen_traps = list(self.options.chosen_traps.value)
 
         # Options drive which trade rules to use, so they need to be setup before we create_regions.
         from .Rules import set_orb_trade_rule
@@ -384,7 +388,7 @@ class JakAndDaxterWorld(World):
         # total_trap_cells + total_trap_orb_bundles.
         total_traps = self.total_trap_cells + self.total_trap_orb_bundles
         for _ in range(total_traps):
-            trap_name = random.choice(list(trap_item_table.values()))
+            trap_name = random.choice(self.chosen_traps)
             self.multiworld.itempool.append(self.create_item(trap_name))
         items_made += total_traps
 
@@ -469,6 +473,7 @@ class JakAndDaxterWorld(World):
                                     "filler_power_cells_replaced_with_traps",
                                     "filler_orb_bundles_replaced_with_traps",
                                     "trap_effect_duration",
+                                    "chosen_traps",
                                     "jak_completion_condition",
                                     "require_punch_for_klaww",
                                     )
