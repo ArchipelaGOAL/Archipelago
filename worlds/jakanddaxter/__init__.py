@@ -357,6 +357,7 @@ class JakAndDaxterWorld(World):
             if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
                 self.multiworld.push_precollected(self.create_item(item_name))
                 self.multiworld.itempool.append(self.create_filler())
+                items_made += 1
                 continue
 
             # Handle Orbsanity option.
