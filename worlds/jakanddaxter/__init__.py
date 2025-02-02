@@ -70,8 +70,8 @@ class JakAndDaxterSettings(settings.Group):
 
     root_directory: RootDirectory = RootDirectory(
         "%programfiles%/OpenGOAL-Launcher/features/jak1/mods/JakMods/archipelagoal")
-    auto_detect_root_directory: AutoDetectRootDirectory | bool = True
-    enforce_friendly_options: EnforceFriendlyOptions | bool = True
+    auto_detect_root_directory: typing.Union[AutoDetectRootDirectory, bool] = True
+    enforce_friendly_options: typing.Union[EnforceFriendlyOptions, bool] = True
 
 
 class JakAndDaxterWebWorld(WebWorld):
