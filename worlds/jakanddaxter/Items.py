@@ -108,9 +108,9 @@ trap_item_table = {
     3: "Gravity Trap",
     4: "Camera Trap",
     5: "Darkness Trap",
-    6: "Invisibility Trap",
-    7: "Ghost Trap",
-    8: "Amnesia Trap",
+    6: "Earthquake Trap",
+    7: "Teleport Trap",
+    8: "Despair Trap",
     9: "Pacifism Trap",
     10: "Ecoless Trap",
 }
