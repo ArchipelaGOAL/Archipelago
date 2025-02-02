@@ -431,16 +431,17 @@ class JakAndDaxterReplClient:
                             lt_count: int, ct_amount: int,
                             ot_amount: int, trap_time: int,
                             goal_id: int) -> bool:
+        # I didn't want to have to do this with floats but GOAL's compile-time vs runtime types leave me no choice.
         ok = await self.send_form(f"(ap-setup-options! (new 'static 'ap-seed-options "
-                                  f":orbsanity-option (the uint {os_option}) "
-                                  f":orbsanity-bundle (the uint {os_bundle}) "
-                                  f":fire-canyon-unlock (the float {fc_count}) "
-                                  f":mountain-pass-unlock (the float {mp_count}) "
-                                  f":lava-tube-unlock (the float {lt_count}) "
-                                  f":citizen-orb-amount (the float {ct_amount}) "
-                                  f":oracle-orb-amount (the float {ot_amount}) "
-                                  f":trap-duration (the float {trap_time}) "
-                                  f":completion-goal (the uint {goal_id})))")
+                                  f":orbsanity-option {os_option} "
+                                  f":orbsanity-bundle {os_bundle} "
+                                  f":fire-canyon-unlock {fc_count}.0 "
+                                  f":mountain-pass-unlock {mp_count}.0 "
+                                  f":lava-tube-unlock {lt_count}.0 "
+                                  f":citizen-orb-amount {ct_amount}.0 "
+                                  f":oracle-orb-amount {ot_amount}.0 "
+                                  f":trap-duration {trap_time}.0 "
+                                  f":completion-goal {goal_id}))")
         message = (f"Setting options: \n"
                    f"   Orbsanity Option {os_option}, Orbsanity Bundle {os_bundle}, \n"
                    f"   FC Cell Count {fc_count}, MP Cell Count {mp_count}, \n"
