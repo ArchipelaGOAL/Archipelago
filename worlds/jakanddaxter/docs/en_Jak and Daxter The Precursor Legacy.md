@@ -15,7 +15,7 @@ At this time, there are several caveats and restrictions:
 The game now contains the following Location checks:
 - All 101 Power Cells 
 - All 112 Scout Flies
-- All the Orb Caches that are not in Gol and Maia's Citadel (a total of 11)
+- All the Orb Caches (a total of 14)
 
 These may contain Items for different games, as well as different Items from within Jak and Daxter. 
 Additionally, several special checks and corresponding items have been added that are required to complete the game.
@@ -143,6 +143,12 @@ There are several options to change the difficulty of this challenge.
   and Locations to the pool inversely proportional to the size of the bundle.
     - For example, if your bundle size is 20 orbs, you will add 100 items to the pool. If your bundle size is 250 orbs,
       you will add 8 items to the pool.
+
+## What do Traps do?
+When creating your player YAML, you can choose to replace some of the game's extraneous Power Cells and Precursor Orbs 
+with traps. When you receive one, you will hear a buzzer and some kind of negative effect will occur in game. These 
+effects may be challenging, maddening, or entertaining. You can choose which traps you want to generate in your seed 
+and how long they last. A random assortment will then be chosen to populate the item pool.
 
 ## I got soft-locked and can't leave, how do I get out of here?
 Open the game's menu, navigate to `Options`, then `Archipelago Options`, then `Warp To Home`. 
