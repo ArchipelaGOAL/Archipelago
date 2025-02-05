@@ -113,6 +113,7 @@ trap_item_table = {
     8: "Despair Trap",
     9: "Pacifism Trap",
     10: "Ecoless Trap",
+    11: "Health Trap",
 }
 
 # All Items
