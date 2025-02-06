@@ -114,6 +114,9 @@ trap_item_table = {
     9: "Pacifism Trap",
     10: "Ecoless Trap",
     11: "Health Trap",
+    12: "Ledge Trap",
+    13: "Zoomer Trap",
+    14: "Mirror Trap",
 }
 
 # All Items
