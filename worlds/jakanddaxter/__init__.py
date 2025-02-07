@@ -385,16 +385,17 @@ class JakAndDaxterWorld(World):
 
         # Handle Traps (for real).
         # Manually fill the item pool with a random assortment of trap items, equal to the sum of
-        # total_trap_cells + total_trap_orb_bundles.
-        total_traps = self.total_trap_cells + self.total_trap_orb_bundles
-        for _ in range(total_traps):
-            trap_name = random.choice(self.chosen_traps)
-            self.multiworld.itempool.append(self.create_item(trap_name))
-        items_made += total_traps
+        # total_trap_cells + total_trap_orb_bundles. Only do this if one or more traps have been selected.
+        if len(self.chosen_traps) > 0:
+            total_traps = self.total_trap_cells + self.total_trap_orb_bundles
+            for _ in range(total_traps):
+                trap_name = random.choice(self.chosen_traps)
+                self.multiworld.itempool.append(self.create_item(trap_name))
+            items_made += total_traps
 
         # Handle Unfilled Locations.
-        # Add an amount of filler items equal to the number of locations yet to be filled. This is the final set
-        # of items we will add to the pool.
+        # Add an amount of filler items equal to the number of locations yet to be filled.
+        # This is the final set of items we will add to the pool.
         all_regions = self.multiworld.get_regions(self.player)
         total_locations = sum(reg.location_count for reg in typing.cast(list[JakAndDaxterRegion], all_regions))
         total_filler = total_locations - items_made
