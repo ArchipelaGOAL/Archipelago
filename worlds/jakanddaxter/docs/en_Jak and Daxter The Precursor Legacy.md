@@ -146,9 +146,14 @@ There are several options to change the difficulty of this challenge.
 
 ## What do Traps do?
 When creating your player YAML, you can choose to replace some of the game's extraneous Power Cells and Precursor Orbs 
-with traps. When you receive one, you will hear a buzzer and some kind of negative effect will occur in game. These 
-effects may be challenging, maddening, or entertaining. You can choose which traps you want to generate in your seed 
-and how long they last. A random assortment will then be chosen to populate the item pool.
+with traps. You can choose which traps you want to generate in your seed and how long they last. A random assortment 
+will then be chosen to populate the item pool.
+
+When you receive one, you will hear a buzzer and some kind of negative effect will occur in game. These effects may be 
+challenging, maddening, or entertaining. Multiple traps can be active at the same time, and they may interact with 
+each other in strange ways. If they become too frustrating, you can lower their duration by navigating to `Options`,
+then `Archipelago Options`, then `Seed Options`, then `Trap Duration`. Lowering this number to zero will disable traps
+entirely.
 
 ## I got soft-locked and can't leave, how do I get out of here?
 Open the game's menu, navigate to `Options`, then `Archipelago Options`, then `Warp To Home`. 
