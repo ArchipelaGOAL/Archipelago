@@ -181,7 +181,6 @@ class FillerOrbBundlesReplacedWithTraps(Range):
     display_name = "Filler Orb Bundles Replaced With Traps"
     range_start = 0
     range_end = 2000
-
     default = 0
 
 
@@ -197,8 +196,7 @@ class TrapEffectDuration(Range):
 
 class ChosenTraps(OptionSet):
     """
-    The types of traps that can be added to the item pool. Traps are chosen randomly from this list. If the list
-    is empty, no traps are created.
+    The list of traps that will be randomly added to the item pool. If the list is empty, no traps are created.
     """
     display_name = "Chosen Traps"
     default = {trap for trap in trap_item_table.values()}
