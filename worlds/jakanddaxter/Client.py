@@ -4,6 +4,7 @@ import sys
 import json
 import subprocess
 from logging import Logger
+from datetime import datetime
 
 import colorama
 
@@ -459,7 +460,8 @@ async def run_game(ctx: JakAndDaxterContext):
 
             # The game freezes if text is inadvertently selected in the stdout/stderr data streams. Let's pipe those
             # streams to a file, and let's not clutter the screen with another console window.
-            log_path = os.path.join(Utils.user_path("logs"), "JakAndDaxterGame.txt")
+            timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+            log_path = os.path.join(Utils.user_path("logs"), f"JakAndDaxterGame_{timestamp}.txt")
             log_path = os.path.normpath(log_path)
             with open(log_path, "w") as log_file:
                 gk_process = subprocess.Popen(
