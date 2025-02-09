@@ -104,9 +104,11 @@ memory_version_offset = offsets.define(sizeof_uint32)
 
 # Connection status to AP server (not the game!)
 server_connection_offset = offsets.define(sizeof_uint8)
+slot_name_offset = offsets.define(sizeof_uint8, 16)
+slot_seed_offset = offsets.define(sizeof_uint8, 8)
 
 # Trap information.
-trap_duration = offsets.define(sizeof_float)
+trap_duration_offset = offsets.define(sizeof_float)
 
 # The End.
 end_marker_offset = offsets.define(sizeof_uint8, 4)

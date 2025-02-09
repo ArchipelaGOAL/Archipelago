@@ -368,8 +368,8 @@ class JakAndDaxterWorld(World):
             # If it is OFF, don't add any orb bundles to the item pool, period.
             # If it is ON, don't add any orb bundles that don't match the chosen option.
             if (item_name in self.item_name_groups["Precursor Orbs"]
-                and (self.options.enable_orbsanity == Options.EnableOrbsanity.option_off
-                     or item_name != self.orb_bundle_item_name)):
+                    and (self.options.enable_orbsanity == Options.EnableOrbsanity.option_off
+                         or item_name != self.orb_bundle_item_name)):
                 continue
 
             # Skip Traps for now.
@@ -462,19 +462,24 @@ class JakAndDaxterWorld(World):
         return change
 
     def fill_slot_data(self) -> dict[str, Any]:
-        return self.options.as_dict("enable_move_randomizer",
-                                    "enable_orbsanity",
-                                    "global_orbsanity_bundle_size",
-                                    "level_orbsanity_bundle_size",
-                                    "fire_canyon_cell_count",
-                                    "mountain_pass_cell_count",
-                                    "lava_tube_cell_count",
-                                    "citizen_orb_trade_amount",
-                                    "oracle_orb_trade_amount",
-                                    "filler_power_cells_replaced_with_traps",
-                                    "filler_orb_bundles_replaced_with_traps",
-                                    "trap_effect_duration",
-                                    "chosen_traps",
-                                    "jak_completion_condition",
-                                    "require_punch_for_klaww",
-                                    )
+        slot_dict = {
+            "slot_name": self.player_name,
+            "slot_seed": self.multiworld.seed_name,
+        }
+        options_dict = self.options.as_dict("enable_move_randomizer",
+                                            "enable_orbsanity",
+                                            "global_orbsanity_bundle_size",
+                                            "level_orbsanity_bundle_size",
+                                            "fire_canyon_cell_count",
+                                            "mountain_pass_cell_count",
+                                            "lava_tube_cell_count",
+                                            "citizen_orb_trade_amount",
+                                            "oracle_orb_trade_amount",
+                                            "filler_power_cells_replaced_with_traps",
+                                            "filler_orb_bundles_replaced_with_traps",
+                                            "trap_effect_duration",
+                                            "chosen_traps",
+                                            "jak_completion_condition",
+                                            "require_punch_for_klaww",
+                                            )
+        return {**slot_dict, **options_dict}

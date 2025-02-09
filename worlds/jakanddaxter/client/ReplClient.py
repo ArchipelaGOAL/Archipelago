@@ -275,6 +275,14 @@ class JakAndDaxterReplClient:
         result = "".join([c if c in ALLOWED_CHARACTERS else "?" for c in text[:32]]).upper()
         return f"\"{result}\""
 
+    # Like sanitize_game_text, but the settings file will NOT allow any whitespace in the slot_name or slot_seed data.
+    # And don't replace any chars with "?" for good measure.
+    @staticmethod
+    def sanitize_file_text(text: str) -> str:
+        allowed_chars_no_space = ALLOWED_CHARACTERS - {" "}
+        result = "".join([c if c in allowed_chars_no_space else "" for c in text[:16]]).upper()
+        return f"\"{result}\""
+
     # Pushes a JsonMessageData object to the json message queue to be processed during the repl main_tick
     def queue_game_text(self, my_item_name, my_item_finder, their_item_name, their_item_owner):
         self.json_message_queue.put(JsonMessageData(my_item_name, my_item_finder, their_item_name, their_item_owner))
@@ -439,7 +447,8 @@ class JakAndDaxterReplClient:
                             fc_count: int, mp_count: int,
                             lt_count: int, ct_amount: int,
                             ot_amount: int, trap_time: int,
-                            goal_id: int) -> bool:
+                            goal_id: int, slot_name: str,
+                            slot_seed: str) -> bool:
         # I didn't want to have to do this with floats but GOAL's compile-time vs runtime types leave me no choice.
         ok = await self.send_form(f"(ap-setup-options! (new 'static 'ap-seed-options "
                                   f":orbsanity-option {os_option} "
@@ -450,13 +459,16 @@ class JakAndDaxterReplClient:
                                   f":citizen-orb-amount {ct_amount}.0 "
                                   f":oracle-orb-amount {ot_amount}.0 "
                                   f":trap-duration {trap_time}.0 "
-                                  f":completion-goal {goal_id}))")
+                                  f":completion-goal {goal_id} "
+                                  f":slot-name {self.sanitize_file_text(slot_name)} "
+                                  f":slot-seed {self.sanitize_file_text(slot_seed)} ))")
         message = (f"Setting options: \n"
                    f"   Orbsanity Option {os_option}, Orbsanity Bundle {os_bundle}, \n"
                    f"   FC Cell Count {fc_count}, MP Cell Count {mp_count}, \n"
                    f"   LT Cell Count {lt_count}, Citizen Orb Amt {ct_amount}, \n"
                    f"   Oracle Orb Amt {ot_amount}, Trap Duration {trap_time}, \n"
-                   f"   Completion GOAL {goal_id}... ")
+                   f"   Completion GOAL {goal_id}, Slot Name {slot_name}, \n"
+                   f"   Slot Seed {slot_seed}... ")
         if ok:
             logger.debug(message + "Success!")
         else:

@@ -154,7 +154,9 @@ class JakAndDaxterContext(CommonContext):
                                         slot_data["citizen_orb_trade_amount"],
                                         slot_data["oracle_orb_trade_amount"],
                                         slot_data["trap_effect_duration"],
-                                        slot_data["jak_completion_condition"]))
+                                        slot_data["jak_completion_condition"],
+                                        slot_data["slot_name"][:16],
+                                        slot_data["slot_seed"][:8]))
 
             # Because Orbsanity and the orb traders in the game are intrinsically linked, we need the server
             # to track our trades at all times to support async play. "Retrieved" will tell us the orbs we lost,
