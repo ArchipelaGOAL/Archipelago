@@ -58,6 +58,7 @@ class JakAndDaxterReplClient:
     initiated_connect: bool = False  # Signals when user tells us to try reconnecting.
     received_deathlink: bool = False
     balanced_orbs: bool = False
+    received_initial_items = False
 
     # The REPL client needs the REPL/compiler process running, but that process
     # also needs the game running. Therefore, the REPL client needs both running.
@@ -66,6 +67,7 @@ class JakAndDaxterReplClient:
 
     item_inbox: dict[int, NetworkItem] = {}
     inbox_index = 0
+    initial_item_count = -1  # New games have 0 items, so initialize this to -1.
     json_message_queue: Queue[JsonMessageData] = queue.Queue()
 
     # Logging callbacks
@@ -130,6 +132,13 @@ class JakAndDaxterReplClient:
             await self.receive_item()
             await self.save_data()
             self.inbox_index += 1
+
+        # When connecting the game to the AP server on the title screen, we may be processing items from starting
+        # inventory or items received in an async game. Once we are done, tell the player that we are ready to start.
+        if not self.received_initial_items and self.initial_item_count >= 0:
+            if self.inbox_index == self.initial_item_count:
+                self.received_initial_items = True
+                await self.send_connection_status("ready")
 
         if self.received_deathlink:
             await self.receive_deathlink()
@@ -450,12 +459,13 @@ class JakAndDaxterReplClient:
                    f"   Completion GOAL {goal_id}... ")
         if ok:
             logger.debug(message + "Success!")
-            status = 1
         else:
             self.log_error(logger, message + "Failed!")
-            status = 2
 
-        ok = await self.send_form(f"(ap-set-connection-status! (the uint {status}))")
+        return ok
+
+    async def send_connection_status(self, status: str) -> bool:
+        ok = await self.send_form(f"(ap-set-connection-status! (connection-status {status}))")
         if ok:
             logger.debug(f"Connection Status {status} set!")
         else:
