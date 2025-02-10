@@ -15,7 +15,7 @@ At this time, there are several caveats and restrictions:
 The game now contains the following Location checks:
 - All 101 Power Cells 
 - All 112 Scout Flies
-- All the Orb Caches (a total of 14)
+- All 14 Orb Caches (collect every orb in the cache and let it close)
 
 These may contain Items for different games, as well as different Items from within Jak and Daxter. 
 Additionally, several special checks and corresponding items have been added that are required to complete the game.
