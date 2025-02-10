@@ -1,4 +1,3 @@
-import random
 import typing
 from typing import Any, ClassVar, Callable
 from math import ceil
@@ -389,7 +388,7 @@ class JakAndDaxterWorld(World):
         if len(self.chosen_traps) > 0:
             total_traps = self.total_trap_cells + self.total_trap_orb_bundles
             for _ in range(total_traps):
-                trap_name = random.choice(self.chosen_traps)
+                trap_name = self.random.choice(self.chosen_traps)
                 self.multiworld.itempool.append(self.create_item(trap_name))
             items_made += total_traps
 
