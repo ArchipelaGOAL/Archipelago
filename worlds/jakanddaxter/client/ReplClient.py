@@ -449,6 +449,9 @@ class JakAndDaxterReplClient:
                             ot_amount: int, trap_time: int,
                             goal_id: int, slot_name: str,
                             slot_seed: str) -> bool:
+        sanitized_name = self.sanitize_file_text(slot_name)
+        sanitized_seed = self.sanitize_file_text(slot_seed)
+
         # I didn't want to have to do this with floats but GOAL's compile-time vs runtime types leave me no choice.
         ok = await self.send_form(f"(ap-setup-options! (new 'static 'ap-seed-options "
                                   f":orbsanity-option {os_option} "
@@ -460,15 +463,15 @@ class JakAndDaxterReplClient:
                                   f":oracle-orb-amount {ot_amount}.0 "
                                   f":trap-duration {trap_time}.0 "
                                   f":completion-goal {goal_id} "
-                                  f":slot-name {self.sanitize_file_text(slot_name)} "
-                                  f":slot-seed {self.sanitize_file_text(slot_seed)} ))")
+                                  f":slot-name {sanitized_name} "
+                                  f":slot-seed {sanitized_seed} ))")
         message = (f"Setting options: \n"
                    f"   Orbsanity Option {os_option}, Orbsanity Bundle {os_bundle}, \n"
                    f"   FC Cell Count {fc_count}, MP Cell Count {mp_count}, \n"
                    f"   LT Cell Count {lt_count}, Citizen Orb Amt {ct_amount}, \n"
                    f"   Oracle Orb Amt {ot_amount}, Trap Duration {trap_time}, \n"
-                   f"   Completion GOAL {goal_id}, Slot Name {slot_name}, \n"
-                   f"   Slot Seed {slot_seed}... ")
+                   f"   Completion GOAL {goal_id}, Slot Name {sanitized_name}, \n"
+                   f"   Slot Seed {sanitized_seed}... ")
         if ok:
             logger.debug(message + "Success!")
         else:
