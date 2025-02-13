@@ -234,7 +234,7 @@ def run_gui(path: str, args: Any):
     from kivymd.uix.button import MDIconButton
     from kivymd.uix.card import MDCard
     from kivymd.uix.menu import MDDropdownMenu
-    from kivymd.uix.navigationdrawer import MDNavigationDrawerDivider
+    from kivymd.uix.navigationdrawer import MDNavigationDrawerDivider, MDNavigationDrawerLabel
     from kivymd.uix.relativelayout import MDRelativeLayout
     from kivymd.uix.screen import MDScreen
     from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
@@ -258,6 +258,11 @@ def run_gui(path: str, args: Any):
                 if "favorites" in persistent["launcher"]:
                     self.favorites.extend(persistent["launcher"]["favorites"])
             super().__init__()
+
+        tools = {c.display_name: c for c in components if c.type == Type.TOOL}
+        clients = {c.display_name: c for c in components if c.type == Type.CLIENT}
+        adjusters = {c.display_name: c for c in components if c.type == Type.ADJUSTER}
+        miscs = {c.display_name: c for c in components if c.type == Type.MISC}
 
         def _refresh_components(self, type_filter: Optional[Sequence[Union[str, Type]]] = None) -> None:
             if not type_filter:
@@ -343,14 +348,19 @@ def run_gui(path: str, args: Any):
             for child in tool_children:
                 self.button_layout.layout.remove_widget(child)
 
-            _tools = {c.display_name: c for c in components if c.type == Type.TOOL}
-            _clients = {c.display_name: c for c in components if c.type == Type.CLIENT}
-            _adjusters = {c.display_name: c for c in components if c.type == Type.ADJUSTER}
-            _miscs = {c.display_name: c for c in components if c.type == Type.MISC}
+            for (type, type_components) in (
+                    (Type.CLIENT, self.clients),
+                    (Type.TOOL, self.tools),
+                    (Type.ADJUSTER, self.adjusters),
+                    (Type.MISC, self.miscs)):
 
-            for (name, component) in itertools.chain(
-                    _tools.items(), _miscs.items(), _adjusters.items(), _clients.items()):
-                if component.type in type_filter or favorites and component.display_name in self.favorites:
+                label_name = str(type).rsplit(".")[1].split(":")[0].title()
+                self.button_layout.layout.add_widget(MDNavigationDrawerLabel(
+                    text=label_name,
+                    halign="center",
+                    padding=[dp(0), dp(0), dp(0), dp(-5)]))
+                self.button_layout.layout.add_widget(MDNavigationDrawerDivider())
+                for (component_name, component) in type_components.items():
                     self.button_layout.layout.add_widget(build_card(component))
 
         def build(self):
@@ -384,7 +394,12 @@ def run_gui(path: str, args: Any):
             }
 
             def filter_clients(caller):
-                self._refresh_components(caller.type)
+                label_name = str(caller.type).rsplit(".")[1].split(":")[0].title()
+                for w in self.button_layout.layout.children:
+                    if isinstance(w, MDNavigationDrawerLabel) and w.text == label_name:
+                        label_to_top = w.y + w.height - self.button_layout.height
+                        scroll_percent = self.button_layout.convert_distance_to_scroll(0, label_to_top)
+                        self.button_layout.scroll_y = max(0, min(1, scroll_percent[1]))
 
             all_item = MDButton(
                 MDButtonIcon(icon="asterisk"),
