@@ -283,6 +283,7 @@ def run_gui(path: str, args: Any):
                 button_card = MDCard(style="filled", padding="4dp", size_hint=(1, None), height=dp(75))
                 button_layout = MDRelativeLayout()
                 button_card.add_widget(button_layout)
+                button_card.component = component
 
                 source = icon_paths[component.icon]
                 image = ApAsyncImage(source=source, size=(40, 40), size_hint_y=None,
@@ -307,12 +308,30 @@ def run_gui(path: str, args: Any):
                 favorite_button.component = component
 
                 def set_favorite(caller):
+                    # Remove a favorite.
                     if caller.component.display_name in self.favorites:
                         self.favorites.remove(caller.component.display_name)
+                        calling_card = caller.parent.parent
+                        clone_card = calling_card.clone
                         caller.icon = "star-outline"
+                        clone_card.children[0].children[2].icon = "star-outline"
+
+                        # Loop reversed: the last index is the top of the scroll view, where the Favorites section is.
+                        for w in reversed(self.button_layout.layout.children):
+                            if isinstance(w, MDCard) and w.component.display_name == caller.component.display_name:
+                                self.button_layout.layout.remove_widget(w)
+                                break
+
+                    # Add a favorite.
                     else:
                         self.favorites.append(caller.component.display_name)
                         caller.icon = "star"
+                        index = len(self.button_layout.layout.children) - 2
+                        favorite_card = build_card(caller.component)
+                        favorite_card.clone = caller.parent.parent  # Link the cards to make finding them later easy.
+                        caller.parent.parent.clone = favorite_card
+                        self.button_layout.layout.add_widget(favorite_card, index=index)
+
 
                 favorite_button.bind(on_release=set_favorite)
                 button_layout.add_widget(favorite_button)
@@ -348,19 +367,27 @@ def run_gui(path: str, args: Any):
             for child in tool_children:
                 self.button_layout.layout.remove_widget(child)
 
+            # Set up a Favorites section at the top.
+            self.button_layout.layout.add_widget(MDNavigationDrawerLabel(
+                text="Favorites",
+                halign="center",
+                padding=[dp(0), dp(0), dp(0), dp(-5)]))
+            self.button_layout.layout.add_widget(MDNavigationDrawerDivider())
+
+            # Set up a section for each of the component types.
             for (type, type_components) in (
                     (Type.CLIENT, self.clients),
                     (Type.TOOL, self.tools),
                     (Type.ADJUSTER, self.adjusters),
                     (Type.MISC, self.miscs)):
 
-                label_name = str(type).rsplit(".")[1].split(":")[0].title()
+                label_name = str(type).rsplit(".")[1].title()
                 self.button_layout.layout.add_widget(MDNavigationDrawerLabel(
                     text=label_name,
                     halign="center",
                     padding=[dp(0), dp(0), dp(0), dp(-5)]))
                 self.button_layout.layout.add_widget(MDNavigationDrawerDivider())
-                for (component_name, component) in type_components.items():
+                for (_, component) in type_components.items():
                     self.button_layout.layout.add_widget(build_card(component))
 
         def build(self):
@@ -393,8 +420,9 @@ def run_gui(path: str, args: Any):
                 "Misc": "dots-horizontal-circle-outline"
             }
 
-            def filter_clients(caller):
-                label_name = str(caller.type).rsplit(".")[1].split(":")[0].title()
+            def scroll_to_section(caller):
+                type = str(caller.type[0])
+                label_name = type.rsplit(".")[1].title() if "." in type else type.title()
                 for w in self.button_layout.layout.children:
                     if isinstance(w, MDNavigationDrawerLabel) and w.text == label_name:
                         label_to_top = w.y + w.height - self.button_layout.height
@@ -407,7 +435,7 @@ def run_gui(path: str, args: Any):
                 style="text"
             )
             all_item.type = (Type.CLIENT, Type.TOOL, Type.ADJUSTER, Type.MISC)
-            all_item.bind(on_release=filter_clients)
+            all_item.bind(on_release=scroll_to_section)
             self.navigation.add_widget(all_item)
             for type in (Type.CLIENT, Type.TOOL, Type.ADJUSTER, Type.MISC):
                 name = str(type).rsplit(".")[1].title()
@@ -417,7 +445,7 @@ def run_gui(path: str, args: Any):
                     style="text"
                 )
                 item.type = (type,)
-                item.bind(on_release=filter_clients)
+                item.bind(on_release=scroll_to_section)
                 self.navigation.add_widget(item)
             favorite_item = MDButton(
                 MDButtonIcon(icon="star"),
@@ -425,7 +453,7 @@ def run_gui(path: str, args: Any):
                 style="text"
             )
             favorite_item.type = ("favorites",)
-            favorite_item.bind(on_release=filter_clients)
+            favorite_item.bind(on_release=scroll_to_section)
             self.navigation.add_widget(favorite_item)
             self.navigation.add_widget(MDNavigationDrawerDivider())
 
