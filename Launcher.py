@@ -367,20 +367,25 @@ def run_gui(path: str, args: Any):
             for child in tool_children:
                 self.button_layout.layout.remove_widget(child)
 
-            # Set up a Favorites section at the top.
+            all_types_components = (
+                (Type.CLIENT, self.clients),
+                (Type.TOOL, self.tools),
+                (Type.ADJUSTER, self.adjusters),
+                (Type.MISC, self.miscs))
+
+            # Set up a Favorites section at the top. Prepopulate from persistent storage.
             self.button_layout.layout.add_widget(MDNavigationDrawerLabel(
                 text="Favorites",
                 halign="center",
                 padding=[dp(0), dp(0), dp(0), dp(-5)]))
             self.button_layout.layout.add_widget(MDNavigationDrawerDivider())
+            for (type, type_components) in all_types_components:
+                for (_, component) in type_components.items():
+                    if component.display_name in self.favorites:
+                        self.button_layout.layout.add_widget(build_card(component))
 
             # Set up a section for each of the component types.
-            for (type, type_components) in (
-                    (Type.CLIENT, self.clients),
-                    (Type.TOOL, self.tools),
-                    (Type.ADJUSTER, self.adjusters),
-                    (Type.MISC, self.miscs)):
-
+            for (type, type_components) in all_types_components:
                 label_name = str(type).rsplit(".")[1].title()
                 self.button_layout.layout.add_widget(MDNavigationDrawerLabel(
                     text=label_name,
