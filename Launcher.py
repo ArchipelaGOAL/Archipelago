@@ -373,16 +373,12 @@ def run_gui(path: str, args: Any):
                 (Type.ADJUSTER, self.adjusters),
                 (Type.MISC, self.miscs))
 
-            # Set up a Favorites section at the top. Prepopulate from persistent storage.
+            # Set up a Favorites section at the top.
             self.button_layout.layout.add_widget(MDNavigationDrawerLabel(
                 text="Favorites",
                 halign="center",
                 padding=[dp(0), dp(0), dp(0), dp(-5)]))
             self.button_layout.layout.add_widget(MDNavigationDrawerDivider())
-            for (type, type_components) in all_types_components:
-                for (_, component) in type_components.items():
-                    if component.display_name in self.favorites:
-                        self.button_layout.layout.add_widget(build_card(component))
 
             # Set up a section for each of the component types.
             for (type, type_components) in all_types_components:
@@ -392,8 +388,19 @@ def run_gui(path: str, args: Any):
                     halign="center",
                     padding=[dp(0), dp(0), dp(0), dp(-5)]))
                 self.button_layout.layout.add_widget(MDNavigationDrawerDivider())
+
+                # Populate each section with cards.
                 for (_, component) in type_components.items():
-                    self.button_layout.layout.add_widget(build_card(component))
+                    component_card = build_card(component)
+                    self.button_layout.layout.add_widget(component_card)
+
+                    # Prepopulate favorites from persistent storage.
+                    if component.display_name in self.favorites:
+                        index = len(self.button_layout.layout.children) - 2
+                        favorite_card = build_card(component)
+                        favorite_card.clone = component_card  # Link the cards to make finding them later easy.
+                        component_card.clone = favorite_card
+                        self.button_layout.layout.add_widget(favorite_card, index=index)
 
         def build(self):
             from kvui import KivyJSONtoTextParser
