@@ -172,4 +172,6 @@ If the client cannot open a REPL connection to the game, you may need to ensure 
 - The Compiler console window is orphaned once you close the game - you will have to kill it manually when you stop playing.
 - The console windows cannot be run as background processes due to how the REPL works, so the best we can do is minimize them.
 - Orbsanity checks may show up out of order in the text client.
-- Large item releases may take up to several minutes for the game to process them all.
+- Large item releases may take up to several minutes for the game to process them all. Item Messages will usually take longer to appear than Items themselves.
+- In Lost Precursor City, if you die in the Color Platforms room, the game may crash after you respawn. The cause is unknown.
+- Darkness Trap may cause some visual glitches on certain levels. This is temporary, and terrain and object collision are unaffected.
