@@ -270,8 +270,8 @@ class JakAndDaxterWorld(World):
             else:
                 self.total_prog_cells = 100
 
-        self.total_cells = self.goal_table["items"]["cells"]
-        self.total_orbs = self.goal_table["items"]["orbs"]
+        self.total_cells = self.goal_table["cells"]
+        self.total_orbs = self.goal_table["orbs"]
 
         # Now that we know how many total_trade_orbs we need, and how many total_orbs there are, verify that
         # we didn't overload it with more orbs than exist in the world. This is easy to do by accident
@@ -293,11 +293,13 @@ class JakAndDaxterWorld(World):
                 from .Rules import enforce_singleplayer_limits
                 enforce_singleplayer_limits(self)
 
-        # Calculate the number of power cells needed for progression, the number being replaced by traps,
-        # and the number of remaining filler. Move Rando and early Completion Conditions modify this number even more.
+        # Early Completion Conditions do not have enough orb cache locations to put the move items, so we will have to
+        # subtract from the total number of cells to make room.
         if goal < Options.CompletionCondition.option_defeat_gol_and_maia and self.options.enable_move_randomizer:
-            self.total_cells -= (len(move_item_table) - len(self.goal_table["locations"]["caches"]))
+            self.total_cells -= (len(move_item_table) - self.goal_table["caches"])
 
+        # Calculate the number of power cells needed for progression, the number being replaced by traps,
+        # and the number of remaining filler.
         non_prog_cells = self.total_cells - self.total_prog_cells
         self.total_trap_cells = min(self.options.filler_power_cells_replaced_with_traps.value, non_prog_cells)
         self.options.filler_power_cells_replaced_with_traps.value = self.total_trap_cells
@@ -324,6 +326,8 @@ class JakAndDaxterWorld(World):
                                               non_prog_orb_bundles)
             self.options.filler_orb_bundles_replaced_with_traps.value = self.total_trap_orb_bundles
             self.total_filler_orb_bundles = non_prog_orb_bundles - self.total_trap_orb_bundles
+        else:
+            self.options.filler_orb_bundles_replaced_with_traps.value = 0
 
         # Options drive which trade rules to use, so they need to be setup before we create_regions.
         from .Rules import set_orb_trade_rule
@@ -355,14 +359,14 @@ class JakAndDaxterWorld(World):
 
         # Make 7 Scout Flies per level. Only do this if the scout fly belongs to a level we're actually building.
         elif item in range(jak1_id + Scouts.fly_offset, jak1_id + Specials.special_offset):
-            if item in self.goal_table["items"]["scouts"]:
+            if item in self.goal_table["scouts"]:
                 counts_and_classes.append((7, ItemClass.progression_skip_balancing))
             else:
                 counts_and_classes.append((0, ItemClass.progression_skip_balancing))
 
         # Make only 1 of each Special Item. Only do this if the item belongs to a level we're actually building.
         elif item in range(jak1_id + Specials.special_offset, jak1_id + Caches.orb_cache_offset):
-            if item in self.goal_table["items"]["specials"]:
+            if item in self.goal_table["specials"]:
                 counts_and_classes.append((1, ItemClass.progression | ItemClass.useful))
             else:
                 counts_and_classes.append((0, ItemClass.progression | ItemClass.useful))
@@ -397,8 +401,7 @@ class JakAndDaxterWorld(World):
             item_id = self.item_name_to_id[item_name]
 
             # Handle Move Randomizer option.
-            # If it is OFF, put all moves in your starting inventory instead of the item pool,
-            # then fill the item pool with a corresponding amount of filler items.
+            # If it is OFF, put all moves in your starting inventory instead of the item pool.
             if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
                 self.multiworld.push_precollected(self.create_item(item_name))
                 continue
@@ -439,6 +442,10 @@ class JakAndDaxterWorld(World):
         total_locations = sum(reg.location_count for reg in typing.cast(list[JakAndDaxterRegion], all_regions))
         total_filler = total_locations - items_made
         self.multiworld.itempool += [self.create_filler() for _ in range(total_filler)]
+
+        # For Debugging
+        #    from .misc.VerifyConnectorLevel import verify_connector_level_accessibility
+        #    verify_connector_level_accessibility(self.multiworld, self.options, self.player)
 
     def create_item(self, name: str) -> Item:
         item_id = self.item_name_to_id[name]

@@ -224,8 +224,8 @@ def verify_orb_trade_amounts(world: JakAndDaxterWorld):
 def verify_orb_divisibility(world: JakAndDaxterWorld):
     options = world.options
 
-    if (options.jak_completion_condition.value < CompletionCondition.option_defeat_gol_and_maia
-            and options.enable_orbsanity.value == EnableOrbsanity.option_global
+    if (options.jak_completion_condition < CompletionCondition.option_defeat_gol_and_maia
+            and options.enable_orbsanity == EnableOrbsanity.option_global
             and options.global_orbsanity_bundle_size.value not in PerLevelOrbsanityBundleSize.options.values()):
         raise OptionError(f"{world.player_name}: {options.global_orbsanity_bundle_size.display_name} must be "
                           f"a factor of 50 for the \"{options.jak_completion_condition.current_option_name}\" "

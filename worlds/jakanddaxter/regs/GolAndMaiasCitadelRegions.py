@@ -57,6 +57,7 @@ def build_regions(level_name: str, world: JakAndDaxterWorld) -> list[JakAndDaxte
     rotating_tower.add_fly_locations([327771], access_rule=lambda state: can_free_scout_flies(state, player))
 
     final_boss = JakAndDaxterRegion("Final Boss", player, multiworld, level_name, 0)
+    final_door = JakAndDaxterRegion("Final Door", player, multiworld, level_name, 0)
 
     # Jump Dive required for a lot of buttons, prepare yourself.
     main_area.connect(robot_scaffolding, rule=lambda state:
@@ -98,7 +99,11 @@ def build_regions(level_name: str, world: JakAndDaxterWorld) -> list[JakAndDaxte
                            can_fight(state, player)
                            and state.has("Freed The Green Sage", player))
 
-    final_boss.connect(rotating_tower)  # Take elevator back down.
+    # Take elevator back down.
+    final_boss.connect(rotating_tower)
+
+    # Final door. Need 100 power cells.
+    final_boss.connect(final_door, rule=lambda state: state.has("Power Cell", player, 100))
 
     multiworld.regions.append(main_area)
     multiworld.regions.append(robot_scaffolding)
@@ -107,6 +112,7 @@ def build_regions(level_name: str, world: JakAndDaxterWorld) -> list[JakAndDaxte
     multiworld.regions.append(bunny_room)
     multiworld.regions.append(rotating_tower)
     multiworld.regions.append(final_boss)
+    multiworld.regions.append(final_door)
 
     # If Per-Level Orbsanity is enabled, build the special Orbsanity Region. This is a virtual region always
     # accessible to Main Area. The Locations within are automatically checked when you collect enough orbs.
@@ -122,13 +128,4 @@ def build_regions(level_name: str, world: JakAndDaxterWorld) -> list[JakAndDaxte
         multiworld.regions.append(orbs)
         main_area.connect(orbs)
 
-    # Final door. Need 100 power cells.
-    if options.jak_completion_condition == CompletionCondition.option_open_100_cell_door:
-        final_door = JakAndDaxterRegion("Final Door", player, multiworld, level_name, 0)
-        final_boss.connect(final_door, rule=lambda state: state.has("Power Cell", player, 100))
-
-        multiworld.regions.append(final_door)
-
-        return [main_area, final_boss, final_door]
-    else:
-        return [main_area, final_boss, None]
+    return [main_area, final_boss, final_door]
