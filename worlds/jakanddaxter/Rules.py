@@ -9,7 +9,8 @@ from .Options import (EnableOrbsanity,
                       MountainPassCellCount,
                       LavaTubeCellCount,
                       CitizenOrbTradeAmount,
-                      OracleOrbTradeAmount)
+                      OracleOrbTradeAmount,
+                      CompletionCondition)
 from .locs import CellLocations as Cells
 from .Locations import location_table
 from .Levels import level_table
@@ -213,8 +214,19 @@ def enforce_singleplayer_limits(world: JakAndDaxterWorld):
 
 def verify_orb_trade_amounts(world: JakAndDaxterWorld):
 
-    if world.total_trade_orbs > 2000:
+    if world.total_trade_orbs > world.total_orbs:
         raise OptionError(f"{world.player_name}: Required number of orbs for all trades ({world.total_trade_orbs}) "
-                          f"is more than all the orbs in the game (2000). Reduce the value of either "
-                          f"{world.options.citizen_orb_trade_amount.display_name} "
-                          f"or {world.options.oracle_orb_trade_amount.display_name}.")
+                          f"is more than all the orbs in this seed ({world.total_orbs}). Reduce the value of either "
+                          f"{world.options.citizen_orb_trade_amount.display_name} or "
+                          f"{world.options.oracle_orb_trade_amount.display_name}.")
+
+
+def verify_orb_divisibility(world: JakAndDaxterWorld):
+    options = world.options
+
+    if (options.jak_completion_condition.value < CompletionCondition.option_defeat_gol_and_maia
+            and options.enable_orbsanity.value == EnableOrbsanity.option_global
+            and options.global_orbsanity_bundle_size.value not in PerLevelOrbsanityBundleSize.options.values()):
+        raise OptionError(f"{world.player_name}: {options.global_orbsanity_bundle_size.display_name} must be "
+                          f"a factor of 50 for the \"{options.jak_completion_condition.current_option_name}\" "
+                          f"Completion Condition (currently {options.global_orbsanity_bundle_size.value}).\n")

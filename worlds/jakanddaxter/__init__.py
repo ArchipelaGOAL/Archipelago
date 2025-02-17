@@ -10,7 +10,7 @@ from BaseClasses import (Item,
                          Tutorial,
                          CollectionState)
 from .GameID import jak1_id, jak1_name, jak1_max
-from . import Options
+from . import Options, Goals
 from .Locations import (JakAndDaxterLocation,
                         location_table,
                         cell_location_table,
@@ -26,7 +26,6 @@ from .Items import (JakAndDaxterItem,
                     move_item_table,
                     orb_item_table,
                     trap_item_table)
-from .Levels import level_table, level_table_with_global
 from .regs.RegionBase import JakAndDaxterRegion
 from .locs import (CellLocations as Cells,
                    ScoutLocations as Scouts,
@@ -207,6 +206,7 @@ class JakAndDaxterWorld(World):
 
     # These functions and variables are Options-driven, keep them as instance variables here so that we don't clog up
     # the seed generation routines with options checking. So we set these once, and then just use them as needed.
+    goal_table: dict
     can_trade: Callable[[CollectionState, int, int | None], bool]
     total_orbs: int = 2000
     orb_bundle_item_name: str = ""
@@ -215,7 +215,7 @@ class JakAndDaxterWorld(World):
     total_prog_orb_bundles: int = 0
     total_trap_orb_bundles: int = 0
     total_filler_orb_bundles: int = 0
-    total_power_cells: int = 101
+    total_cells: int = 101
     total_prog_cells: int = 0
     total_trap_cells: int = 0
     total_filler_cells: int = 0
@@ -225,14 +225,14 @@ class JakAndDaxterWorld(World):
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
 
-        # Cache the power cell threshold values for quicker reference.
+        # Cache the power cell threshold values for quicker reference, then order them if necessary.
+        # It is important to do this before anything else, because it will affect how many cells are
+        # needed for progression.
         self.power_cell_thresholds = []
         self.power_cell_thresholds.append(self.options.fire_canyon_cell_count.value)
         self.power_cell_thresholds.append(self.options.mountain_pass_cell_count.value)
         self.power_cell_thresholds.append(self.options.lava_tube_cell_count.value)
         self.power_cell_thresholds.append(100)  # The 100 Power Cell Door.
-
-        # Order the thresholds ascending and set the options values to the new order.
         try:
             if self.options.enable_ordered_cell_counts:
                 self.power_cell_thresholds.sort()
@@ -242,9 +242,48 @@ class JakAndDaxterWorld(World):
         except IndexError:
             pass  # Skip if not possible.
 
+        # Set the goal table depending on the completion condition.
+        # This is crucial as it will inform how many items, locations, and regions we need to make.
+        goal = self.options.jak_completion_condition
+        if goal == Options.CompletionCondition.option_defeat_dark_eco_plant:
+            self.goal_table = Goals.plant_boss_goal_table
+            self.total_prog_cells = 0
+            self.total_trade_orbs = (
+                (2 * self.options.citizen_orb_trade_amount) +
+                (2 * self.options.oracle_orb_trade_amount))
+
+        elif goal == Options.CompletionCondition.option_defeat_klaww:
+            self.goal_table = Goals.klaww_goal_table
+            self.total_prog_cells = max(self.power_cell_thresholds[:2])
+            self.total_trade_orbs = (
+                (5 * self.options.citizen_orb_trade_amount) +
+                (4 * self.options.oracle_orb_trade_amount))
+
+        else:
+            self.goal_table = Goals.citadel_goal_table
+            self.total_trade_orbs = (
+                (9 * self.options.citizen_orb_trade_amount) +
+                (6 * self.options.oracle_orb_trade_amount))
+
+            if goal == Options.CompletionCondition.option_defeat_gol_and_maia:
+                self.total_prog_cells = max(self.power_cell_thresholds[:3])
+            else:
+                self.total_prog_cells = 100
+
+        self.total_cells = self.goal_table["items"]["cells"]
+        self.total_orbs = self.goal_table["items"]["orbs"]
+
+        # Now that we know how many total_trade_orbs we need, and how many total_orbs there are, verify that
+        # we didn't overload it with more orbs than exist in the world. This is easy to do by accident
+        # even in a singleplayer world. Also check the player is using an orb bundle divisible into 50 if they chose
+        # an early completion condition (only 550 or 1250 orbs are created in those cases).
+        from .Rules import verify_orb_trade_amounts, verify_orb_divisibility
+        verify_orb_trade_amounts(self)
+        verify_orb_divisibility(self)
+
         # For the fairness of other players in a multiworld game, enforce some friendly limitations on our options,
         # so we don't cause chaos during seed generation. These friendly limits should **guarantee** a successful gen.
-        # We would have done this earlier, but we needed to sort the power cell thresholds first.
+        # We would have done this earlier, but we needed to handle all of the above first.
         enforce_friendly_options = Utils.get_settings()["jakanddaxter_options"]["enforce_friendly_options"]
         if enforce_friendly_options:
             if self.multiworld.players > 1:
@@ -254,21 +293,15 @@ class JakAndDaxterWorld(World):
                 from .Rules import enforce_singleplayer_limits
                 enforce_singleplayer_limits(self)
 
-        # Calculate the number of power cells needed for full region access, the number being replaced by traps,
-        # and the number of remaining filler.
-        if self.options.jak_completion_condition == Options.CompletionCondition.option_open_100_cell_door:
-            self.total_prog_cells = 100
-        else:
-            self.total_prog_cells = max(self.power_cell_thresholds[:3])
-        non_prog_cells = self.total_power_cells - self.total_prog_cells
-        self.total_trap_cells = min(self.options.filler_power_cells_replaced_with_traps.value, non_prog_cells)
-        self.total_filler_cells = non_prog_cells - self.total_trap_cells
+        # Calculate the number of power cells needed for progression, the number being replaced by traps,
+        # and the number of remaining filler. Move Rando and early Completion Conditions modify this number even more.
+        if goal < Options.CompletionCondition.option_defeat_gol_and_maia and self.options.enable_move_randomizer:
+            self.total_cells -= (len(move_item_table) - len(self.goal_table["locations"]["caches"]))
 
-        # Verify that we didn't overload the trade amounts with more orbs than exist in the world.
-        # This is easy to do by accident even in a singleplayer world.
-        self.total_trade_orbs = (9 * self.options.citizen_orb_trade_amount) + (6 * self.options.oracle_orb_trade_amount)
-        from .Rules import verify_orb_trade_amounts
-        verify_orb_trade_amounts(self)
+        non_prog_cells = self.total_cells - self.total_prog_cells
+        self.total_trap_cells = min(self.options.filler_power_cells_replaced_with_traps.value, non_prog_cells)
+        self.options.filler_power_cells_replaced_with_traps.value = self.total_trap_cells
+        self.total_filler_cells = non_prog_cells - self.total_trap_cells
 
         # Cache the orb bundle size and item name for quicker reference.
         if self.options.enable_orbsanity == Options.EnableOrbsanity.option_per_level:
@@ -289,13 +322,15 @@ class JakAndDaxterWorld(World):
             non_prog_orb_bundles = total_orb_bundles - self.total_prog_orb_bundles
             self.total_trap_orb_bundles = min(self.options.filler_orb_bundles_replaced_with_traps.value,
                                               non_prog_orb_bundles)
+            self.options.filler_orb_bundles_replaced_with_traps.value = self.total_trap_orb_bundles
             self.total_filler_orb_bundles = non_prog_orb_bundles - self.total_trap_orb_bundles
-
-        self.chosen_traps = list(self.options.chosen_traps.value)
 
         # Options drive which trade rules to use, so they need to be setup before we create_regions.
         from .Rules import set_orb_trade_rule
         set_orb_trade_rule(self)
+
+        # Finally, cache the list of traps for quicker reference.
+        self.chosen_traps = list(self.options.chosen_traps.value)
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
@@ -313,18 +348,24 @@ class JakAndDaxterWorld(World):
 
         # Make N Power Cells. We only want AP's Progression Fill routine to handle the amount of cells we need
         # to reach the furthest possible region. Even for early completion goals, all areas in the game must be
-        # reachable or generation will fail. TODO - Option-driven region creation would be an enormous refactor.
+        # reachable or generation will fail.
         if item in range(jak1_id, jak1_id + Scouts.fly_offset):
             counts_and_classes.append((self.total_prog_cells, ItemClass.progression_skip_balancing))
             counts_and_classes.append((self.total_filler_cells, ItemClass.filler))
 
-        # Make 7 Scout Flies per level.
+        # Make 7 Scout Flies per level. Only do this if the scout fly belongs to a level we're actually building.
         elif item in range(jak1_id + Scouts.fly_offset, jak1_id + Specials.special_offset):
-            counts_and_classes.append((7, ItemClass.progression_skip_balancing))
+            if item in self.goal_table["items"]["scouts"]:
+                counts_and_classes.append((7, ItemClass.progression_skip_balancing))
+            else:
+                counts_and_classes.append((0, ItemClass.progression_skip_balancing))
 
-        # Make only 1 of each Special Item.
+        # Make only 1 of each Special Item. Only do this if the item belongs to a level we're actually building.
         elif item in range(jak1_id + Specials.special_offset, jak1_id + Caches.orb_cache_offset):
-            counts_and_classes.append((1, ItemClass.progression | ItemClass.useful))
+            if item in self.goal_table["items"]["specials"]:
+                counts_and_classes.append((1, ItemClass.progression | ItemClass.useful))
+            else:
+                counts_and_classes.append((0, ItemClass.progression | ItemClass.useful))
 
         # Make only 1 of each Move Item.
         elif item in range(jak1_id + Caches.orb_cache_offset, jak1_id + Orbs.orb_offset):
@@ -360,8 +401,6 @@ class JakAndDaxterWorld(World):
             # then fill the item pool with a corresponding amount of filler items.
             if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
                 self.multiworld.push_precollected(self.create_item(item_name))
-                self.multiworld.itempool.append(self.create_filler())
-                items_made += 1
                 continue
 
             # Handle Orbsanity option.

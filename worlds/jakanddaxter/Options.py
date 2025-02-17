@@ -29,7 +29,9 @@ class EnableOrbsanity(Choice):
 
 class GlobalOrbsanityBundleSize(Choice):
     """Set the orb bundle size for Global Orbsanity. This only applies if "Enable Orbsanity" is set to "Global."
-    There are 2000 orbs in the game, so your bundle size must be a factor of 2000.
+    There are 2000 orbs in the game, so your bundle size must be a factor of 2000. Some of these options are
+    incompatible with Completion Conditions "Defeat Klaww" and "Defeat Dark Eco Plant", which require a bundle size
+    that is a factor of 50.
 
     Multiplayer Minimum: 10
     Multiplayer Maximum: 200"""
@@ -206,9 +208,6 @@ class ChosenTraps(OptionSet):
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
-    option_cross_fire_canyon = 69
-    option_cross_mountain_pass = 87
-    option_cross_lava_tube = 89
     option_defeat_dark_eco_plant = 6
     option_defeat_klaww = 86
     option_defeat_gol_and_maia = 112
