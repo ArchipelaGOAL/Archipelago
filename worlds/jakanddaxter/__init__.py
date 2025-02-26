@@ -1,23 +1,22 @@
-import typing
-from typing import Any, ClassVar, Callable
+# Python standard libraries
 from math import ceil
-import Utils
-import settings
-from Options import OptionGroup
+from typing import Any, ClassVar, Callable, Union, cast
 
+# Archipelago imports
+import settings
+import Utils
+
+from worlds.AutoWorld import World, WebWorld
+from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 from BaseClasses import (Item,
                          ItemClassification as ItemClass,
                          Tutorial,
                          CollectionState)
+from Options import OptionGroup
+
+# Jak imports
+from .Options import *
 from .GameID import jak1_id, jak1_name, jak1_max
-from . import Options
-from .Locations import (JakAndDaxterLocation,
-                        location_table,
-                        cell_location_table,
-                        scout_location_table,
-                        special_location_table,
-                        cache_location_table,
-                        orb_location_table)
 from .Items import (JakAndDaxterItem,
                     item_table,
                     cell_item_table,
@@ -27,14 +26,19 @@ from .Items import (JakAndDaxterItem,
                     orb_item_table,
                     trap_item_table)
 from .Levels import level_table, level_table_with_global
-from .regs.RegionBase import JakAndDaxterRegion
+from .Locations import (JakAndDaxterLocation,
+                        location_table,
+                        cell_location_table,
+                        scout_location_table,
+                        special_location_table,
+                        cache_location_table,
+                        orb_location_table)
 from .locs import (CellLocations as Cells,
                    ScoutLocations as Scouts,
                    SpecialLocations as Specials,
                    OrbCacheLocations as Caches,
                    OrbLocations as Orbs)
-from worlds.AutoWorld import World, WebWorld
-from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
+from .regs.RegionBase import JakAndDaxterRegion
 
 
 def launch_client():
@@ -70,8 +74,8 @@ class JakAndDaxterSettings(settings.Group):
     root_directory: RootDirectory = RootDirectory(
         "%programfiles%/OpenGOAL-Launcher/features/jak1/mods/JakMods/archipelagoal")
     # Don't ever change these type hints again.
-    auto_detect_root_directory: typing.Union[AutoDetectRootDirectory, bool] = True
-    enforce_friendly_options: typing.Union[EnforceFriendlyOptions, bool] = True
+    auto_detect_root_directory: Union[AutoDetectRootDirectory, bool] = True
+    enforce_friendly_options: Union[EnforceFriendlyOptions, bool] = True
 
 
 class JakAndDaxterWebWorld(WebWorld):
@@ -124,7 +128,7 @@ class JakAndDaxterWorld(World):
     """
     # ID, name, version
     game = jak1_name
-    required_client_version = (0, 5, 0)
+    required_client_version = (0, 6, 0)
 
     # Options
     settings: ClassVar[JakAndDaxterSettings]
@@ -401,7 +405,7 @@ class JakAndDaxterWorld(World):
         # Add an amount of filler items equal to the number of locations yet to be filled.
         # This is the final set of items we will add to the pool.
         all_regions = self.multiworld.get_regions(self.player)
-        total_locations = sum(reg.location_count for reg in typing.cast(list[JakAndDaxterRegion], all_regions))
+        total_locations = sum(reg.location_count for reg in cast(list[JakAndDaxterRegion], all_regions))
         total_filler = total_locations - items_made
         self.multiworld.itempool += [self.create_filler() for _ in range(total_filler)]
 
