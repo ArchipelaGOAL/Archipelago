@@ -144,7 +144,7 @@ class JakAndDaxterContext(CommonContext):
                 orbsanity_bundle = 1
 
             # Connected packet is unaware of starting inventory or if player is returning to an existing game.
-            # Set initial item count to 0 if it hasn't been set higher by a ReceivedItems packet yet.
+            # Set initial_item_count to 0, see below comments for more info.
             if not self.repl.received_initial_items and self.repl.initial_item_count < 0:
                 self.repl.initial_item_count = 0
 
@@ -181,11 +181,15 @@ class JakAndDaxterContext(CommonContext):
                 create_task_log_exception(self.repl.subtract_traded_orbs(orbs_traded))
 
         if cmd == "ReceivedItems":
-            if not self.repl.received_initial_items:
 
-                # ReceivedItems packet should set the initial item count to > 0, even if already set to 0 by the
-                # Connected packet. Then we should tell the game to update the title screen, telling the player
-                # to wait while we process the initial items. This is skipped if no initial items are sent.
+            # If you have a starting inventory or are returning to a game where you have items, a ReceivedItems will be
+            # in the same network packet as Connected. This guarantees it is the first of any ReceivedItems we process.
+            # In this case, we should set the initial_item_count to > 0, even if already set to 0 by Connected, as well
+            # as the received_initial_items flag. Finally, use send_connection_status to tell the player to wait while
+            # we process the initial items. However, we will skip all this if there was no initial ReceivedItems and
+            # the REPL indicates it already handled any initial items (0 or otherwise).
+            if not self.repl.received_initial_items and not self.repl.processed_initial_items:
+                self.repl.received_initial_items = True
                 self.repl.initial_item_count = len(args["items"])
                 create_task_log_exception(self.repl.send_connection_status("wait"))
 
