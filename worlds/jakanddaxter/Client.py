@@ -588,6 +588,7 @@ async def main():
 
 
 def launch():
-    colorama.init()
+    # use colorama to display colored text highlighting
+    colorama.just_fix_windows_console()
     asyncio.run(main())
     colorama.deinit()
