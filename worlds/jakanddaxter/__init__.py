@@ -111,7 +111,7 @@ class JakAndDaxterWebWorld(WebWorld):
             Options.FillerPowerCellsReplacedWithTraps,
             Options.FillerOrbBundlesReplacedWithTraps,
             Options.TrapEffectDuration,
-            Options.ChosenTraps,
+            Options.TrapWeights,
         ]),
     ]
 
@@ -224,7 +224,7 @@ class JakAndDaxterWorld(World):
     total_trap_cells: int = 0
     total_filler_cells: int = 0
     power_cell_thresholds: list[int] = []
-    chosen_traps: list[str] = []
+    trap_weights: tuple[list[str], list[int]] = []
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -299,7 +299,7 @@ class JakAndDaxterWorld(World):
         else:
             self.options.filler_orb_bundles_replaced_with_traps.value = 0
 
-        self.chosen_traps = list(self.options.chosen_traps.value)
+        self.trap_weights = self.options.trap_weights.weights_pair
 
         # Options drive which trade rules to use, so they need to be setup before we create_regions.
         from .Rules import set_orb_trade_rule
@@ -392,13 +392,13 @@ class JakAndDaxterWorld(World):
                 items_made += count
 
         # Handle Traps (for real).
-        # Manually fill the item pool with a random assortment of trap items, equal to the sum of
-        # total_trap_cells + total_trap_orb_bundles. Only do this if one or more traps have been selected.
-        if len(self.chosen_traps) > 0:
+        # Manually fill the item pool with a weighted assortment of trap items, equal to the sum of
+        # total_trap_cells + total_trap_orb_bundles. Only do this if one or more traps have weights > 0.
+        if sum(self.trap_weights[1]) > 0:
             total_traps = self.total_trap_cells + self.total_trap_orb_bundles
-            for _ in range(total_traps):
-                trap_name = self.random.choice(self.chosen_traps)
-                self.multiworld.itempool.append(self.create_item(trap_name))
+            names, weights = self.trap_weights
+            trap_list = self.random.choices(names, weights=weights, k=total_traps)
+            self.multiworld.itempool += [self.create_item(trap_name) for trap_name in trap_list]
             items_made += total_traps
 
         # Handle Unfilled Locations.
@@ -486,7 +486,7 @@ class JakAndDaxterWorld(World):
                                             "filler_power_cells_replaced_with_traps",
                                             "filler_orb_bundles_replaced_with_traps",
                                             "trap_effect_duration",
-                                            "chosen_traps",
+                                            "trap_weights",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
                                             )
