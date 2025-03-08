@@ -27,10 +27,8 @@ def build_regions(level_name: str, world: JakAndDaxterWorld) -> list[JakAndDaxte
 
     orb_cache = JakAndDaxterRegion("Orb Cache", player, multiworld, level_name, 20)
 
-    # You need roll jump or punch to be able to reach this before the blue eco runs out.
-    orb_cache.add_cache_locations([10945], access_rule=lambda state:
-                                  state.has_all({"Roll", "Roll Jump"}, player)
-                                  or state.has("Punch", player))
+    # You need roll jump to be able to reach this before the blue eco runs out.
+    orb_cache.add_cache_locations([10945], access_rule=lambda state: state.has_all({"Roll", "Roll Jump"}, player))
 
     # Fly here can be gotten with Yellow Eco from Boggy, goggles, and no extra movement options (see fly ID 43).
     pontoon_bridge = JakAndDaxterRegion("Pontoon Bridge", player, multiworld, level_name, 7)

@@ -128,7 +128,7 @@ class JakAndDaxterWorld(World):
     """
     # ID, name, version
     game = jak1_name
-    required_client_version = (0, 6, 0)
+    required_client_version = (0, 5, 0)
 
     # Options
     settings: ClassVar[JakAndDaxterSettings]
