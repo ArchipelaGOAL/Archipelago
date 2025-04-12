@@ -380,9 +380,6 @@ def run_gui(path: str, args: Any) -> None:
                 self.cards.append(self.build_card(component))
 
             self._refresh_components(self.current_filter)
-
-            self.search_box.bind(text=self.filter_clients_by_name)
-
             return self.top_screen
 
         def on_start(self):
