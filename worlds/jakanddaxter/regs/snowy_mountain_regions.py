@@ -109,7 +109,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.connect(blockers, rule=lambda state: can_jump_blockers(state, player))
     main_area.connect(glacier_lurkers, rule=lambda state: can_fight(state, player))
 
-    # Yes, the only way into the rest of the level requires advanced movement.
+    # Yes, this is a bit nutty, but it's an alternate way into SM without having to change the rest of the regions.
+    if options.snowy_mountain_entrance_climb:
+        slippery_rock = JakAndDaxterRegion("Slippery Rock", player, multiworld, level_name, 0)
+        main_area.connect(slippery_rock, rule=lambda state:
+                          (state.has("Double Jump", player) or state.has_all(("Crouch", "Crouch Jump"), player)))
+        slippery_rock.connect(snowball_canyon)
+
+    # Yes, the only (other) way into the rest of the level requires advanced movement.
     main_area.connect(snowball_canyon, rule=lambda state: can_cross_long_gap(state, player))
 
     snowball_canyon.connect(main_area)                              # But you can just jump down and run up the ramp.

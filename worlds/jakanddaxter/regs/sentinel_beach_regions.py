@@ -48,7 +48,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                  state.has("Blue Eco Switch", player)
                                  or can_free_scout_flies(state, player))
 
-    cannon_tower = JakAndDaxterRegion("Cannon Tower", player, multiworld, level_name, 12)
+    rock_spires = JakAndDaxterRegion("Rock Spires", player, multiworld, level_name, 12)
+
+    cannon_tower = JakAndDaxterRegion("Cannon Tower", player, multiworld, level_name, 0)
     cannon_tower.add_cell_locations([19], access_rule=lambda state: can_fight(state, player))
 
     main_area.connect(pelican)           # Swim and jump.
@@ -72,7 +74,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                       state.has("Blue Eco Switch", player)
                       or can_uppercut_and_jump_logs(state, player))
 
-    main_area.connect(cannon_tower, rule=lambda state: state.has("Blue Eco Switch", player))
+    main_area.connect(rock_spires, rule=lambda state: state.has("Blue Eco Switch", player))
+    rock_spires.connect(cannon_tower)
+
+    # An advanced way of reaching the cannon tower without Blue Eco Switch.
+    if options.sentinel_beach_cannon_tower_climb:
+        main_area.connect(cannon_tower, rule=lambda state: state.has("Double Jump", player))
 
     # All these can go back to main_area immediately.
     pelican.connect(main_area)
@@ -80,6 +87,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     eco_harvesters.connect(main_area)
     green_ridge.connect(main_area)
     blue_ridge.connect(main_area)
+    rock_spires.connect(main_area)
     cannon_tower.connect(main_area)
 
     world.level_to_regions[level_name].append(main_area)
