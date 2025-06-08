@@ -61,7 +61,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     second_bats.add_fly_locations([262187], access_rule=lambda state: can_jump_farther(state, player))
 
     third_jump_pad = JakAndDaxterRegion("Third Jump Pad (Arena)", player, multiworld, level_name, 0)
-    third_jump_pad.add_cell_locations([38], access_rule=lambda state: can_fight(state, player))
+
+    # We have to choose our access rule depending on our Flut Flut escape option.
+    # We want to make that decision while we are creating regions, NOT INSIDE the access rule itself.
+    if options.boggy_swamp_flut_flut_escape:
+        third_jump_pad.add_cell_locations([38], access_rule=lambda state:
+                                          (state.has("Flut Flut", player) or can_fight(state, player)))
+    else:
+        third_jump_pad.add_cell_locations([38], access_rule=lambda state: can_fight(state, player))
 
     # The platform for the third tether might look high, but you can get a boost from the yellow eco vent.
     fourth_jump_pad = JakAndDaxterRegion("Fourth Jump Pad (Third Tether)", player, multiworld, level_name, 9)

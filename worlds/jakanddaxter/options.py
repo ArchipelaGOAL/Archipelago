@@ -318,6 +318,56 @@ class TrapWeights(OptionCounter):
         return list(self.value.keys()), list(self.value.values())
 
 
+class BoostedAndExtendedUppercuts(Toggle):
+    """
+    Create alternate paths to some areas with advanced movement. Enabling this setting may require Jak to use boosted
+    and extended uppercuts as opposed to regular movement options. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Boosted and Extended Uppercuts"
+
+
+class GeyserRockCliffClimb(Toggle):
+    """
+    Remove the movement requirement for the Geyser Rock Cliff. Enabling this setting may require Jak to use uneven
+    terrain to reach the cliff with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Geyser Rock Cliff Climb"
+
+
+class SentinelBeachCannonTowerClimb(Toggle):
+    """
+    Create an alternate path to the Sentinel Beach Cannon Tower. Enabling this setting may require Jak to use uneven
+    geometry to reach the cannon tower with only Double Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Sentinel Beach Cannon Tower Climb"
+
+
+class SnowyMountainEntranceClimb(Toggle):
+    """
+    Create an alternate path into Snowy Mountain. Enabling this setting may require Jak to use uneven geometry to reach
+    Snowy Mountain's main area with only Double Jump or Crouch Jump. This only applies if "Enable Move Randomizer"
+    is ON.
+    """
+    display_name = "Snowy Mountain Entrance Climb"
+
+
+class BoggySwampFlutFlutEscape(Toggle):
+    """
+    Create an alternate path into the Boggy Swamp Ambush. Enabling this setting may require Jak to get Flut Flut
+    into the ambush arena instead of using attacking moves. This only applies if "Enable Move Randomizer"
+    is ON.
+    """
+    display_name = "Boggy Swamp Flut Flut Escape"
+
+
+class SnowyMountainFlutFlutEscape(Toggle):
+    """
+    Changes Snowy Mountain to rely on Flut Flut for movement. Enabling this setting may require Jak to get Flut Flut
+    over an invisible barrier to access nearly all of Snowy Mountain.
+    """
+    display_name = "Snowy Mountain Flut Flut Escape"
+
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -348,5 +398,11 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     filler_orb_bundles_replaced_with_traps: FillerOrbBundlesReplacedWithTraps
     trap_effect_duration: TrapEffectDuration
     trap_weights: TrapWeights
+    boosted_and_extended_uppercuts: BoostedAndExtendedUppercuts
+    geyser_rock_cliff_climb: GeyserRockCliffClimb
+    sentinel_beach_cannon_tower_climb: SentinelBeachCannonTowerClimb
+    snowy_mountain_entrance_climb: SnowyMountainEntranceClimb
+    boggy_swamp_flut_flut_escape: BoggySwampFlutFlutEscape
+    snowy_mountain_flut_flut_escape: SnowyMountainFlutFlutEscape
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
