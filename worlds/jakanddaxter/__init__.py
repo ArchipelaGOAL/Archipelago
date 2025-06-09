@@ -336,8 +336,8 @@ class JakAndDaxterWorld(World):
             # This should help speed up orbsanity calculations.
             self.level_to_orb_regions[level] = [reg for reg in self.level_to_regions[level] if reg.orb_count > 0]
 
-        # from Utils import visualize_regions
-        # visualize_regions(self.multiworld.get_region("Menu", self.player), "jakanddaxter.puml")
+        from Utils import visualize_regions
+        visualize_regions(self.multiworld.get_region("Menu", self.player), "jakanddaxter.puml")
 
     def item_data_helper(self, item: int) -> list[tuple[int, ItemClass, OrbAssoc, int]]:
         """
