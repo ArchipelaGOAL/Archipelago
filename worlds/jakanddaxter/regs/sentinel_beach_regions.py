@@ -96,6 +96,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     world.level_to_regions[level_name].append(eco_harvesters)
     world.level_to_regions[level_name].append(green_ridge)
     world.level_to_regions[level_name].append(blue_ridge)
+    world.level_to_regions[level_name].append(rock_spires)
     world.level_to_regions[level_name].append(cannon_tower)
 
     # If Per-Level Orbsanity is enabled, build the special Orbsanity Region. This is a virtual region always
