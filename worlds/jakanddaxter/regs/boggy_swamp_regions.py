@@ -128,7 +128,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     fourth_jump_pad.connect(second_bats)
 
     flut_flut_pad.connect(second_bats)
-    flut_flut_pad.connect(flut_flut_course, rule=lambda state: state.has("Flut Flut", player))  # Naturally.
+
+    if options.boosted_and_extended_uppercuts:
+        flut_flut_pad.connect(flut_flut_course, rule=lambda state:
+                              state.has("Flut Flut", player)
+                              or state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player))
+    else:
+        flut_flut_pad.connect(flut_flut_course, rule=lambda state: state.has("Flut Flut", player))  # Naturally.
+
     flut_flut_pad.connect(farthy_snacks)
 
     flut_flut_course.connect(flut_flut_pad)

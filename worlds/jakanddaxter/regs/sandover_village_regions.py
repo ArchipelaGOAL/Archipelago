@@ -51,9 +51,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                       or state.has_all(("Crouch", "Crouch Jump"), player)
                       or state.has_all(("Crouch", "Crouch Uppercut", "Jump Kick"), player))
 
-    main_area.connect(oracle_platforms, rule=lambda state:
-                      state.has_all(("Roll", "Roll Jump"), player)
-                      or state.has_all(("Double Jump", "Jump Kick"), player))
+    if options.boosted_and_extended_uppercuts:
+        main_area.connect(oracle_platforms, rule=lambda state:
+                          state.has_all(("Roll", "Roll Jump"), player)
+                          or state.has_all(("Double Jump", "Jump Kick"), player)
+                          or state.has_all(("Punch", "Punch Uppercut"), player))
+    else:
+        main_area.connect(oracle_platforms, rule=lambda state:
+                          state.has_all(("Roll", "Roll Jump"), player)
+                          or state.has_all(("Double Jump", "Jump Kick"), player))
 
     # All these can go back to main_area immediately.
     orb_cache_cliff.connect(main_area)
