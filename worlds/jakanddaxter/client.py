@@ -443,6 +443,28 @@ def find_root_directory(ctx: JakAndDaxterContext):
 
 
 async def run_game(ctx: JakAndDaxterContext):
+    terminal = []
+    
+    if Utils.is_linux:
+        gnome_term_paths = [
+            '/usr/bin/gnome-terminal',
+            '/usr/local/bin/gnome-terminal',
+        ]
+        
+        if any(os.path.isfile(path) for path in gnome_term_paths):
+            terminal = ['gnome-terminal', '--']
+        else:
+            konsole_paths = [
+                '/usr/bin/konsole',
+                '/usr/local/bin/konsole',
+            ]
+            
+            if any(os.path.isfile(path) for path in konsole_paths):
+                terminal = ['konsole', '-e']
+            else:
+                logger.error("No valid terminal found. Please install either gnome-terminal or konsole")
+    elif Utils.is_macos:
+        terminal = ['open', '-a', 'Terminal', '-n', '--args']
 
     # These may already be running. If they are not running, try to start them.
     gk_running = False
@@ -518,13 +540,27 @@ async def run_game(ctx: JakAndDaxterContext):
             log_path = os.path.join(Utils.user_path("logs"), f"JakAndDaxterGame_{timestamp}.txt")
             log_path = os.path.normpath(log_path)
             with open(log_path, "w") as log_file:
-                gk_process = subprocess.Popen(
-                    [gk_path, "--game", "jak1",
-                     "--config-path", config_path,
-                     "--", "-v", "-boot", "-fakeiso", "-debug"],
-                    stdout=log_file,
-                    stderr=log_file,
-                    creationflags=subprocess.CREATE_NO_WINDOW)
+                gk_args = [
+                    gk_path,
+                    "--game", "jak1",
+                    "--config-path", config_path,
+                    "--", "-v", "-boot", "-fakeiso", "-debug"
+                ]
+                
+                if Utils.is_windows:
+                    gk_process = subprocess.Popen(
+                        gk_args,
+                        stdout=log_file,
+                        stderr=log_file,
+                        creationflags=subprocess.CREATE_NO_WINDOW
+                    )
+                else:
+                    gk_process = subprocess.Popen(
+                        gk_args,
+                        stdout=log_file,
+                        stderr=log_file
+                    )
+
 
         if not goalc_running:
             # For the OpenGOAL Compiler, the existence of the "data" subfolder indicates you are running it from
@@ -574,7 +610,14 @@ async def run_game(ctx: JakAndDaxterContext):
                 goalc_args = [goalc_path, "--game", "jak1"]
 
             # This needs to be a new console. The REPL console cannot share a window with any other process.
-            goalc_process = subprocess.Popen(goalc_args, creationflags=subprocess.CREATE_NEW_CONSOLE)
+            
+            if Utils.is_windows:
+                goalc_process = subprocess.Popen(goalc_args, creationflags=subprocess.CREATE_NEW_CONSOLE)
+            else:
+                if os.environ.get('GTK_PATH', None):
+                    del os.environ['GTK_PATH']
+                    
+                goalc_process = subprocess.Popen(terminal + ['bash', '-c', f"{' '.join(["'" + arg + "'" if ' ' in arg else arg for arg in goalc_args])}"])
 
     except AttributeError as e:
         if " " in e.args[0]:
