@@ -443,29 +443,6 @@ def find_root_directory(ctx: JakAndDaxterContext):
 
 
 async def run_game(ctx: JakAndDaxterContext):
-    terminal = []
-    
-    if Utils.is_linux:
-        gnome_term_paths = [
-            '/usr/bin/gnome-terminal',
-            '/usr/local/bin/gnome-terminal',
-        ]
-        
-        if any(os.path.isfile(path) for path in gnome_term_paths):
-            terminal = ['gnome-terminal', '--']
-        else:
-            konsole_paths = [
-                '/usr/bin/konsole',
-                '/usr/local/bin/konsole',
-            ]
-            
-            if any(os.path.isfile(path) for path in konsole_paths):
-                terminal = ['konsole', '-e']
-            else:
-                logger.error("No valid terminal found. Please install either gnome-terminal or konsole")
-    elif Utils.is_macos:
-        terminal = ['open', '-a', 'Terminal', '-n', '--args']
-
     # These may already be running. If they are not running, try to start them.
     gk_running = False
     try:
@@ -613,11 +590,56 @@ async def run_game(ctx: JakAndDaxterContext):
             
             if Utils.is_windows:
                 goalc_process = subprocess.Popen(goalc_args, creationflags=subprocess.CREATE_NEW_CONSOLE)
-            else:
+            elif Utils.is_linux:
                 if os.environ.get('GTK_PATH', None):
                     del os.environ['GTK_PATH']
+                
                     
-                goalc_process = subprocess.Popen(terminal + ['bash', '-c', f"{' '.join(["'" + arg + "'" if ' ' in arg else arg for arg in goalc_args])}"])
+                # Bash commands are wrapped in quotes, and so make a single argument for subprocess.Popen()
+                # 
+                # Here we are concatenating the args into a string, and if any of the args has a space, we
+                # wrap that arg in quotes before. This is to support filepaths with spaces in them
+                goalc_command = 'bash -c \''
+
+                for i, arg in enumerate(goalc_args):
+                    if i == 0:
+                        if ' ' in arg:
+                            goalc_command += f"\\'{arg}\\'"
+                        else:
+                            goalc_command += f"{arg}"
+                    else:
+                        if ' ' in arg:
+                            goalc_command += f" \\'{arg}\\'"
+                        else:
+                            goalc_command += f" {arg}"
+                
+                goalc_command += '\''
+                
+                logger.info(goalc_command)
+                
+                goalc_process = subprocess.Popen(['x-terminal-emulator', '-e', goalc_command])
+            elif Utils.is_macos:
+                # osascript commands are wrapped in quotes, and so make a single argument for subprocess.Popen()
+                # 
+                # Here we are concatenating the args into a string, and if any of the args has a space, we
+                # wrap that arg in quotes before. This is to support filepaths with spaces in them
+                goalc_command = 'tell app "Terminal" to do script "'
+
+                for i, arg in enumerate(goalc_args):
+                    if i == 0:
+                        if ' ' in arg:
+                            goalc_command += f"\\'{arg}\\'"
+                        else:
+                            goalc_command += f"{arg}"
+                    else:
+                        if ' ' in arg:
+                            goalc_command += f" \\'{arg}\\'"
+                        else:
+                            goalc_command += f" {arg}"
+                
+                goalc_command += '"'
+                
+                goalc_process = subprocess.Popen(['osascript', '-e', goalc_command])
 
     except AttributeError as e:
         if " " in e.args[0]:
