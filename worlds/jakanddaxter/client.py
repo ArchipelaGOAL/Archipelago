@@ -20,6 +20,7 @@ import ModuleUpdate
 import Utils
 
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
+from Launcher import launch as program_launch
 from NetUtils import ClientStatus
 
 # Jak imports
@@ -591,55 +592,15 @@ async def run_game(ctx: JakAndDaxterContext):
             if Utils.is_windows:
                 goalc_process = subprocess.Popen(goalc_args, creationflags=subprocess.CREATE_NEW_CONSOLE)
             elif Utils.is_linux:
+                # This is to prevent issues with snap variants of GTK that fail to run with this flag set when trying to open goalc
                 if os.environ.get('GTK_PATH', None):
                     del os.environ['GTK_PATH']
                 
-                    
-                # Bash commands are wrapped in quotes, and so make a single argument for subprocess.Popen()
-                # 
-                # Here we are concatenating the args into a string, and if any of the args has a space, we
-                # wrap that arg in quotes before. This is to support filepaths with spaces in them
-                goalc_command = 'bash -c \''
-
-                for i, arg in enumerate(goalc_args):
-                    if i == 0:
-                        if ' ' in arg:
-                            goalc_command += f"\\'{arg}\\'"
-                        else:
-                            goalc_command += f"{arg}"
-                    else:
-                        if ' ' in arg:
-                            goalc_command += f" \\'{arg}\\'"
-                        else:
-                            goalc_command += f" {arg}"
-                
-                goalc_command += '\''
-                
-                logger.info(goalc_command)
-                
-                goalc_process = subprocess.Popen(['x-terminal-emulator', '-e', goalc_command])
+                # Here, program_launch is imported from archipelago to run executatbles, including terminal ones. 
+                goalc_process = program_launch(goalc_args, in_terminal=True)
             elif Utils.is_macos:
-                # osascript commands are wrapped in quotes, and so make a single argument for subprocess.Popen()
-                # 
-                # Here we are concatenating the args into a string, and if any of the args has a space, we
-                # wrap that arg in quotes before. This is to support filepaths with spaces in them
-                goalc_command = 'tell app "Terminal" to do script "'
-
-                for i, arg in enumerate(goalc_args):
-                    if i == 0:
-                        if ' ' in arg:
-                            goalc_command += f"\\'{arg}\\'"
-                        else:
-                            goalc_command += f"{arg}"
-                    else:
-                        if ' ' in arg:
-                            goalc_command += f" \\'{arg}\\'"
-                        else:
-                            goalc_command += f" {arg}"
-                
-                goalc_command += '"'
-                
-                goalc_process = subprocess.Popen(['osascript', '-e', goalc_command])
+                # Here, program_launch is imported from archipelago to run executatbles, including terminal ones. 
+                goalc_process = program_launch(goalc_args, in_terminal=True)
 
     except AttributeError as e:
         if " " in e.args[0]:
