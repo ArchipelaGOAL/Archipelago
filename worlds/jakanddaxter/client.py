@@ -596,10 +596,6 @@ async def run_game(ctx: JakAndDaxterContext):
             if Utils.is_windows:
                 goalc_process = subprocess.Popen(goalc_args, creationflags=subprocess.CREATE_NEW_CONSOLE)
             elif Utils.is_linux:
-                # This is to prevent issues with snap variants of GTK that fail to run with this flag set when trying to open goalc
-                if os.environ.get('GTK_PATH', None):
-                    del os.environ['GTK_PATH']
-                
                 # Here, program_launch is imported from archipelago to run executatbles, including terminal ones. 
                 goalc_process = program_launch(goalc_args, in_terminal=True)
             elif Utils.is_macos:
