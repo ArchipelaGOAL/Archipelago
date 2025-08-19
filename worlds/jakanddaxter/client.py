@@ -14,6 +14,7 @@ from typing import Awaitable
 # Misc imports
 import colorama
 from PyMemoryEditor import OpenProcess, ProcessNotFoundError
+from psutil import NoSuchProcess
 
 # Archipelago imports
 import ModuleUpdate
@@ -330,10 +331,13 @@ class JakAndDaxterContext(CommonContext):
             await asyncio.sleep(0.1)
 
     async def run_memr_loop(self):
-        while True:
-            await self.memr.main_tick()
-            await asyncio.sleep(0.1)
-
+        try:
+            while True:
+                await self.memr.main_tick()
+                await asyncio.sleep(0.1)
+        # This catch re-engages the memr loop, enabling the client to re-connect on losing the process
+        except NoSuchProcess:
+            await self.run_memr_loop()
 
 def find_root_directory(ctx: JakAndDaxterContext):
 
