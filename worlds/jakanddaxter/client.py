@@ -13,7 +13,6 @@ from typing import Awaitable
 
 # Misc imports
 import colorama
-from PyMemoryEditor import OpenProcess, ProcessNotFoundError
 
 # Archipelago imports
 import ModuleUpdate
@@ -28,6 +27,7 @@ from .options import EnableOrbsanity
 from .agents.memory_reader import JakAndDaxterMemoryReader
 from .agents.repl_client import JakAndDaxterReplClient
 from . import JakAndDaxterWorld
+from .agents.PyMemoryEditor import OpenProcess, ProcessNotFoundError
 
 
 ModuleUpdate.update()
