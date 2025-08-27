@@ -87,19 +87,22 @@ def start_playing():
 @cache.cached()
 def game_info(game, lang):
     """Game Info Pages"""
-    theme = get_world_theme(game)
-    secure_game_name = secure_filename(game)
-    lang = secure_filename(lang)
-    document = render_markdown(os.path.join(
-        app.static_folder, "generated", "docs",
-        secure_game_name, f"{lang}_{secure_game_name}.md"
-    ))
-    return render_template(
-        "markdown_document.html",
-        title=f"{game} Guide",
-        html_from_markdown=document,
-        theme=theme,
-    )
+    try:
+        theme = get_world_theme(game)
+        secure_game_name = secure_filename(game)
+        lang = secure_filename(lang)
+        document = render_markdown(os.path.join(
+            app.static_folder, "generated", "docs",
+            secure_game_name, f"{lang}_{secure_game_name}.md"
+        ))
+        return render_template(
+            "markdown_document.html",
+            title=f"{game} Guide",
+            html_from_markdown=document,
+            theme=theme,
+        )
+    except FileNotFoundError:
+        return abort(404)
 
 
 @app.route('/games')
@@ -112,19 +115,31 @@ def games():
 @app.route('/tutorial/<string:game>/<string:file>')
 @cache.cached()
 def tutorial(game: str, file: str):
-    theme = get_world_theme(game)
-    secure_game_name = secure_filename(game)
-    file = secure_filename(file)
-    document = render_markdown(os.path.join(
-        app.static_folder, "generated", "docs",
-        secure_game_name, file+".md"
-    ))
-    return render_template(
-        "markdown_document.html",
-        title=f"{game} Guide",
-        html_from_markdown=document,
-        theme=theme,
-    )
+    try:
+        theme = get_world_theme(game)
+        secure_game_name = secure_filename(game)
+        file = secure_filename(file)
+        document = render_markdown(os.path.join(
+            app.static_folder, "generated", "docs",
+            secure_game_name, file+".md"
+        ))
+        return render_template(
+            "markdown_document.html",
+            title=f"{game} Guide",
+            html_from_markdown=document,
+            theme=theme,
+        )
+    except FileNotFoundError:
+        return abort(404)
+
+
+@app.route('/tutorial/<string:game>/<string:file>/<string:lang>')
+def tutorial_redirect(game: str, file: str, lang: str):
+    """
+    Permanent redirect old tutorial URLs to new ones to keep search engines happy.
+    e.g. /tutorial/Archipelago/setup/en -> /tutorial/Archipelago/setup_en
+    """
+    return redirect(url_for("tutorial", game=game, file=f"{file}_{lang}"), code=301)
 
 
 @app.route('/tutorial/')
