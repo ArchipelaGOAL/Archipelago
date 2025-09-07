@@ -22,7 +22,7 @@ ITEM_ID_FILLER_START = 34       # Filler items start at ID 34 (Dark Eco Pill)
 ITEM_ID_FILLER_END = 50         # Standard filler items end here (room for expansion)
 
 # Unified Item Table - Single source of truth for all items
-# Items are organized by classification using ID ranges defined above
+# Every item is organized by classification using ID ranges defined above
 item_table = {
     # ========== KEY/PROGRESSION ITEMS (IDs 1-33) ==========
     
