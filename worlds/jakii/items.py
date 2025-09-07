@@ -55,4 +55,9 @@ key_item_table = {
     32: Jak2ItemData(item_id=32, name="Seal Piece #3", symbol="seal-piece-3"),
     33: Jak2ItemData(item_id=33, name="Rift Rider", symbol="rift-rider"),
     34: Jak2ItemData(item_id=34, name="Dark Eco Pill", symbol="dark-eco-pill"),
+    35: Jak2ItemData(item_id=35, name="Health Pack", symbol="health-pack"),
+    36: Jak2ItemData(item_id=37, name="Scatter Gun Ammo", symbol="ammo-red"),
+    37: Jak2ItemData(item_id=38, name="Blaster Ammo", symbol="ammo-yellow"),
+    38: Jak2ItemData(item_id=39, name="Vulcan Fury Ammo", symbol="ammo-blue"),
+    39: Jak2ItemData(item_id=40, name="Peacemaker Ammo", symbol="ammo-dark")
 }
