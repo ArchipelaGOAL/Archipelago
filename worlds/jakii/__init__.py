@@ -3,9 +3,8 @@ import settings
 from worlds.AutoWorld import World, WebWorld
 from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 from BaseClasses import (Tutorial, ItemClassification as ItemClass)
-from typing import cast, ClassVar
+from typing import cast
 from .options import CompletionCondition
-import typing
 
 # Jak 2 imports
 from .game_id import jak2_name, jak2_max
@@ -35,9 +34,6 @@ class JakIIWebWorld(WebWorld):
 
     tutorials = [setup_en]
     bug_report_page = "https://github.com/narramoment/Archipelago/issues"
-
-
-
 
 
 class JakIIWorld(World):
@@ -79,8 +75,8 @@ class JakIIWorld(World):
         else:
             # If we try to make items with ID's outside defined ranges, something has gone wrong
             raise KeyError(f"Tried to fill item pool with unknown ID {item}. Valid ranges: "
-                         f"key items ({ITEM_ID_KEY_START}-{ITEM_ID_KEY_END}), "
-                         f"filler items ({ITEM_ID_FILLER_START}-{ITEM_ID_FILLER_END})")
+                           f"key items ({ITEM_ID_KEY_START}-{ITEM_ID_KEY_END}), "
+                           f"filler items ({ITEM_ID_FILLER_START}-{ITEM_ID_FILLER_END})")
         return data
 
     def create_items(self) -> None:
@@ -106,9 +102,9 @@ class JakIIWorld(World):
         return Jak2Item(name, classification, item_id, self.player)
 
     def get_filler_item_name(self) -> str:
-        filler_item_name = ["Dark Eco Pill", "Health Pack", "Scatter Gun Ammo", "Blaster Ammo", "Vulcan Fury Ammo",
-                            "Peacemaker Ammo"]
-        return filler_item_name[self.player]
+        filler_item_names = ["Dark Eco Pill", "Health Pack", "Scatter Gun Ammo", "Blaster Ammo", "Vulcan Fury Ammo",
+                             "Peacemaker Ammo"]
+        return self.random.choice(filler_item_names)
 
     def create_regions(self) -> None:
         multiworld = self.multiworld

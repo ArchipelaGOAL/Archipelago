@@ -189,7 +189,7 @@ class Jak2ReplClient:
                 print("⏳ [REPL] Please wait while the mod is compiled and loaded into the game...")
                 self.log_info(logger, "[3/8] Compiling Jak 2 with ArchipelaGOAL mod (this may take 30-60 seconds)...")
                 success = await self.send_form("(mi)", print_ok=False, expect_response=False)
-                await asyncio.sleep(30)  # Give compilation time to complete
+                await asyncio.sleep(0.5)
                 if success:
                     print("✅ [REPL] [3/8] Compilation complete!")
                     self.log_success(logger, "[3/8] Compilation complete!")
