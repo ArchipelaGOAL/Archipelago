@@ -4,6 +4,7 @@ from worlds.AutoWorld import World, WebWorld
 from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 from BaseClasses import (Tutorial, ItemClassification as ItemClass)
 from typing import cast, ClassVar
+from .options import CompletionCondition
 import typing
 
 # Jak 2 imports
@@ -108,14 +109,20 @@ class JakIIWorld(World):
         return "Dark Eco Pill"
 
     def create_regions(self) -> None:
+        multiworld = self.multiworld
+        player = self.player
+
         mission_tree_region = JakIIRegion("Mission Tree", self.player, self.multiworld)
 
         for mission_id in all_locations_table:
             mission = all_locations_table[mission_id]
-            breakpoint()
+
             mission_tree_region.add_jak_mission(mission_id, mission.name, mission.rule)
 
         self.multiworld.regions.append(mission_tree_region)
+
+        multiworld.completion_condition[player] = lambda state: (
+            state.can_reach("Destroy Metal Kor at Nest", player=self.player))
 
 
 components.append(Component("Jak II Client",
