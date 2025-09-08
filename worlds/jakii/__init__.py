@@ -106,7 +106,9 @@ class JakIIWorld(World):
         return Jak2Item(name, classification, item_id, self.player)
 
     def get_filler_item_name(self) -> str:
-        return "Dark Eco Pill"
+        filler_item_name = ["Dark Eco Pill", "Health Pack", "Scatter Gun Ammo", "Blaster Ammo", "Vulcan Fury Ammo",
+                            "Peacemaker Ammo"]
+        return filler_item_name[self.player]
 
     def create_regions(self) -> None:
         multiworld = self.multiworld
@@ -122,7 +124,7 @@ class JakIIWorld(World):
         self.multiworld.regions.append(mission_tree_region)
 
         multiworld.completion_condition[player] = lambda state: (
-            state.can_reach("Destroy Metal Kor at Nest", player=self.player))
+            state.can_reach_location("Destroy Metal Kor at Nest", player=self.player))
 
 
 components.append(Component("Jak II Client",
