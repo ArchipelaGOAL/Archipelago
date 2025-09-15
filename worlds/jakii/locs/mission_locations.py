@@ -334,8 +334,7 @@ side_mission_table = {
                              slums_to_stadium(state, player)),
     112: Jak2SideMissionData(mission_id=112, task_id=95, name="Orb Search 12 (Computer #7)",
                              rule=lambda state, player:
-                             state.has_all(("Red Security Pass", "Yellow Security Pass"), player)
-                             or slums_to_market(state, player)),
+                             slums_to_market(state, player)),
     113: Jak2SideMissionData(mission_id=113, task_id=97, name="Orb Search 13 (Computer #16)",
                              rule=lambda state, player:
                              state.has("Green Security Pass", player)),
@@ -350,7 +349,7 @@ side_mission_table = {
     117: Jak2SideMissionData(mission_id=117, task_id=84, name="Ring Race 2 (Computer #8)",
                              rule=lambda state, player:
                              slums_to_port(state, player)
-                             or state.has("Yellow Security Pass", player)),
+                             and state.has("Yellow Security Pass", player)),
     118: Jak2SideMissionData(mission_id=118, task_id=94, name="Ring Race 3 (Computer #1)",
                              rule=lambda state, player:
                              state.has("Red Security Pass", player)),
@@ -365,26 +364,29 @@ side_mission_table = {
                              rule=lambda state, player:
                              slums_to_market(state, player)),
     # Missions Turned Side Missions
-    122: Jak2SideMissionData(mission_id=122, task_id=83, name="Deliver Package Side Mission (Computer #7)"),
+    122: Jak2SideMissionData(mission_id=122, task_id=83, name="Deliver Package Side Mission (Computer #7)",
+                             rule=lambda state, player:
+                             state.has_all(("Red Security Pass", "Yellow Security Pass"), player)),
     123: Jak2SideMissionData(mission_id=123, task_id=87, name="Shuttle Underground Fighters Side Mission (Computer #7)",
                              rule=lambda state, player:
                              state.has_all(("Red Security Pass", "Yellow Security Pass"), player)),
     124: Jak2SideMissionData(mission_id=124, task_id=96, name="Destroy Blast Bots Side Mission (Computer #7)",
                              rule=lambda state, player:
                              slums_to_market(state, player)
-                             or state.has("Yellow Security Pass", player)),
+                             and state.has("Yellow Security Pass", player)),
     # Extra Race Missions
     125: Jak2SideMissionData(mission_id=125, task_id=25, name="Erol Race Side Mission",
                              rule=lambda state, player:
                              slums_to_port(state, player)
-                             or state.has("Yellow Security Pass", player)),
+                             and state.has("Yellow Security Pass", player)),
     126: Jak2SideMissionData(mission_id=126, task_id=26, name="Port Race Side Mission",
                              rule=lambda state, player:
                              slums_to_port(state, player)),
     # Stadium Challenges
     127: Jak2SideMissionData(mission_id=127, task_id=103, name="JET-Board Stadium Challenge Side Mission",
                              rule=lambda state, player:
-                             state.has("JET-Board", player)),
+                             state.has("JET-Board", player)
+                             and slums_to_stadium(state, player)),
     128: Jak2SideMissionData(mission_id=128, task_id=104, name="Class 3 Race Side Mission (Computer by Stadium)",
                              rule=lambda state, player:
                              slums_to_stadium(state, player)),
