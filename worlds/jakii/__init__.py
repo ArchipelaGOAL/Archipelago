@@ -1,12 +1,13 @@
 # Archipelago Imports
 import settings
+from Options import OptionError
 from worlds.AutoWorld import World, WebWorld
 from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 from BaseClasses import (Tutorial, ItemClassification as ItemClass)
-from typing import cast, ClassVar
-from .options import CompletionCondition
+from typing import cast, ClassVar, Any
 
 # Jak 2 imports
+from . import options
 from .game_id import jak2_name, jak2_max
 from .items import (item_table, 
                     ITEM_ID_KEY_START, ITEM_ID_KEY_END, ITEM_ID_FILLER_START, ITEM_ID_FILLER_END,
@@ -38,6 +39,16 @@ def launch_client():
     launch_subprocess(client.launch, name="Jak2Client")
 
 
+components.append(Component("Jak II Client",
+                            func=launch_client,
+                            component_type=Type.CLIENT,
+                            icon="jak2_icon"))
+
+
+# TODO: Add proper icon for Jak 2
+icon_paths["jak2_icon"] = f"ap:{__name__}/icons/jak2_icon.png"
+
+
 class JakIIWebWorld(WebWorld):
     setup_en = Tutorial(
         "Multiworld Setup Guide",
@@ -65,17 +76,34 @@ class JakIIWorld(World):
     """
 
     game = jak2_name
+    web = JakIIWebWorld()
+
+    # Options
+    options_dataclass = options.JakIIOptions
+    options: options.JakIIOptions
 
     # Settings will be applied after class definition
     settings: ClassVar[Jak2Settings]
-
-    web = JakIIWebWorld()
 
     item_name_to_id = {item_data.name: k for k, item_data in item_table.items()}
     location_name_to_id = {data.name: k for k, data in all_locations_table.items()}
     item_name_groups = {}
     location_name_groups = {}
     origin_region_name = "Mission Tree"
+
+    # Cache option-related values.
+    completion_type: int
+    completion_value: int
+
+    def generate_early(self) -> None:
+        # Cache completion conditions and values.
+        self.completion_type = self.options.jak_2_completion_condition.value  # Sorry about the naming here.
+        if self.completion_type == options.CompletionCondition.option_complete_specific_mission:
+            self.completion_value = self.options.specific_mission_for_completion.value
+        elif self.completion_type == options.CompletionCondition.option_complete_number_of_missions:
+            self.completion_value = self.options.number_of_missions_for_completion.value
+        else:
+            raise OptionError(f"Unknown completion condition selected for Jak II: {self.completion_type}")
 
     @staticmethod
     def item_data_helper(item: int) -> list[tuple[int, ItemClass, int]]:
@@ -124,26 +152,36 @@ class JakIIWorld(World):
         return self.random.choice(filler_item_names)
 
     def create_regions(self) -> None:
-        multiworld = self.multiworld
-        player = self.player
 
+        # Add missions to the mission tree.
         mission_tree_region = JakIIRegion("Mission Tree", self.player, self.multiworld)
-
         for mission_id in all_locations_table:
             mission = all_locations_table[mission_id]
-
             mission_tree_region.add_jak_mission(mission_id, mission.name, mission.rule)
 
         self.multiworld.regions.append(mission_tree_region)
 
-        multiworld.completion_condition[player] = lambda state: (
-            state.can_reach_location("Destroy Metal Kor at Nest", player=self.player))
+        # Handle completion condition.
+        if self.completion_type == options.CompletionCondition.option_complete_specific_mission:
+            mission = all_locations_table[self.completion_value]
 
+            self.multiworld.completion_condition[self.player] = lambda state: (
+                state.can_reach_location(mission.name, player=self.player))
 
-components.append(Component("Jak II Client",
-                            func=launch_client,
-                            component_type=Type.CLIENT,
-                            icon="jak2_icon"))
+        elif self.completion_type == options.CompletionCondition.option_complete_number_of_missions:
+            def _completion_rule(state, player) -> bool:
+                completed_count = 0
+                for _, miss in all_locations_table.items():
+                    if miss.rule(state, player):
+                        completed_count += 1
+                return completed_count >= self.completion_value
 
-# TODO: Add proper icon for Jak 2
-icon_paths["jak2_icon"] = f"ap:{__name__}/icons/jak2_icon.png"
+            self.multiworld.completion_condition[self.player] = lambda state: (
+                _completion_rule(state=state, player=self.player))
+
+    def fill_slot_data(self) -> dict[str, Any]:
+        options_dict = self.options.as_dict("jak_2_completion_condition",
+                                            "specific_mission_for_completion",
+                                            "number_of_missions_for_completion",
+                                            )
+        return options_dict

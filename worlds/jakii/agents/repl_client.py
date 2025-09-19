@@ -296,16 +296,22 @@ class Jak2ReplClient:
     # that instance as input.
     async def setup_options(self,
                             slot_name: str,
-                            slot_seed: str) -> bool:
+                            slot_seed: str,
+                            completion_type: int,
+                            completion_value: int) -> bool:
         sanitized_name = self.sanitize_file_text(slot_name)
         sanitized_seed = self.sanitize_file_text(slot_seed)
 
         ok = await self.send_form(f"(ap-setup-options! (new 'static 'ap-seed-options "
                                   f":slot-name {sanitized_name} "
-                                  f":slot-seed {sanitized_seed} ))")
+                                  f":slot-seed {sanitized_seed} "
+                                  f":completion-type {completion_type} "
+                                  f":completion-value {completion_value} ))")
         message = (f"Setting options: \n"
                    f"   Slot Name {sanitized_name}, \n"
-                   f"   Slot Seed {sanitized_seed}... ")
+                   f"   Slot Seed {sanitized_seed}, \n"
+                   f"   Goal Type {completion_type}, \n"
+                   f"   Goal Value {completion_value}... ")
         if ok:
             logger.debug(message + "Success!")
         else:
@@ -313,7 +319,7 @@ class Jak2ReplClient:
         return ok
 
     async def send_connection_status(self, status: str) -> bool:
-        ok = await self.send_form(f"(ap-set-connection-status! (connection-status {status}))")
+        ok = await self.send_form(f"(ap-set-connection-status! (ap-connection-status {status}))")
         if ok:
             logger.debug(f"Connection Status {status} set!")
         else:

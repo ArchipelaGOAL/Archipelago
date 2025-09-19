@@ -29,7 +29,7 @@ from .game_id import jak2_name
 from .agents.memory_reader import Jak2MemoryReader
 from .agents.repl_client import Jak2ReplClient
 from . import JakIIWorld
-
+from .options import CompletionCondition
 
 ModuleUpdate.update()
 logger = logging.getLogger("Jak2Client")
@@ -138,15 +138,25 @@ class Jak2Context(CommonContext):
 
         if cmd == "Connected":
             slot_data = args["slot_data"]
+            completion_type = slot_data["jak_2_completion_condition"]
+            if completion_type == CompletionCondition.option_complete_specific_mission:
+                completion_value = slot_data["specific_mission_for_completion"]
+            elif completion_type == CompletionCondition.option_complete_number_of_missions:
+                completion_value = slot_data["number_of_missions_for_completion"]
+            else:
+                completion_value = 0
 
             # Connected packet is unaware of starting inventory or if player is returning to an existing game.
             # Set initial_item_count to 0, see below comments for more info.
             if not self.repl.received_initial_items and self.repl.initial_item_count < 0:
                 self.repl.initial_item_count = 0
 
-            create_task_log_exception(self.repl.setup_options(
-                self.auth[:16],
-                self.slot_seed[:8]))
+            create_task_log_exception(
+                self.repl.setup_options(
+                    self.auth[:16],
+                    self.slot_seed[:8],
+                    completion_type,
+                    completion_value))
 
         if cmd == "ReceivedItems":
 
