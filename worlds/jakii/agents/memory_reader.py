@@ -66,6 +66,11 @@ side_missions_checked_offset = offsets.define(sizeof_uint32, 35)
 # Connection status (added in version 2)
 connection_status_offset = offsets.define(sizeof_uint32)  # ap-connection-status enum
 
+# Completion Information
+completion_goal_type_offset = offsets.define(sizeof_uint32)
+completion_goal_value_offset = offsets.define(sizeof_uint32)
+completed_offset = offsets.define(sizeof_uint8)
+
 # End marker (uint8 array of 4 bytes - "end\0")
 end_marker_offset = offsets.define(sizeof_uint8, 4)
 
