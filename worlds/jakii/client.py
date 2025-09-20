@@ -355,7 +355,7 @@ def find_root_directory(ctx: Jak2Context):
         archipelagoal_source = None
         for src in mod_sources:
             for mod in mod_sources[src].keys():
-                if mod == "archipelagoal":
+                if mod == "archipelagoal-2":
                     archipelagoal_source = src
                     # Using this file, we could verify the right version is installed, but we don't need to.
         if archipelagoal_source is None:
@@ -366,7 +366,7 @@ def find_root_directory(ctx: Jak2Context):
 
         # This is just the base OpenGOAL directory, we need to go deeper.
         base_path = load["installationDir"]
-        mod_relative_path = f"features/jak2/mods/{archipelagoal_source}/archipelagoal"
+        mod_relative_path = f"features/jak2/mods/{archipelagoal_source}/archipelagoal-2"
         mod_path = os.path.normpath(
             os.path.join(
                 os.path.normpath(base_path),
@@ -440,7 +440,7 @@ async def run_game(ctx: Jak2Context):
             # Per-mod saves and settings are stored outside the ArchipelaGOAL root folder, so we have to traverse
             # a relative path, normalize it, and pass it in as an argument to gk. This folder will be created if
             # it does not exist.
-            config_relative_path = "../_settings/archipelagoal"
+            config_relative_path = "../_settings/archipelagoal-2"
             config_path = os.path.normpath(
                 os.path.join(
                     root_path,
