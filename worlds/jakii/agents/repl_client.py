@@ -200,7 +200,7 @@ class Jak2ReplClient:
                 ("Listen on the game's port", "(lt)"),
                 ("Set debug flag to on", "(set! *debug-segment* #t)"),
                 ("Compile the game", "(mi)"),
-                ("Set debug flag to off", "(set! *debug-segment* #f)"),
+                # ("Set debug flag to off", "(set! *debug-segment* #f)"),
                 ("Set cheat mode to off", "(set! *cheat-mode* #f)"),
                 ("Run the title screen", "(start \'play (get-continue-by-name *game-info* \"title-start\"))"),
             ]

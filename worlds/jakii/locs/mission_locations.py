@@ -395,16 +395,16 @@ side_mission_table = {
                              slums_to_stadium(state, player)),
     130: Jak2SideMissionData(mission_id=130, task_id=106, name="Class 1 Race Side Mission (Computer by Stadium)",
                              rule=lambda state, player:
-                             slums_to_stadium(state, player)),
-    131: Jak2SideMissionData(mission_id=131, task_id=107, name="Class 3R Race Side Mission (Computer by Stadium)",
-                             rule=lambda state, player:
-                             slums_to_stadium(state, player)),
-    132: Jak2SideMissionData(mission_id=132, task_id=108, name="Class 2R Race Side Mission (Computer by Stadium)",
-                             rule=lambda state, player:
-                             slums_to_stadium(state, player)),
-    133: Jak2SideMissionData(mission_id=133, task_id=109, name="Class 1R Race Side Mission (Computer by Stadium)",
-                             rule=lambda state, player:
                              slums_to_stadium(state, player))
+#    131: Jak2SideMissionData(mission_id=131, task_id=107, name="Class 3R Race Side Mission (Computer by Stadium)",
+#                             rule=lambda state, player:
+#                             slums_to_stadium(state, player)),
+#    132: Jak2SideMissionData(mission_id=132, task_id=108, name="Class 2R Race Side Mission (Computer by Stadium)",
+#                             rule=lambda state, player:
+#                             slums_to_stadium(state, player)),
+#    133: Jak2SideMissionData(mission_id=133, task_id=109, name="Class 1R Race Side Mission (Computer by Stadium)",
+#                             rule=lambda state, player:
+#                             slums_to_stadium(state, player))
 }
 
 
