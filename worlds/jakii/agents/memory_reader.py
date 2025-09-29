@@ -1,5 +1,4 @@
 import logging
-import random
 import struct
 from typing import ByteString, Callable
 import json
@@ -257,8 +256,8 @@ class Jak2MemoryReader:
 
                         mission_name = main_tasks_to_missions[raw_main_task_id].name
                         logger.debug(f"Mission completed! Raw game-task: {raw_main_task_id}"
-                                    f" -> Mission ID: {main_mission_id}"
-                                    f" -> '{mission_name}'")
+                                     f" -> Mission ID: {main_mission_id}"
+                                     f" -> '{mission_name}'")
 
             # Read completed side missions
             next_side_mission_idx = self.read_goal_address(next_side_mission_index_offset, sizeof_uint64)
@@ -277,23 +276,12 @@ class Jak2MemoryReader:
 
                         side_mission_name = side_tasks_to_missions[raw_side_task_id].name
                         logger.debug(f"Side mission completed! ID: {raw_side_task_id} -> '{side_mission_name}' "
-                                    f"(location: {side_mission_id})")
+                                     f"(location: {side_mission_id})")
 
-            # Check if final boss is defeated (mission 65 - "Destroy Metal Kor at Nest")
-            # Look for the raw game-task enum 70 which maps to mission 65
-            completed_raw_missions = [self.read_goal_address(missions_checked_offset + (i * sizeof_uint32),
-                                                             sizeof_uint32)
-                                      for i in range(int(next_mission_idx))]
-
-            if 70 in completed_raw_missions:  # game-task enum 70 = mission 65 "Destroy Metal Kor at Nest"
-                if not self.finished_game:  # Only print once
-                    self.finished_game = True
-                    self.log_success(logger, "Game completed! Final boss defeated!")
-
-            # completed = self.read_goal_address(completed_offset, sizeof_uint8)
-            # if completed > 0 and not self.finished_game:
-            #     self.finished_game = True
-            #     self.log_success(logger, "Congratulations! You finished the game!")
+            completed = self.read_goal_address(completed_offset, sizeof_uint8)
+            if completed > 0 and not self.finished_game:
+                self.finished_game = True
+                self.log_success(logger, "Congratulations! You finished the game!")
 
         except (ProcessError, MemoryReadError, WinAPIError):
             msg = (f"Error reading game memory! (Did the game crash?)\n"
