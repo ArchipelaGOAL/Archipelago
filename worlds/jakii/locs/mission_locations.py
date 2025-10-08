@@ -291,7 +291,8 @@ main_mission_table = {
     65: Jak2MissionData(mission_id=65, task_id=74, name="Destroy Metal Kor at Nest",
                         rule=lambda state, player:
                         slums_to_nest(state, player)
-                        and state.has("Precursor Stone", player)
+                        and state.has_all(("Heart of Mar", "Time Map", "Rift Rider", "Precursor Stone", "Dark Jak"),
+                                          player)
                         and any_gun(state, player))
 }
 
