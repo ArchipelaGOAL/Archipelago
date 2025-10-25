@@ -29,6 +29,7 @@ from .game_id import jak2_name
 from .agents.memory_reader import Jak2MemoryReader
 from .agents.repl_client import Jak2ReplClient
 from . import JakIIWorld
+from .locs.mission_locations import main_mission_table
 from .options import CompletionCondition
 
 ModuleUpdate.update()
@@ -140,7 +141,8 @@ class Jak2Context(CommonContext):
             slot_data = args["slot_data"]
             completion_type = slot_data["jak_2_completion_condition"]
             if completion_type == CompletionCondition.option_complete_specific_mission:
-                completion_value = slot_data["specific_mission_for_completion"]
+                specific_mission = slot_data["specific_mission_for_completion"]
+                completion_value = main_mission_table[specific_mission].task_id
             elif completion_type == CompletionCondition.option_complete_number_of_missions:
                 completion_value = slot_data["number_of_missions_for_completion"]
             else:
