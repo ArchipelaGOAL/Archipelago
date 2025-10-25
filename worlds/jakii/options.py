@@ -12,6 +12,7 @@ class CompletionCondition(Choice):
 
 class SpecificMissionForCompletion(Choice):
     """Set the specific mission to complete for the "Complete Specific Mission" completion condition."""
+    display_name = "Specific Mission for Completion"
     option_unlock_mar_tomb = 40
     option_defeat_baron_at_palace = 22
     option_defeat_baron_in_tomb = 43
@@ -21,6 +22,7 @@ class SpecificMissionForCompletion(Choice):
 
 class NumberOfMissionsForCompletion(Range):
     """Set the number of missions to complete for the "Complete Number of Missions" completion condition."""
+    display_name = "Number of Missions for Completion"
     range_start = 5
     range_end = 98
     default = 65
