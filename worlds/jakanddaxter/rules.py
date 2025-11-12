@@ -133,37 +133,6 @@ def can_fight(state: CollectionState, player: int) -> bool:
     return state.has_any(("Jump Dive", "Jump Kick", "Punch", "Kick"), player)
 
 
-def clamp_cell_limits(world: "JakAndDaxterWorld") -> str:
-    options = world.options
-    friendly_message = ""
-
-    if options.fire_canyon_cell_count.value > FireCanyonCellCount.friendly_maximum:
-        old_value = options.fire_canyon_cell_count.value
-        options.fire_canyon_cell_count.value = FireCanyonCellCount.friendly_maximum
-        friendly_message += (f"  "
-                             f"{options.fire_canyon_cell_count.display_name} must be no greater than "
-                             f"{FireCanyonCellCount.friendly_maximum} (was {old_value}), "
-                             f"changed option to appropriate value.\n")
-
-    if options.mountain_pass_cell_count.value > MountainPassCellCount.friendly_maximum:
-        old_value = options.mountain_pass_cell_count.value
-        options.mountain_pass_cell_count.value = MountainPassCellCount.friendly_maximum
-        friendly_message += (f"  "
-                             f"{options.mountain_pass_cell_count.display_name} must be no greater than "
-                             f"{MountainPassCellCount.friendly_maximum} (was {old_value}), "
-                             f"changed option to appropriate value.\n")
-
-    if options.lava_tube_cell_count.value > LavaTubeCellCount.friendly_maximum:
-        old_value = options.lava_tube_cell_count.value
-        options.lava_tube_cell_count.value = LavaTubeCellCount.friendly_maximum
-        friendly_message += (f"  "
-                             f"{options.lava_tube_cell_count.display_name} must be no greater than "
-                             f"{LavaTubeCellCount.friendly_maximum} (was {old_value}), "
-                             f"changed option to appropriate value.\n")
-
-    return friendly_message
-
-
 def clamp_trade_total_limits(world: "JakAndDaxterWorld"):
     """Check if we need to recalculate the 2 trade orb options so the total fits under 2000. If so let's keep them
     proportional relative to each other. Then we'll recalculate total_trade_orbs. Remember this situation is
@@ -193,7 +162,7 @@ def clamp_trade_total_limits(world: "JakAndDaxterWorld"):
     return friendly_message
 
 
-def enforce_mp_friendly_limits(world: "JakAndDaxterWorld"):
+def enforce_friendly_limits(world: "JakAndDaxterWorld"):
     options = world.options
     friendly_message = ""
 
@@ -239,7 +208,6 @@ def enforce_mp_friendly_limits(world: "JakAndDaxterWorld"):
                              f"{OracleOrbTradeAmount.friendly_maximum} (was {old_value}), "
                              f"changed option to appropriate value.\n")
 
-    friendly_message += clamp_cell_limits(world)
     friendly_message += clamp_trade_total_limits(world)
 
     if friendly_message != "":
@@ -249,22 +217,9 @@ def enforce_mp_friendly_limits(world: "JakAndDaxterWorld"):
                         f"generator's host.yaml to false and generating locally. (Use at your own risk!)")
 
 
-def enforce_mp_absolute_limits(world: "JakAndDaxterWorld"):
-    friendly_message = ""
+def enforce_absolute_limits(world: "JakAndDaxterWorld"):
 
-    friendly_message += clamp_trade_total_limits(world)
-
-    if friendly_message != "":
-        logging.warning(f"{world.player_name}: Your options have been modified to avoid seed generation failures.\n"
-                        f"{friendly_message}")
-
-
-def enforce_sp_limits(world: "JakAndDaxterWorld"):
-    friendly_message = ""
-
-    friendly_message += clamp_cell_limits(world)
-    friendly_message += clamp_trade_total_limits(world)
-
+    friendly_message = clamp_trade_total_limits(world)
     if friendly_message != "":
         logging.warning(f"{world.player_name}: Your options have been modified to avoid seed generation failures.\n"
                         f"{friendly_message}")
