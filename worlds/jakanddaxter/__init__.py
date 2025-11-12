@@ -34,9 +34,8 @@ from .locations import (JakAndDaxterLocation,
                         cache_location_table,
                         orb_location_table)
 from .regions import create_regions
-from .rules import (enforce_mp_absolute_limits,
-                    enforce_mp_friendly_limits,
-                    enforce_sp_limits,
+from .rules import (enforce_absolute_limits,
+                    enforce_friendly_limits,
                     set_orb_trade_rule)
 from .locs import (cell_locations as cells,
                    scout_locations as scouts,
@@ -243,6 +242,15 @@ class JakAndDaxterWorld(World):
         self.level_to_regions = defaultdict(list)
         self.level_to_orb_regions = defaultdict(list)
 
+        # Handle friendly limits.
+        if self.multiworld.players == 1 or not self.settings.enforce_friendly_options:
+            # For singleplayer games or for those who opted out, only enforce the bare necessities to valid values.
+            enforce_absolute_limits(self)
+        else:
+            # For multiplayer games, we have a host setting to make options fair/sane for other players.
+            # If this setting is enabled, enforce/clamp some friendly limitations on our options.
+            enforce_friendly_limits(self)
+
         # Cache the power cell threshold values for quicker reference.
         self.power_cell_thresholds = [
             self.options.fire_canyon_cell_count.value,
@@ -258,34 +266,11 @@ class JakAndDaxterWorld(World):
             self.options.mountain_pass_cell_count.value = self.power_cell_thresholds[1]
             self.options.lava_tube_cell_count.value = self.power_cell_thresholds[2]
 
-        # We would have done this earlier, but we needed to sort the power cell thresholds first. Don't worry, we'll
-        # come back to them.
-        enforce_friendly_options = self.settings.enforce_friendly_options
-        if self.multiworld.players == 1:
-            # For singleplayer games, always enforce/clamp the cell counts to valid values.
-            enforce_sp_limits(self)
-        else:
-            if enforce_friendly_options:
-                # For multiplayer games, we have a host setting to make options fair/sane for other players.
-                # If this setting is enabled, enforce/clamp some friendly limitations on our options.
-                enforce_mp_friendly_limits(self)
-            else:
-                # Even if the setting is disabled, some values must be clamped to avoid generation errors.
-                enforce_mp_absolute_limits(self)
-
-        # That's right, set the collection of thresholds again. Don't just clamp the values without updating this list!
-        self.power_cell_thresholds = [
-            self.options.fire_canyon_cell_count.value,
-            self.options.mountain_pass_cell_count.value,
-            self.options.lava_tube_cell_count.value,
-            100,  # The 100 Power Cell Door.
-        ]
-
-        # Now that the threshold list is finalized, store this for the remove function.
+        # Now store the thresholds minus one for the remove function.
         self.power_cell_thresholds_minus_one = [x - 1 for x in self.power_cell_thresholds]
 
-        # Calculate the number of power cells needed for full region access, the number being replaced by traps,
-        # and the number of remaining filler.
+        # Calculate the number of power cells needed for full region access,
+        # the number being replaced by traps,  and the number of remaining filler.
         if self.options.jak_completion_condition == options.CompletionCondition.option_open_100_cell_door:
             self.total_prog_cells = 100
         else:

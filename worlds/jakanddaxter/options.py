@@ -187,10 +187,8 @@ class FireCanyonCellCount(Range):
     ensure valid singleplayer games and non-disruptive multiplayer games, but the host can remove this restriction by
     turning off enforce_friendly_options in host.yaml."""
     display_name = "Fire Canyon Cell Count"
-    friendly_maximum = 30
-    absolute_maximum = 100
     range_start = 0
-    range_end = determine_range_end
+    range_end = 30
     default = 20
 
 
@@ -199,10 +197,8 @@ class MountainPassCellCount(Range):
     maximum value to ensure valid singleplayer games and non-disruptive multiplayer games, but the host can
     remove this restriction by turning off enforce_friendly_options in host.yaml."""
     display_name = "Mountain Pass Cell Count"
-    friendly_maximum = 60
-    absolute_maximum = 100
     range_start = 0
-    range_end = determine_range_end
+    range_end = 60
     default = 45
 
 
@@ -211,10 +207,8 @@ class LavaTubeCellCount(Range):
     ensure valid singleplayer games and non-disruptive multiplayer games, but the host can remove this restriction by
     turning off enforce_friendly_options in host.yaml."""
     display_name = "Lava Tube Cell Count"
-    friendly_maximum = 90
-    absolute_maximum = 100
     range_start = 0
-    range_end = determine_range_end
+    range_end = 90
     default = 72
 
 
