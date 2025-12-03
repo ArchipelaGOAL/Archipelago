@@ -386,16 +386,7 @@ side_mission_table = {
     127: Jak2SideMissionData(mission_id=127, task_id=103, name="JET-Board Stadium Challenge Side Mission",
                              rule=lambda state, player:
                              state.has("JET-Board", player)
-                             and slums_to_stadium(state, player)),
-    128: Jak2SideMissionData(mission_id=128, task_id=104, name="Class 3 Race Side Mission (Computer by Stadium)",
-                             rule=lambda state, player:
-                             slums_to_stadium(state, player)),
-    129: Jak2SideMissionData(mission_id=129, task_id=105, name="Class 2 Race Side Mission (Computer by Stadium)",
-                             rule=lambda state, player:
-                             slums_to_stadium(state, player)),
-    130: Jak2SideMissionData(mission_id=130, task_id=106, name="Class 1 Race Side Mission (Computer by Stadium)",
-                             rule=lambda state, player:
-                             slums_to_stadium(state, player))
+                             and slums_to_stadium(state, player))
 }
 
 
