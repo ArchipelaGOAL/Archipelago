@@ -22,7 +22,7 @@ sizeof_float = 4
 # *****************************************************************************
 # **** This number must match (-> *ap-info-jak2* version) in ap-struct.gc! ****
 # *****************************************************************************
-expected_memory_version = 3
+expected_memory_version = 4
 
 
 # IMPORTANT: OpenGOAL memory structures are particular about the alignment, in memory, of member elements according to
@@ -69,6 +69,11 @@ connection_status_offset = offsets.define(sizeof_uint32)  # ap-connection-status
 completion_goal_type_offset = offsets.define(sizeof_uint32)
 completion_goal_value_offset = offsets.define(sizeof_uint32)
 completed_offset = offsets.define(sizeof_uint8)
+
+# Deathlink Information
+death_count_offset = offsets.define(sizeof_uint32)
+cause_of_death_offset = offsets.define(sizeof_uint8)
+deathlink_enabled_offset = offsets.define(sizeof_uint8)
 
 # End marker (uint8 array of 4 bytes - "end\0")
 end_marker_offset = offsets.define(sizeof_uint8, 4)
