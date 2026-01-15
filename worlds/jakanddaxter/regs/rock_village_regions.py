@@ -45,7 +45,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     klaww_cliff = JakAndDaxterRegion("Klaww's Cliff", player, multiworld, level_name, 0)
 
-    main_area.connect(orb_cache, rule=lambda state: state.has_all(("Roll", "Roll Jump"), player))
+    if options.rock_village_early_orb_cache:
+        # It is possible to just reach the orb cache with blue eco without roll jump.
+        main_area.connect(orb_cache)
+    else:
+        main_area.connect(orb_cache, rule=lambda state: state.has_all(("Roll", "Roll Jump"), player))
 
     if options.rock_village_pontoon_skip:
         # Reachable with Jump/Swim

@@ -379,8 +379,8 @@ class SandoverVillageCliffOrbCacheClimb(Toggle):
 
 class AttacklessLurkerCannons(Toggle):
     """
-    Create alternative paths to the lurker cannon power cells in Sentinel Beach and Misty Island. Enabling this setting
-    may require Jak to defeat the lurkers next to the cannon without any attacking moves.
+    Remove the attack requirement for lurker cannon power cells in Sentinel Beach and Misty Island. Enabling this
+    setting may require Jak to defeat the lurkers next to the cannon without any attacking moves.
     This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Attackless Lurker Cannons"
@@ -389,7 +389,7 @@ class AttacklessLurkerCannons(Toggle):
 class SentinelBeachAttacklessPelican(Toggle):
     """
     Create an alternative path to the Pelican power cell in Sentinel Beach. Enabling this setting may require Jak to
-    use obscure game mechanics to acquire the power cell without any attacking moves.
+    use other unlocks to acquire the power cell without any attacking moves.
     This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Sentinel Beach Attackless Pelican"
@@ -397,24 +397,15 @@ class SentinelBeachAttacklessPelican(Toggle):
 
 class AttackWithRollJump(Toggle):
     """
-    Create alternative paths to some power cells which normally require attacking moves. Enabling this setting may
-    require Jak to use Roll Jump to acquire these power cells. This only applies if "Enable Move Randomizer" is ON.
+    Treat Roll Jump as a valid attack move for some power cells. Enabling this setting may require Jak to use Roll Jump
+    to destroy objects to acquire these power cells. This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Attack with Roll Jump"
 
 
-class SentinelBeachGreenRidgeSkip(Toggle):
-    """
-    Create an alternative path to the ridge near the green vents in Sentinel Beach. Enabling this setting may require
-    Jak to collect the scout fly and orbs on the ridge without having moves unlocked to get up the ridge.
-    This only applies if "Enable Move Randomizer" is ON.
-    """
-    display_name = "Sentinel Beach Green Ridge Skip"
-
-
 class ForbiddenJungleAttacklessSpiralStumpsScoutFly(Toggle):
     """
-    Create an alternative path to the Scout Fly On Spiral Of Stumps in Forbidden Jungle. Enabling this setting may
+    Create an alternative path to the Scout Fly "On Spiral Of Stumps" in Forbidden Jungle. Enabling this setting may
     require Jak to collect this scout fly without attack moves. This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Forbidden Jungle Attackless Spiral Stumps Scout Fly"
@@ -438,7 +429,7 @@ class MistyIslandEarlyFarSideOrbCache(Toggle):
 
 class MistyIslandAttacklessScoutFlies(Toggle):
     """
-    Create alternative paths to the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
+    Remove attack requirements to the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
     "Overlooking Entrance" in Misty Island. Enabling this setting may require Jak to break these scout fly boxes with
     precise blue eco movement or clever use of game mechanics.
     This only applies if "Enable Move Randomizer" is ON.
@@ -457,15 +448,15 @@ class MistyIslandArenaFightSkip(Toggle):
 class MistyIslandFarSideCliffSeesawSkip(Toggle):
     """
     Create an alternative path to the far side cliff (with scout fly "Scout Fly On Ledge Near Arena Exit") in Misty
-    Island. Enabling this setting may require Jak to use uneven terrain to reach the cliff with only Single Jump,
-    without using the seesaw. This only applies if "Enable Move Randomizer" is ON.
+    Island. Enabling this setting may require Jak to use uneven terrain to find an alternative way to the cliff, using
+    only Single Jump. This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Misty Island Far Side Cliff Seesaw Skip"
 
 
 class RockVillageEarlyOrbCache(Toggle):
     """
-    Create an alternative path to the orb cache in Rock Village. Enabling this setting may require Jak to use precise
+    Remove requirements from the orb cache in Rock Village. Enabling this setting may require Jak to use precise
     movement to reach the orb cache with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Rock Village Early Orb Cache"
@@ -491,8 +482,8 @@ class KlawwCliffClimb(Toggle):
 
 class KlawwBoulderSkip(Toggle):
     """
-    Create an alternative path to Klaww without meeting the power cell requirement. Enabling this setting may require
-    Jak to use glitches to each Klaww even if the boulder is not lifted. This may drastically increase the amount of
+    Create an alternative path to Klaww without having enough power cells. Enabling this setting may require
+    Jak to use glitches to reach Klaww even if the boulder is not lifted. This may drastically increase the amount of
     reachable locations when Rock Village is reachable. This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Klaww Boulder Skip"
@@ -509,17 +500,16 @@ class BoggySwampPreciseMovement(Toggle):
 
 class BoggySwampAttacklessAmbush(Toggle):
     """
-    Create an alternative path through the boggy swamp ambush without attack moves. Enabling this setting may require
-    Jak to shoot yellow Eco through his goggles to defeat the ambush.
-    This only applies if "Enable Move Randomizer" is ON.
+    Remove the attack requirement from the Boggy Swamp ambush. Enabling this setting may require Jak to shoot yellow Eco
+    through his goggles to defeat the lurkers. This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Boggy Swamp Attackless Ambush"
 
 
 class BoggySwampFlutFlutSkip(Toggle):
     """
-    Create an alternative path to the Flut Flut course. Enabling this setting may require Jak to complete the whole
-    Flut Flut course without Flut Flut, and only Roll and Roll Jump unlocked.
+    Create an alternative path to the Flut Flut course without having Flut Flut unlocked. Enabling this setting may
+    require Jak to complete the whole course with only Roll and Roll Jump.
     """
     display_name = "Boggy Swamp Flut Flut Skip"
 
@@ -573,7 +563,6 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     attackless_lurker_cannons: AttacklessLurkerCannons
     sentinel_beach_attackless_pelican: SentinelBeachAttacklessPelican
     attack_with_roll_jump: AttackWithRollJump
-    sentinel_beach_green_ridge_skip: SentinelBeachGreenRidgeSkip
     forbidden_jungle_attackless_spiral_stumps_scout_fly: ForbiddenJungleAttacklessSpiralStumpsScoutFly
     forbidden_jungle_elevator_skip: ForbiddenJungleElevatorSkip
     misty_island_early_far_side_orb_cache: MistyIslandEarlyFarSideOrbCache

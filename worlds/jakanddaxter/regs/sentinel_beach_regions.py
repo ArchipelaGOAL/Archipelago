@@ -62,12 +62,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     eco_harvesters.add_cell_locations([15], access_rule=lambda state: can_fight_or_roll_jump(state, player))
 
     green_ridge = JakAndDaxterRegion("Ridge Near Green Vents", player, multiworld, level_name, 5)
-    if options.sentinel_beach_green_ridge_skip:
-        # You can bring the blue eco from the switch all the way over here
-        green_ridge.add_fly_locations([131092], access_rule=lambda state:
-                                      state.has("Blue Eco Switch", player) or can_free_scout_flies(state, player))
-    else:
-        green_ridge.add_fly_locations([131092], access_rule=lambda state: can_free_scout_flies(state, player))
+    green_ridge.add_fly_locations([131092], access_rule=lambda state: can_free_scout_flies(state, player))
 
     blue_ridge = JakAndDaxterRegion("Ridge Near Blue Vent", player, multiworld, level_name, 5)
     blue_ridge.add_fly_locations([196628], access_rule=lambda state:
@@ -93,19 +88,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                 and (state.has_all(("Crouch", "Crouch Uppercut"), p)
                      or state.has_all(("Punch", "Punch Uppercut"), p)))
 
-    if options.sentinel_beach_green_ridge_skip:
-        # You can collect everything on the green ridge with blue eco, even if you cannot get up
-        main_area.connect(green_ridge, rule=lambda state:
-                          state.has("Double Jump", player)
-                          or state.has_all(("Crouch", "Crouch Jump"), player)
-                          or can_uppercut_and_jump_logs(state, player)
-                          or state.has("Blue Eco Switch", player))
-    else:
-        # If you have double jump or crouch jump, you don't need the logs to reach this place.
-        main_area.connect(green_ridge, rule=lambda state:
-                          state.has("Double Jump", player)
-                          or state.has_all(("Crouch", "Crouch Jump"), player)
-                          or can_uppercut_and_jump_logs(state, player))
+    # If you have double jump or crouch jump, you don't need the logs to reach this place.
+    main_area.connect(green_ridge, rule=lambda state:
+                      state.has("Double Jump", player)
+                      or state.has_all(("Crouch", "Crouch Jump"), player)
+                      or can_uppercut_and_jump_logs(state, player))
 
     # If you have the blue eco jump pad, you don't need the logs to reach this place.
     main_area.connect(blue_ridge, rule=lambda state:
