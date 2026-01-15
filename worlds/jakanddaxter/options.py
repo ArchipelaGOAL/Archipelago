@@ -368,6 +368,98 @@ class SnowyMountainFlutFlutEscape(Toggle):
     display_name = "Snowy Mountain Flut Flut Escape"
 
 
+class SandoverVillageCliffOrbCacheClimb(Toggle):
+    """
+    Create an alternative path to the Sandover Village orb cache on the cliff. Enabling this setting may require Jak to
+    use precise jumps to reach the orb cache (and the blue eco next to it) with only Single Jump.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Sandover Village Orb Cache Climb"
+
+
+class AttacklessLurkerCannons(Toggle):
+    """
+    Create alternative paths to the lurker cannon power cells in Sentinel Beach and Misty Island. Enabling this setting
+    may require Jak to defeat the lurkers next to the cannon without any attacking moves.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Attackless Lurker Cannons"
+
+
+class SentinelBeachAttacklessPelican(Toggle):
+    """
+    Create an alternative path to the Pelican power cell in Sentinel Beach. Enabling this setting may require Jak to
+    use obscure game mechanics to acquire the power cell without any attacking moves.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Sentinel Beach Attackless Pelican"
+
+
+class AttackWithRollJump(Toggle):
+    """
+    Create alternative paths to some power cells which normally require attacking moves. Enabling this setting may
+    require Jak to use Roll Jump to acquire these power cells. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Attack with Roll Jump"
+
+
+class SentinelBeachGreenRidgeSkip(Toggle):
+    """
+    Create an alternative path to the ridge near the green vents in Sentinel Beach. Enabling this setting may require
+    Jak to collect the scout fly and orbs on the ridge without having moves unlocked to get up the ridge.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Sentinel Beach Green Ridge Skip"
+
+
+class ForbiddenJungleAttacklessSpiralStumpsScoutFly(Toggle):
+    """
+    Create an alternative path to the Scout Fly On Spiral Of Stumps in Forbidden Jungle. Enabling this setting may
+    require Jak to collect this scout fly without attack moves. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Forbidden Jungle Attackless Spiral Stumps Scout Fly"
+
+
+class ForbiddenJungleElevatorSkip(Toggle):
+    """
+    Create an alternative path to the temple interior in Forbidden Jungle. Enabling this setting may require Jak to
+    get inside the temple without having the Jungle Elevator unlocked.
+    """
+    display_name = "Forbidden Jungle Elevator Skip"
+
+
+class MistyIslandEarlyFarSideOrbCache(Toggle):
+    """
+    Create an alternative path to the Far Side Orb Cache in Misty Island. Enabling this setting may require Jak to
+    reach the orb cache with blue eco with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Early Far Side Orb Cache"
+
+
+class MistyIslandAttacklessScoutFlies(Toggle):
+    """
+    Create alternative paths to the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
+    "Overlooking Entrance" in Misty Island. Enabling this setting may require Jak to break these scout fly boxes with
+    precise blue eco movement or clever use of game mechanics.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Attackless Barrel Course Scout Fly"
+
+
+class MistyIslandArenaFightSkip(Toggle):
+    """
+    Create an alternative path to the power cell "Return To The Dark Eco Pool" in Misty Island. Enabling this setting
+    may require Jak to reach this power cell with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Arena Fight Skip"
+
+
+class MistyIslandFarSideCliffSeesawSkip(Toggle):
+    """Create an alternative path to the far side cliff (with scout fly "Scout Fly On Ledge Near Arena Exit") in Misty
+    Island. Enabling this setting may require Jak to use uneven terrain to reach the cliff with only Single Jump,
+    without using the seesaw. This only applies if "Enable Move Randomizer" is ON."""
+
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -404,5 +496,16 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     snowy_mountain_entrance_climb: SnowyMountainEntranceClimb
     boggy_swamp_flut_flut_escape: BoggySwampFlutFlutEscape
     snowy_mountain_flut_flut_escape: SnowyMountainFlutFlutEscape
+    sandover_village_cliff_orb_cache_climb: SandoverVillageCliffOrbCacheClimb
+    attackless_lurker_cannons: AttacklessLurkerCannons
+    sentinel_beach_attackless_pelican: SentinelBeachAttacklessPelican
+    attack_with_roll_jump: AttackWithRollJump
+    sentinel_beach_green_ridge_skip: SentinelBeachGreenRidgeSkip
+    forbidden_jungle_attackless_spiral_stumps_scout_fly: ForbiddenJungleAttacklessSpiralStumpsScoutFly
+    forbidden_jungle_elevator_skip: ForbiddenJungleElevatorSkip
+    misty_island_early_far_side_orb_cache: MistyIslandEarlyFarSideOrbCache
+    misty_island_attackless_scout_flies: MistyIslandAttacklessScoutFlies
+    misty_island_arena_fight_skip: MistyIslandArenaFightSkip
+    misty_island_far_side_cliff_seesaw_skip: MistyIslandFarSideCliffSeesawSkip
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool

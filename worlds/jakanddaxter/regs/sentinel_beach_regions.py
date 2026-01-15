@@ -12,6 +12,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     options = world.options
     player = world.player
 
+    # Define a helper function for all locations that can be acquired by regular fight moves or roll jump
+    # We do not want to check the options each time we call those functions for performance reasons
+    if options.attack_with_roll_jump:
+        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
+            return can_fight(state, p) or state.has_all(("Roll", "Roll Jump"), p)
+    else:
+        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
+            return can_fight(state, p)
+
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 128)
     main_area.add_cell_locations([18, 21, 22])
 
@@ -28,7 +37,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.add_cache_locations([12634, 12635])
 
     pelican = JakAndDaxterRegion("Pelican", player, multiworld, level_name, 0)
-    pelican.add_cell_locations([16], access_rule=lambda state: can_fight(state, player))
+    if options.sentinel_beach_attackless_pelican:
+        # Pelican power cell can be acquired by shooting the Pelican if the tower is accessible (no fight abilities needed)
+        if options.sentinel_beach_cannon_tower_climb:
+            # Tower can be reached with a double jump as well if the option is enabled
+            pelican.add_cell_locations([16], access_rule=lambda state:
+                                       can_fight_or_roll_jump(state, player) or state.has("Blue Eco Switch", player)
+                                       or state.has("Double Jump", player))
+        else:
+            # Otherwise, tower can only be reached by using the blue eco
+            pelican.add_cell_locations([16], access_rule=lambda state:
+                                       can_fight_or_roll_jump(state, player) or state.has("Blue Eco Switch", player))
+    else:
+        pelican.add_cell_locations([16], access_rule=lambda state: can_fight_or_roll_jump(state, player))
 
     # Only these specific attacks can push the flut flut egg off the cliff.
     flut_flut_egg = JakAndDaxterRegion("Flut Flut Egg", player, multiworld, level_name, 0)
@@ -38,10 +59,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                         state.has_any(("Punch", "Kick", "Jump Kick"), player))
 
     eco_harvesters = JakAndDaxterRegion("Eco Harvesters", player, multiworld, level_name, 0)
-    eco_harvesters.add_cell_locations([15], access_rule=lambda state: can_fight(state, player))
+    eco_harvesters.add_cell_locations([15], access_rule=lambda state: can_fight_or_roll_jump(state, player))
 
     green_ridge = JakAndDaxterRegion("Ridge Near Green Vents", player, multiworld, level_name, 5)
-    green_ridge.add_fly_locations([131092], access_rule=lambda state: can_free_scout_flies(state, player))
+    if options.sentinel_beach_green_ridge_skip:
+        # You can bring the blue eco from the switch all the way over here
+        green_ridge.add_fly_locations([131092], access_rule=lambda state:
+                                      state.has("Blue Eco Switch", player) or can_free_scout_flies(state, player))
+    else:
+        green_ridge.add_fly_locations([131092], access_rule=lambda state: can_free_scout_flies(state, player))
 
     blue_ridge = JakAndDaxterRegion("Ridge Near Blue Vent", player, multiworld, level_name, 5)
     blue_ridge.add_fly_locations([196628], access_rule=lambda state:
@@ -51,7 +77,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     rock_spires = JakAndDaxterRegion("Rock Spires", player, multiworld, level_name, 12)
 
     cannon_tower = JakAndDaxterRegion("Cannon Tower", player, multiworld, level_name, 0)
-    cannon_tower.add_cell_locations([19], access_rule=lambda state: can_fight(state, player))
+    if options.attackless_lurker_cannons:
+        # It's possible to shoot the lurkers with their own cannon (or jump on them with the blue eco launcher)
+        cannon_tower.add_cell_locations([19])
+    else:
+        cannon_tower.add_cell_locations([19], access_rule=lambda state: can_fight_or_roll_jump(state, player))
 
     main_area.connect(pelican)           # Swim and jump.
     main_area.connect(flut_flut_egg)     # Run and jump.
@@ -63,11 +93,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                 and (state.has_all(("Crouch", "Crouch Uppercut"), p)
                      or state.has_all(("Punch", "Punch Uppercut"), p)))
 
-    # If you have double jump or crouch jump, you don't need the logs to reach this place.
-    main_area.connect(green_ridge, rule=lambda state:
-                      state.has("Double Jump", player)
-                      or state.has_all(("Crouch", "Crouch Jump"), player)
-                      or can_uppercut_and_jump_logs(state, player))
+    if options.sentinel_beach_green_ridge_skip:
+        # You can collect everything on the green ridge with blue eco, even if you cannot get up
+        main_area.connect(green_ridge, rule=lambda state:
+                          state.has("Double Jump", player)
+                          or state.has_all(("Crouch", "Crouch Jump"), player)
+                          or can_uppercut_and_jump_logs(state, player)
+                          or state.has("Blue Eco Switch", player))
+    else:
+        # If you have double jump or crouch jump, you don't need the logs to reach this place.
+        main_area.connect(green_ridge, rule=lambda state:
+                          state.has("Double Jump", player)
+                          or state.has_all(("Crouch", "Crouch Jump"), player)
+                          or can_uppercut_and_jump_logs(state, player))
 
     # If you have the blue eco jump pad, you don't need the logs to reach this place.
     main_area.connect(blue_ridge, rule=lambda state:
