@@ -455,9 +455,82 @@ class MistyIslandArenaFightSkip(Toggle):
 
 
 class MistyIslandFarSideCliffSeesawSkip(Toggle):
-    """Create an alternative path to the far side cliff (with scout fly "Scout Fly On Ledge Near Arena Exit") in Misty
+    """
+    Create an alternative path to the far side cliff (with scout fly "Scout Fly On Ledge Near Arena Exit") in Misty
     Island. Enabling this setting may require Jak to use uneven terrain to reach the cliff with only Single Jump,
-    without using the seesaw. This only applies if "Enable Move Randomizer" is ON."""
+    without using the seesaw. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Far Side Cliff Seesaw Skip"
+
+
+class RockVillageEarlyOrbCache(Toggle):
+    """
+    Create an alternative path to the orb cache in Rock Village. Enabling this setting may require Jak to use precise
+    movement to reach the orb cache with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Rock Village Early Orb Cache"
+
+
+class RockVillagePontoonSkip(Toggle):
+    """
+    Create alternative paths to Boggy Swamp and Klaww Cliff in Rock Village. Enabling this setting may require Jak to
+    use precise movement to reach these locations without having the Warrior's Pontoons unlocked.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Rock Village Pontoon Skip"
+
+
+class KlawwCliffClimb(Toggle):
+    """
+    Create an alternative path to get up to Klaww from Rock Village. Enabling this setting may require Jak to use
+    glitches and uneven terrain to reach Klaww with only Single Jump. This only applies if "Enable Move Randomizer" is
+    ON.
+    """
+    display_name = "Klaww Cliff Climb"
+
+
+class KlawwBoulderSkip(Toggle):
+    """
+    Create an alternative path to Klaww without meeting the power cell requirement. Enabling this setting may require
+    Jak to use glitches to each Klaww even if the boulder is not lifted. This may drastically increase the amount of
+    reachable locations when Rock Village is reachable. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Klaww Boulder Skip"
+
+
+class BoggySwampPreciseMovement(Toggle):
+    """
+    Create an alternative path through Boggy Swamp. Enabling this setting may require Jak to traverse through the
+    whole Boggy Swamp with only Single Jump using precise movement, invincibility after taking damage, and respawns.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Boggy Swamp Precise Movement"
+
+
+class BoggySwampAttacklessAmbush(Toggle):
+    """
+    Create an alternative path through the boggy swamp ambush without attack moves. Enabling this setting may require
+    Jak to shoot yellow Eco through his goggles to defeat the ambush.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Boggy Swamp Attackless Ambush"
+
+
+class BoggySwampFlutFlutSkip(Toggle):
+    """
+    Create an alternative path to the Flut Flut course. Enabling this setting may require Jak to complete the whole
+    Flut Flut course without Flut Flut, and only Roll and Roll Jump unlocked.
+    """
+    display_name = "Boggy Swamp Flut Flut Skip"
+
+
+class LostPrecursorCitySingleJumpSlideTubeClimb(Toggle):
+    """
+    Create an alternative path through the helix with the rising dark eco in Lost Precursor City. Enabling this setting
+    may require Jak to use precise movement to reach the power cell at the bottom of Lost Precursor City and escape the
+    rising dark eco with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Lost Precursor City Single Jump Slide Tube Climb"
 
 
 class CompletionCondition(Choice):
@@ -507,5 +580,13 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     misty_island_attackless_scout_flies: MistyIslandAttacklessScoutFlies
     misty_island_arena_fight_skip: MistyIslandArenaFightSkip
     misty_island_far_side_cliff_seesaw_skip: MistyIslandFarSideCliffSeesawSkip
+    rock_village_early_orb_cache: RockVillageEarlyOrbCache
+    rock_village_pontoon_skip: RockVillagePontoonSkip
+    klaww_cliff_climb: KlawwCliffClimb
+    klaww_boulder_skip: KlawwBoulderSkip
+    boggy_swamp_precise_movement: BoggySwampPreciseMovement
+    boggy_swamp_attackless_ambush: BoggySwampAttacklessAmbush
+    boggy_swamp_flut_flut_skip: BoggySwampFlutFlutSkip
+    lost_precursor_city_single_jump_slide_tube_climb: LostPrecursorCitySingleJumpSlideTubeClimb
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
