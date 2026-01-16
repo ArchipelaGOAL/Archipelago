@@ -16,7 +16,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     muse_course = JakAndDaxterRegion("Muse Course", player, multiworld, level_name, 21)
     muse_course.add_cell_locations([23])
     if options.misty_island_attackless_scout_flies:
-        # Grabbing 3 blue eco orbs and running back can reach this scout fly
+        # Grabbing blue eco orbs and running back can reach this scout fly
         muse_course.add_fly_locations([327708])
     else:
         muse_course.add_fly_locations([327708], access_rule=lambda state: can_free_scout_flies(state, player))

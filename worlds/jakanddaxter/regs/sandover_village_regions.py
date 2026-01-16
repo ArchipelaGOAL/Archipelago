@@ -22,7 +22,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.add_fly_locations([262219, 327755, 131147, 65611])
 
     if options.sandover_village_cliff_orb_cache_climb:
-        # It is possible to jump up to the blue Eco next to the Orb Cache, and take it to the Farmer's scout fly
+        # It is possible to jump up to the blue Eco next to the Orb Cache, and take it to the Farmer's scout fly.
         main_area.add_fly_locations([196683])
     else:
         # The farmer's scout fly. You can either get the Orb Cache Cliff blue eco, or break it normally.

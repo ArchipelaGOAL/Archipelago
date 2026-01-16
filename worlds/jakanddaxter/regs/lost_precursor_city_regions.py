@@ -47,7 +47,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     center_complex.add_cell_locations([51])
 
     color_platforms = JakAndDaxterRegion("Color Platforms", player, multiworld, level_name, 6)
-    # This power cell can be reached with only a Single Jump by taking damage once to start the left platform.
+    # This power cell can be reached with only a Single Jump by taking damage once to start at the left platform.
     color_platforms.add_cell_locations([44])
 
     quick_platforms = JakAndDaxterRegion("Quick Platforms", player, multiworld, level_name, 3)

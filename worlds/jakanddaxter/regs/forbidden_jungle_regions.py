@@ -45,7 +45,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     temple_exit = JakAndDaxterRegion("Temple Exit", player, multiworld, level_name, 12)
 
     if options.forbidden_jungle_attackless_spiral_stumps_scout_fly:
-        # This fly can be reached using the blue eco vent inside the temple, (easiest with Fall Damage Animation Cancel)
+        # This fly can be reached using the blue eco vent inside the temple (easiest with Fall Damage Animation Cancel).
         temple_exit.add_fly_locations([262151])
     else:
         # This fly is too far from accessible blue eco sources.

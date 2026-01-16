@@ -414,7 +414,7 @@ class ForbiddenJungleAttacklessSpiralStumpsScoutFly(Toggle):
 class ForbiddenJungleElevatorSkip(Toggle):
     """
     Create an alternative path to the temple interior in Forbidden Jungle. Enabling this setting may require Jak to
-    get inside the temple without having the Jungle Elevator unlocked.
+    get inside the temple with only Jump Kick (without having the Jungle Elevator unlocked).
     """
     display_name = "Forbidden Jungle Elevator Skip"
 
@@ -434,7 +434,7 @@ class MistyIslandAttacklessScoutFlies(Toggle):
     precise blue eco movement or clever use of game mechanics.
     This only applies if "Enable Move Randomizer" is ON.
     """
-    display_name = "Misty Island Attackless Barrel Course Scout Fly"
+    display_name = "Misty Island Attackless Scout Flies"
 
 
 class MistyIslandArenaFightSkip(Toggle):
