@@ -103,7 +103,11 @@ def create_regions(world: "JakAndDaxterWorld"):
     rv.connect(pb)
     rv.connect(lpc)
     rvp.connect(bs)  # rv->rvp/rvc connections defined internally by RockVillageRegions.
-    rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, mp_count))  # Normally 45.
+    if options.klaww_boulder_skip:
+        # With Klaww boulder skip, it is always possible to reach Mountain Pass without any power cell requirements.
+        rvc.connect(mp)
+    else:
+        rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, mp_count))  # Normally 45.
     mpr.connect(vc)  # mp->mpr connection defined internally by MountainPassRegions.
     vc.connect(sc)
     vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))

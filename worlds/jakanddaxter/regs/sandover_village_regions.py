@@ -21,11 +21,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # These 4 scout fly boxes can be broken by running with all the blue eco from Sentinel Beach.
     main_area.add_fly_locations([262219, 327755, 131147, 65611])
 
-    # The farmer's scout fly. You can either get the Orb Cache Cliff blue eco, or break it normally.
-    main_area.add_fly_locations([196683], access_rule=lambda state:
-                                state.has("Double Jump", player)
-                                or state.has_all(("Crouch", "Crouch Jump"), player)
-                                or can_free_scout_flies(state, player))
+    if options.sandover_village_cliff_orb_cache_climb:
+        # It is possible to jump up to the blue Eco next to the Orb Cache, and take it to the Farmer's scout fly.
+        main_area.add_fly_locations([196683])
+    else:
+        # The farmer's scout fly. You can either get the Orb Cache Cliff blue eco, or break it normally.
+        main_area.add_fly_locations([196683], access_rule=lambda state:
+                                    state.has("Double Jump", player)
+                                    or state.has_all(("Crouch", "Crouch Jump"), player)
+                                    or can_free_scout_flies(state, player))
 
     orb_cache_cliff = JakAndDaxterRegion("Orb Cache Cliff", player, multiworld, level_name, 15)
     orb_cache_cliff.add_cache_locations([10344])
@@ -41,10 +45,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     oracle_platforms.add_fly_locations([393291], access_rule=lambda state:
                                        can_free_scout_flies(state, player))
 
-    main_area.connect(orb_cache_cliff, rule=lambda state:
-                      state.has("Double Jump", player)
-                      or state.has_all(("Crouch", "Crouch Jump"), player)
-                      or state.has_all(("Crouch", "Crouch Uppercut", "Jump Kick"), player))
+    if options.sandover_village_cliff_orb_cache_climb:
+        # It is possible to reach this cliff (and the blue Eco next to it) with a single jump
+        main_area.connect(orb_cache_cliff)
+    else:
+        main_area.connect(orb_cache_cliff, rule=lambda state:
+                          state.has("Double Jump", player)
+                          or state.has_all(("Crouch", "Crouch Jump"), player)
+                          or state.has_all(("Crouch", "Crouch Uppercut", "Jump Kick"), player))
 
     main_area.connect(yakow_cliff, rule=lambda state:
                       state.has("Double Jump", player)
