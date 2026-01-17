@@ -1,3 +1,4 @@
+from BaseClasses import CollectionState
 from .region_base import JakAndDaxterRegion
 from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
@@ -11,6 +12,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     options = world.options
     player = world.player
 
+    # Define a helper function for all locations that can be acquired by regular fight moves or roll jump
+    # We do not want to check the options each time we call those functions for performance reasons
+    if options.attack_with_roll_jump:
+        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
+            return can_fight(state, p) or state.has_all(("Roll", "Roll Jump"), p)
+    else:
+        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
+            return can_fight(state, p)
+
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 25)
 
     # You can get this scout fly by running from the blue eco vent across the temple bridge,
@@ -18,7 +28,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     main_area.add_fly_locations([393223])
 
     lurker_machine = JakAndDaxterRegion("Lurker Machine", player, multiworld, level_name, 5)
-    lurker_machine.add_cell_locations([3], access_rule=lambda state: can_fight(state, player))
+    lurker_machine.add_cell_locations([3], access_rule=lambda state: can_fight_or_roll_jump(state, player))
 
     # This cell and this scout fly can both be gotten with the blue eco clusters near the jump pad.
     lurker_machine.add_cell_locations([9])
@@ -34,8 +44,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     temple_exit = JakAndDaxterRegion("Temple Exit", player, multiworld, level_name, 12)
 
-    # This fly is too far from accessible blue eco sources.
-    temple_exit.add_fly_locations([262151], access_rule=lambda state: can_free_scout_flies(state, player))
+    if options.forbidden_jungle_attackless_spiral_stumps_scout_fly:
+        # This fly can be reached using the blue eco vent inside the temple (easiest with Fall Damage Animation Cancel).
+        temple_exit.add_fly_locations([262151])
+    else:
+        # This fly is too far from accessible blue eco sources.
+        temple_exit.add_fly_locations([262151], access_rule=lambda state: can_free_scout_flies(state, player))
 
     temple_exterior = JakAndDaxterRegion("Temple Exterior", player, multiworld, level_name, 10)
 
@@ -68,8 +82,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     temple_exit.connect(river)                      # Jump down.
     temple_exit.connect(temple_exterior)            # Run and jump (bridges, dodge spikes).
 
-    # Requires Jungle Elevator.
-    temple_exterior.connect(temple_int_pre_blue, rule=lambda state: state.has("Jungle Elevator", player))
+    if options.forbidden_jungle_elevator_skip:
+        # With a deload, it's possible to skip the Elevator, but Jak has to hit the loading zone while falling down.
+        # With Jump Kick, that's definitely possible.
+        temple_exterior.connect(temple_int_pre_blue, rule=lambda state:
+                                state.has("Jungle Elevator", player) or state.has("Jump Kick", player))
+    else:
+        # Requires Jungle Elevator.
+        temple_exterior.connect(temple_int_pre_blue, rule=lambda state: state.has("Jungle Elevator", player))
 
     # Requires Blue Eco Switch.
     temple_int_pre_blue.connect(temple_int_post_blue, rule=lambda state: state.has("Blue Eco Switch", player))
