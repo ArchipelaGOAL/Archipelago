@@ -368,6 +368,161 @@ class SnowyMountainFlutFlutEscape(Toggle):
     display_name = "Snowy Mountain Flut Flut Escape"
 
 
+class SandoverVillageCliffOrbCacheClimb(Toggle):
+    """
+    Create an alternative path to the Sandover Village orb cache on the cliff. Enabling this setting may require Jak to
+    use precise jumps to reach the orb cache (and the blue eco next to it) with only Single Jump.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Sandover Village Orb Cache Climb"
+
+
+class AttacklessLurkerCannons(Toggle):
+    """
+    Remove the attack requirement for lurker cannon power cells in Sentinel Beach and Misty Island. Enabling this
+    setting may require Jak to defeat the lurkers next to the cannon without any attacking moves.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Attackless Lurker Cannons"
+
+
+class SentinelBeachAttacklessPelican(Toggle):
+    """
+    Create an alternative path to the Pelican power cell in Sentinel Beach. Enabling this setting may require Jak to
+    use other unlocks to acquire the power cell without any attacking moves.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Sentinel Beach Attackless Pelican"
+
+
+class AttackWithRollJump(Toggle):
+    """
+    Treat Roll Jump as a valid attack move for some power cells. Enabling this setting may require Jak to use Roll Jump
+    to destroy objects to acquire these power cells. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Attack with Roll Jump"
+
+
+class ForbiddenJungleAttacklessSpiralStumpsScoutFly(Toggle):
+    """
+    Create an alternative path to the Scout Fly "On Spiral Of Stumps" in Forbidden Jungle. Enabling this setting may
+    require Jak to collect this scout fly without attack moves. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Forbidden Jungle Attackless Spiral Stumps Scout Fly"
+
+
+class ForbiddenJungleElevatorSkip(Toggle):
+    """
+    Create an alternative path to the temple interior in Forbidden Jungle. Enabling this setting may require Jak to
+    get inside the temple with only Jump Kick (without having the Jungle Elevator unlocked).
+    """
+    display_name = "Forbidden Jungle Elevator Skip"
+
+
+class MistyIslandEarlyFarSideOrbCache(Toggle):
+    """
+    Create an alternative path to the Far Side Orb Cache in Misty Island. Enabling this setting may require Jak to
+    reach the orb cache with blue eco with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Early Far Side Orb Cache"
+
+
+class MistyIslandAttacklessScoutFlies(Toggle):
+    """
+    Remove attack requirements to the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
+    "Overlooking Entrance" in Misty Island. Enabling this setting may require Jak to break these scout fly boxes with
+    precise blue eco movement or clever use of game mechanics.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Attackless Scout Flies"
+
+
+class MistyIslandArenaFightSkip(Toggle):
+    """
+    Create an alternative path to the power cell "Return To The Dark Eco Pool" in Misty Island. Enabling this setting
+    may require Jak to reach this power cell with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Arena Fight Skip"
+
+
+class MistyIslandFarSideCliffSeesawSkip(Toggle):
+    """
+    Create an alternative path to the far side cliff (with scout fly "Scout Fly On Ledge Near Arena Exit") in Misty
+    Island. Enabling this setting may require Jak to use uneven terrain to find an alternative way to the cliff, using
+    only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Misty Island Far Side Cliff Seesaw Skip"
+
+
+class RockVillageEarlyOrbCache(Toggle):
+    """
+    Remove requirements from the orb cache in Rock Village. Enabling this setting may require Jak to use precise
+    movement to reach the orb cache with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Rock Village Early Orb Cache"
+
+
+class RockVillagePontoonSkip(Toggle):
+    """
+    Create alternative paths to Boggy Swamp and Klaww Cliff in Rock Village. Enabling this setting may require Jak to
+    use precise movement to reach these locations without having the Warrior's Pontoons unlocked.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Rock Village Pontoon Skip"
+
+
+class KlawwCliffClimb(Toggle):
+    """
+    Create an alternative path to get up to Klaww from Rock Village. Enabling this setting may require Jak to use
+    glitches and uneven terrain to reach Klaww with only Single Jump. This only applies if "Enable Move Randomizer" is
+    ON.
+    """
+    display_name = "Klaww Cliff Climb"
+
+
+class KlawwBoulderSkip(Toggle):
+    """
+    Create an alternative path to Klaww without having enough power cells. Enabling this setting may require
+    Jak to use glitches to reach Klaww even if the boulder is not lifted. This may drastically increase the amount of
+    reachable locations when Rock Village is reachable. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Klaww Boulder Skip"
+
+
+class BoggySwampPreciseMovement(Toggle):
+    """
+    Create an alternative path through Boggy Swamp. Enabling this setting may require Jak to traverse through the
+    whole Boggy Swamp with only Single Jump using precise movement, invincibility after taking damage, and respawns.
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Boggy Swamp Precise Movement"
+
+
+class BoggySwampAttacklessAmbush(Toggle):
+    """
+    Remove the attack requirement from the Boggy Swamp ambush. Enabling this setting may require Jak to shoot yellow Eco
+    through his goggles to defeat the lurkers. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Boggy Swamp Attackless Ambush"
+
+
+class BoggySwampFlutFlutSkip(Toggle):
+    """
+    Create an alternative path to the Flut Flut course without having Flut Flut unlocked. Enabling this setting may
+    require Jak to complete the whole course with only Roll and Roll Jump.
+    """
+    display_name = "Boggy Swamp Flut Flut Skip"
+
+
+class LostPrecursorCitySingleJumpSlideTubeClimb(Toggle):
+    """
+    Create an alternative path through the helix with the rising dark eco in Lost Precursor City. Enabling this setting
+    may require Jak to use precise movement to reach the power cell at the bottom of Lost Precursor City and escape the
+    rising dark eco with only Single Jump. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Lost Precursor City Single Jump Slide Tube Climb"
+
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -404,5 +559,23 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     snowy_mountain_entrance_climb: SnowyMountainEntranceClimb
     boggy_swamp_flut_flut_escape: BoggySwampFlutFlutEscape
     snowy_mountain_flut_flut_escape: SnowyMountainFlutFlutEscape
+    sandover_village_cliff_orb_cache_climb: SandoverVillageCliffOrbCacheClimb
+    attackless_lurker_cannons: AttacklessLurkerCannons
+    sentinel_beach_attackless_pelican: SentinelBeachAttacklessPelican
+    attack_with_roll_jump: AttackWithRollJump
+    forbidden_jungle_attackless_spiral_stumps_scout_fly: ForbiddenJungleAttacklessSpiralStumpsScoutFly
+    forbidden_jungle_elevator_skip: ForbiddenJungleElevatorSkip
+    misty_island_early_far_side_orb_cache: MistyIslandEarlyFarSideOrbCache
+    misty_island_attackless_scout_flies: MistyIslandAttacklessScoutFlies
+    misty_island_arena_fight_skip: MistyIslandArenaFightSkip
+    misty_island_far_side_cliff_seesaw_skip: MistyIslandFarSideCliffSeesawSkip
+    rock_village_early_orb_cache: RockVillageEarlyOrbCache
+    rock_village_pontoon_skip: RockVillagePontoonSkip
+    klaww_cliff_climb: KlawwCliffClimb
+    klaww_boulder_skip: KlawwBoulderSkip
+    boggy_swamp_precise_movement: BoggySwampPreciseMovement
+    boggy_swamp_attackless_ambush: BoggySwampAttacklessAmbush
+    boggy_swamp_flut_flut_skip: BoggySwampFlutFlutSkip
+    lost_precursor_city_single_jump_slide_tube_climb: LostPrecursorCitySingleJumpSlideTubeClimb
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
