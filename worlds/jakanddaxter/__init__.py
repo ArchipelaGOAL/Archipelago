@@ -130,17 +130,17 @@ class JakAndDaxterWebWorld(WebWorld):
             options.KlawwCliffClimb, # Easy when out of bounds spot is known
             options.KlawwBoulderSkip, # Same trick as above
             options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint
+            options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over
+            options.SnowyMountainFlutFlutEscape,
         ]),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
             options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell
             options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback
-            options.BoggySwampFlutFlutEscape,
+            options.BoggySwampFlutFlutEscape, # Harder trick, long runback
             options.BoggySwampAttacklessAmbush, # Doing the lurker ambush without attacks is annoying (and hard)
             options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping
             options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard
-            options.SnowyMountainEntranceClimb,
-            options.SnowyMountainFlutFlutEscape,
         ]),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,
