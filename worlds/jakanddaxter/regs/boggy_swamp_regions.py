@@ -54,17 +54,30 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # You can break this tether with a yellow eco vent and goggles,
     # but you can't reach the platform unless you can jump high.
     second_tether = JakAndDaxterRegion("Second Tether", player, multiworld, level_name, 0)
-    second_tether.add_cell_locations([39], access_rule=lambda state: can_jump_higher(state, player))
+    if options.boggy_swamp_precise_movement:
+        # Jump Kick is enough to reach the power cell.
+        second_tether.add_cell_locations([39], access_rule=lambda state:
+                                         can_jump_higher(state, player) or state.has("Jump Kick", player))
+    else:
+        second_tether.add_cell_locations([39], access_rule=lambda state: can_jump_higher(state, player))
 
     # Fly and orbs are collectable with nearby blue eco cluster.
     second_bats = JakAndDaxterRegion("Second Bats Area", player, multiworld, level_name, 27)
-    second_bats.add_fly_locations([262187], access_rule=lambda state: can_jump_farther(state, player))
+
+    if options.boggy_swamp_precise_movement:
+        # By taking damage once, this fly is easily reachable with blue eco. It can also be destroyed using yellow eco.
+        second_bats.add_fly_locations([262187])
+    else:
+        second_bats.add_fly_locations([262187], access_rule=lambda state: can_jump_farther(state, player))
 
     third_jump_pad = JakAndDaxterRegion("Third Jump Pad (Arena)", player, multiworld, level_name, 0)
 
     # We have to choose our access rule depending on our Flut Flut escape option.
     # We want to make that decision while we are creating regions, NOT INSIDE the access rule itself.
-    if options.boggy_swamp_flut_flut_escape:
+    if options.boggy_swamp_attackless_ambush:
+        # It is possible (but annoying/hard) to beat the ambush by shooting yellow eco through the goggles.
+        third_jump_pad.add_cell_locations([38])
+    elif options.boggy_swamp_flut_flut_escape:
         third_jump_pad.add_cell_locations([38], access_rule=lambda state:
                                           (state.has("Flut Flut", player) or can_fight(state, player)))
     else:
@@ -92,9 +105,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     last_tar_pit = JakAndDaxterRegion("Last Tar Pit", player, multiworld, level_name, 12)
 
     fourth_tether = JakAndDaxterRegion("Fourth Tether", player, multiworld, level_name, 11)
-    fourth_tether.add_cell_locations([41], access_rule=lambda state: can_jump_higher(state, player))
 
-    main_area.connect(first_bats, rule=lambda state: can_jump_farther(state, player))
+    if options.boggy_swamp_precise_movement:
+        # This power cell can be reached with a single jump.
+        fourth_tether.add_cell_locations([41])
+        main_area.connect(first_bats)
+    else:
+        fourth_tether.add_cell_locations([41], access_rule=lambda state: can_jump_higher(state, player))
+        main_area.connect(first_bats, rule=lambda state: can_jump_farther(state, player))
 
     first_bats.connect(main_area)
     first_bats.connect(first_jump_pad)
@@ -103,9 +121,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     first_jump_pad.connect(first_bats)
 
     first_tether.connect(first_bats)
-    first_tether.connect(first_tether_rat_colony, rule=lambda state:
-                         (state.has_all(("Roll", "Roll Jump"), player)
-                          or state.has_all(("Double Jump", "Jump Kick"), player)))
+
+    if options.boggy_swamp_precise_movement:
+        # These orbs can be reached with a single jump by keeping the rat colony intact and jumping onto it.
+        first_tether.connect(first_tether_rat_colony)
+    else:
+        first_tether.connect(first_tether_rat_colony, rule=lambda state:
+                             (state.has_all(("Roll", "Roll Jump"), player)
+                              or state.has_all(("Double Jump", "Jump Kick"), player)))
     first_tether.connect(second_jump_pad)
     first_tether.connect(first_pole_course)
 
@@ -130,9 +153,22 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     flut_flut_pad.connect(second_bats)
 
     if options.boosted_and_extended_uppercuts:
+        if options.boggy_swamp_flut_flut_skip:
+            # Allow both uppercuts and Roll Jump.
+            flut_flut_pad.connect(flut_flut_course, rule=lambda state:
+                                  state.has("Flut Flut", player)
+                                  or state.has_all(("Roll", "Roll Jump"), player)
+                                  or state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player))
+        else:
+            # Uppercuts only.
+            flut_flut_pad.connect(flut_flut_course, rule=lambda state:
+                                  state.has("Flut Flut", player)
+                                  or state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player))
+    elif options.boggy_swamp_flut_flut_skip:
+        # Roll Jump only.
         flut_flut_pad.connect(flut_flut_course, rule=lambda state:
                               state.has("Flut Flut", player)
-                              or state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player))
+                              or state.has_all(("Roll", "Roll Jump"), player))
     else:
         flut_flut_pad.connect(flut_flut_course, rule=lambda state: state.has("Flut Flut", player))  # Naturally.
 
@@ -141,15 +177,32 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     flut_flut_course.connect(flut_flut_pad)
 
     farthy_snacks.connect(flut_flut_pad)
-    farthy_snacks.connect(box_field, rule=lambda state: can_jump_higher(state, player))
 
-    box_field.connect(farthy_snacks, rule=lambda state: can_jump_higher(state, player))
-    box_field.connect(last_tar_pit, rule=lambda state: can_jump_farther(state, player))
+    if options.boggy_swamp_precise_movement:
+        # These can all be reached with Single Jump only by taking damage, and using invincibility after taking damage
+        # when required.
+        farthy_snacks.connect(box_field)
 
-    last_tar_pit.connect(box_field, rule=lambda state: can_jump_farther(state, player))
-    last_tar_pit.connect(fourth_tether, rule=lambda state: can_jump_farther(state, player))
+        box_field.connect(farthy_snacks)
+        # The last tar pit can be reached by taking damage 2-3 times (there is usually a big green Eco blob in the box
+        # field, making this easier). After entering the cave behind the tar pit, the checkpoint is set and everything
+        # can be collected easily.
+        box_field.connect(last_tar_pit)
 
-    fourth_tether.connect(last_tar_pit, rule=lambda state: can_jump_farther(state, player))
+        last_tar_pit.connect(box_field)
+        last_tar_pit.connect(fourth_tether)
+
+        fourth_tether.connect(last_tar_pit)
+    else:
+        farthy_snacks.connect(box_field, rule=lambda state: can_jump_higher(state, player))
+
+        box_field.connect(farthy_snacks, rule=lambda state: can_jump_higher(state, player))
+        box_field.connect(last_tar_pit, rule=lambda state: can_jump_farther(state, player))
+
+        last_tar_pit.connect(box_field, rule=lambda state: can_jump_farther(state, player))
+        last_tar_pit.connect(fourth_tether, rule=lambda state: can_jump_farther(state, player))
+
+        fourth_tether.connect(last_tar_pit, rule=lambda state: can_jump_farther(state, player))
     fourth_tether.connect(main_area)  # Fall down.
 
     world.level_to_regions[level_name].append(main_area)
