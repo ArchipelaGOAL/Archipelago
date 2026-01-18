@@ -4,7 +4,7 @@ from ..options import EnableOrbsanity, CompletionCondition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_free_scout_flies, can_fight, can_reach_orbs_level
+from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
 
 
 # God help me... here we go.
@@ -12,6 +12,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     multiworld = world.multiworld
     options = world.options
     player = world.player
+
+    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     # This level is full of short-medium gaps that cannot be crossed by single jump alone. If you have the boosted
     # and extended uppercut option on, those moves are added as part of the function definition. We do NOT want to

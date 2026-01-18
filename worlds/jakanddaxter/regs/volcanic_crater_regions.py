@@ -3,7 +3,7 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_free_scout_flies, can_reach_orbs_level
+from ..rules import can_reach_orbs_level, get_can_free_scout_flies_fn
 from ..locs import scout_locations as scouts
 
 
@@ -11,6 +11,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     multiworld = world.multiworld
     options = world.options
     player = world.player
+
+    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     # No area is inaccessible in VC even with only running and jumping.
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 50)

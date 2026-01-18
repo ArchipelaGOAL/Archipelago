@@ -1,6 +1,7 @@
 import logging
 import math
 import typing
+from typing import Callable
 from BaseClasses import CollectionState
 from Options import OptionError
 from .options import (EnableOrbsanity,
@@ -10,7 +11,8 @@ from .options import (EnableOrbsanity,
                       MountainPassCellCount,
                       LavaTubeCellCount,
                       CitizenOrbTradeAmount,
-                      OracleOrbTradeAmount)
+                      OracleOrbTradeAmount,
+                      JakAndDaxterOptions)
 from .locs import cell_locations as cells
 from .locations import location_table
 from .levels import level_table
@@ -125,8 +127,23 @@ def can_trade_orbsanity(state: CollectionState,
     return state.has("Tradeable Orbs", player, required_orbs)
 
 
-def can_free_scout_flies(state: CollectionState, player: int) -> bool:
-    return state.has("Jump Dive", player) or state.has_all({"Crouch", "Crouch Uppercut"}, player)
+def get_can_free_scout_flies_fn(options: JakAndDaxterOptions) -> Callable[[CollectionState, int], bool]:
+    """
+    Returns a function that can be used in access rules to check whether Jak can break scout fly boxes.
+    Depending on the options chosen, this function may allow different moves.
+    """
+
+    # We do not want to check the options every time the function is called, so we define different functions based on
+    # the options.
+    if options.punch_uppercut_scout_flies:
+        def can_free_scout_flies(state: CollectionState, player: int) -> bool:
+            return (state.has("Jump Dive", player) or state.has_all(("Crouch", "Crouch Uppercut"), player)
+                    or state.has_all(("Punch", "Punch Uppercut"), player))
+    else:
+        def can_free_scout_flies(state: CollectionState, player: int) -> bool:
+            return state.has("Jump Dive", player) or state.has_all(("Crouch", "Crouch Uppercut"), player)
+
+    return can_free_scout_flies
 
 
 def can_fight(state: CollectionState, player: int) -> bool:

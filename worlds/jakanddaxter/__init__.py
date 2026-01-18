@@ -118,9 +118,9 @@ class JakAndDaxterWebWorld(WebWorld):
             options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon
         ]),
         OptionGroup("Tricks & Glitches - Medium", [
+            options.PunchUppercutScoutFlies,  # Some may be a little tricky
             options.GeyserRockCliffClimb, # You have to know where to jump, but the jump is not terribly difficult
             options.SandoverVillageCliffOrbCacheClimb, # Same here
-            options.SentinelBeachCannonTowerClimb, # Same here
             options.ForbiddenJungleElevatorSkip, # Deload glitch is easy, but hitting the loading zone can be tricky
             options.MistyIslandEarlyFarSideOrbCache, # Precise movement, but not too hard
             options.MistyIslandArenaFightSkip, # Drop down from top or use cannon to shoot enemies
@@ -135,6 +135,7 @@ class JakAndDaxterWebWorld(WebWorld):
         ]),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
+            options.SentinelBeachCannonTowerClimb, # Climbing with only Jump Kick is hard, fish may eat Jak when failing
             options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell
             options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback
             options.BoggySwampFlutFlutEscape, # Harder trick, long runback

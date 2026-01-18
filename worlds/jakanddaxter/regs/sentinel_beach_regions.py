@@ -4,13 +4,15 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_free_scout_flies, can_fight, can_reach_orbs_level
+from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
     multiworld = world.multiworld
     options = world.options
     player = world.player
+
+    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     # Define a helper function for all locations that can be acquired by regular fight moves or roll jump
     # We do not want to check the options each time we call those functions for performance reasons
@@ -40,10 +42,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     if options.sentinel_beach_attackless_pelican:
         # Pelican power cell can be acquired by shooting the Pelican if the tower is accessible (no fight abilities needed)
         if options.sentinel_beach_cannon_tower_climb:
-            # Tower can be reached with a double jump as well if the option is enabled
+            # Tower can be reached with a double jump (or Jump Kick) as well if the option is enabled
             pelican.add_cell_locations([16], access_rule=lambda state:
-                                       can_fight_or_roll_jump(state, player) or state.has("Blue Eco Switch", player)
-                                       or state.has("Double Jump", player))
+                                       can_fight_or_roll_jump(state, player)
+                                       or state.has_any(("Blue Eco Switch", "Double Jump", "Jump Kick"), player))
         else:
             # Otherwise, tower can only be reached by using the blue eco
             pelican.add_cell_locations([16], access_rule=lambda state:
@@ -104,7 +106,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # An advanced way of reaching the cannon tower without Blue Eco Switch.
     if options.sentinel_beach_cannon_tower_climb:
-        main_area.connect(cannon_tower, rule=lambda state: state.has("Double Jump", player))
+        main_area.connect(cannon_tower, rule=lambda state: state.has_any(("Double Jump", "Jump Kick"), player))
 
     # All these can go back to main_area immediately.
     pelican.connect(main_area)

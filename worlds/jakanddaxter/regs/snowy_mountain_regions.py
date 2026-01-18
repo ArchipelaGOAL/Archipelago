@@ -4,7 +4,7 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_free_scout_flies, can_fight, can_reach_orbs_level
+from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
 
 
 # God help me... here we go.
@@ -14,6 +14,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     multiworld = world.multiworld
     options = world.options
     player = world.player
+
+    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     # We need a few helper functions.
     def can_cross_long_gap(state: CollectionState, p: int) -> bool:
@@ -225,6 +227,8 @@ def build_regions_with_flut_flut(level_name: str, world: "JakAndDaxterWorld") ->
     multiworld = world.multiworld
     options = world.options
     player = world.player
+
+    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     # We need a few helper functions.
     def can_cross_long_gap(state: CollectionState, p: int) -> bool:
