@@ -113,9 +113,9 @@ class JakAndDaxterWebWorld(WebWorld):
             options.OracleOrbTradeAmount,
         ]),
         OptionGroup("Tricks & Glitches - Easy", [
-            options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets
-            options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon
-            options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon
+            options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
+            options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
+            options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon.
         ]),
         OptionGroup("Tricks & Glitches - Medium", [
             options.PunchUppercutScoutFlies,  # Some may be a little tricky
@@ -132,16 +132,16 @@ class JakAndDaxterWebWorld(WebWorld):
             options.KlawwBoulderSkip, # Same trick as above
             options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint
             options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over
-            options.SnowyMountainFlutFlutEscape,
         ]),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
-            options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell
-            options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback
-            options.BoggySwampFlutFlutEscape, # Harder trick, long runback
-            options.BoggySwampAttacklessAmbush, # Doing the lurker ambush without attacks is annoying (and hard)
-            options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping
-            options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard
+            options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell.
+            options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback.
+            options.BoggySwampFlutFlutEscape, # Harder trick, long runback.
+            options.BoggySwampAttacklessAmbush, # Doing the lurker ambush without attacks is annoying (and hard).
+            options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping.
+            options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard.
+            options.SnowyMountainFlutFlutEscape,  # Escaping is easy, doing the whole level can be tricky though
         ]),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,

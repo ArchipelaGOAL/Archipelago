@@ -357,13 +357,18 @@ class SentinelBeachCannonTowerClimb(Choice):
     option_hard = 2
 
 
-class SnowyMountainEntranceClimb(Toggle):
+class SnowyMountainEntranceClimb(Choice):
     """
     Create an alternate path into Snowy Mountain. Enabling this setting may require Jak to use uneven geometry to reach
-    Snowy Mountain's main area with only Double Jump or Crouch Jump. This only applies if "Enable Move Randomizer"
-    is ON.
+    Snowy Mountain's main area with fewer move options. This only applies if "Enable Move Randomizer" is ON.
+
+    Medium: only Double Jump or Crouch Jump
+    Hard: only Single Jump
     """
     display_name = "Snowy Mountain Entrance Climb"
+    option_off = 0
+    option_medium = 1
+    option_hard = 2
 
 
 class BoggySwampFlutFlutEscape(Toggle):
@@ -378,9 +383,17 @@ class BoggySwampFlutFlutEscape(Toggle):
 class SnowyMountainFlutFlutEscape(Toggle):
     """
     Changes Snowy Mountain to rely on Flut Flut for movement. Enabling this setting may require Jak to get Flut Flut
-    over an invisible barrier to access nearly all of Snowy Mountain.
+    over an invisible barrier to access all of Snowy Mountain.
     """
     display_name = "Snowy Mountain Flut Flut Escape"
+
+
+class SnowyMountainFlutFlutSkip(Toggle):
+    """
+    Create an alternative path to the end of the Flut Flut course in Snowy Mountain. Enabling this setting may require
+    Jak to use advanced movement tricks to reach the end of the Flut Flut course with only Single Jump and no Flut Flut.
+    """
+    display_name = "Snowy Mountain Flut Flut Skip"
 
 
 class SandoverVillageCliffOrbCacheClimb(Toggle):
@@ -575,6 +588,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     snowy_mountain_entrance_climb: SnowyMountainEntranceClimb
     boggy_swamp_flut_flut_escape: BoggySwampFlutFlutEscape
     snowy_mountain_flut_flut_escape: SnowyMountainFlutFlutEscape
+    snowy_mountain_flut_flut_skip: SnowyMountainFlutFlutSkip
     sandover_village_cliff_orb_cache_climb: SandoverVillageCliffOrbCacheClimb
     attackless_lurker_cannons: AttacklessLurkerCannons
     sentinel_beach_attackless_pelican: SentinelBeachAttacklessPelican
