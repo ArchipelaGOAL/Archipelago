@@ -342,13 +342,19 @@ class GeyserRockCliffClimb(Toggle):
     display_name = "Geyser Rock Cliff Climb"
 
 
-class SentinelBeachCannonTowerClimb(Toggle):
+class SentinelBeachCannonTowerClimb(Choice):
     """
     Create an alternate path to the Sentinel Beach Cannon Tower. Enabling this setting may require Jak to use uneven
-    geometry to reach the cannon tower with only Jump Kick or only Double Jump.
+    geometry to reach the cannon tower without having the Blue Eco Switch unlocked.
     This only applies if "Enable Move Randomizer" is ON.
+
+    Medium: Tower is climbable with only Double Jump
+    Hard: Tower is climbable with only Jump Kick too
     """
     display_name = "Sentinel Beach Cannon Tower Climb"
+    option_off = 0
+    option_medium = 1
+    option_hard = 2
 
 
 class SnowyMountainEntranceClimb(Toggle):

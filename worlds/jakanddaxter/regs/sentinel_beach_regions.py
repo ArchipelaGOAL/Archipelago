@@ -1,6 +1,6 @@
 from BaseClasses import CollectionState
 from .region_base import JakAndDaxterRegion
-from ..options import EnableOrbsanity
+from ..options import EnableOrbsanity, SentinelBeachCannonTowerClimb
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
@@ -23,6 +23,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
             return can_fight(state, p)
 
+    if options.sentinel_beach_cannon_tower_climb == SentinelBeachCannonTowerClimb.option_hard:
+        def can_climb_cannon_tower(state: CollectionState, p: int) -> bool:
+            return state.has_any(("Double Jump", "Jump Kick"), p)
+    elif options.sentinel_beach_cannon_tower_climb == SentinelBeachCannonTowerClimb.option_medium:
+        def can_climb_cannon_tower(state: CollectionState, p: int) -> bool:
+            return state.has("Double Jump", p)
+    else:
+        def can_climb_cannon_tower(_: CollectionState, __: int) -> bool:
+            return False
+
+    def can_reach_cannon(state: CollectionState, p: int) -> bool:
+        return state.has("Blue Eco Switch", p) or can_climb_cannon_tower(state, p)
+
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 128)
     main_area.add_cell_locations([18, 21, 22])
 
@@ -41,15 +54,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     pelican = JakAndDaxterRegion("Pelican", player, multiworld, level_name, 0)
     if options.sentinel_beach_attackless_pelican:
         # Pelican power cell can be acquired by shooting the Pelican if the tower is accessible (no fight abilities needed)
-        if options.sentinel_beach_cannon_tower_climb:
-            # Tower can be reached with a double jump (or Jump Kick) as well if the option is enabled
-            pelican.add_cell_locations([16], access_rule=lambda state:
-                                       can_fight_or_roll_jump(state, player)
-                                       or state.has_any(("Blue Eco Switch", "Double Jump", "Jump Kick"), player))
-        else:
-            # Otherwise, tower can only be reached by using the blue eco
-            pelican.add_cell_locations([16], access_rule=lambda state:
-                                       can_fight_or_roll_jump(state, player) or state.has("Blue Eco Switch", player))
+        pelican.add_cell_locations([16], access_rule=lambda state:
+                                   can_fight_or_roll_jump(state, player) or can_reach_cannon(state, player))
     else:
         pelican.add_cell_locations([16], access_rule=lambda state: can_fight_or_roll_jump(state, player))
 
@@ -105,8 +111,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     rock_spires.connect(cannon_tower)
 
     # An advanced way of reaching the cannon tower without Blue Eco Switch.
-    if options.sentinel_beach_cannon_tower_climb:
-        main_area.connect(cannon_tower, rule=lambda state: state.has_any(("Double Jump", "Jump Kick"), player))
+    if options.sentinel_beach_cannon_tower_climb != SentinelBeachCannonTowerClimb.option_off:
+        main_area.connect(cannon_tower, rule=lambda state: can_climb_cannon_tower(state, player))
 
     # All these can go back to main_area immediately.
     pelican.connect(main_area)
