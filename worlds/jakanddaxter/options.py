@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from functools import cached_property
+from typing import Any
+
 from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle, OptionCounter, \
     AssembleOptions
 from .items import trap_item_table
@@ -688,3 +690,65 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     lost_precursor_city_single_jump_slide_tube_climb: LostPrecursorCitySingleJumpSlideTubeClimb
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
+
+jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
+    "Move Randomizer + Easy Tricks & Glitches": {
+        "enable_move_randomizer": True,
+        "attack_with_roll_jump": True,
+        "attackless_lurker_cannons": True,
+        "sentinel_beach_attackless_pelican": True,
+    },
+    "Move Randomizer + Medium Tricks & Glitches": {
+        "enable_move_randomizer": True,
+        "attack_with_roll_jump": True,
+        "attackless_lurker_cannons": True,
+        "sentinel_beach_attackless_pelican": True,
+
+        "punch_uppercut_scout_flies": True,
+        "geyser_rock_cliff_climb": True,
+        "sandover_village_cliff_orb_cache_climb": True,
+        "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_medium,
+        "forbidden_jungle_elevator_skip": True,
+        "misty_island_early_far_side_orb_cache": True,
+        "misty_island_arena_fight_skip": True,
+        "misty_island_far_side_cliff_seesaw_skip": True,
+        "rock_village_early_orb_cache": True,
+        "rock_village_pontoon_skip": True,
+        "klaww_cliff_climb": True,
+        "klaww_boulder_skip": True,
+        "boggy_swamp_precise_movement": True,
+        "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_medium,
+        "snowy_mountain_flut_flut_skip": True,
+    },
+    "Move Randomizer + Hard Tricks & Glitches": {
+        "enable_move_randomizer": True,
+        "attack_with_roll_jump": True,
+        "attackless_lurker_cannons": True,
+        "sentinel_beach_attackless_pelican": True,
+
+        "punch_uppercut_scout_flies": True,
+        "geyser_rock_cliff_climb": True,
+        "sandover_village_cliff_orb_cache_climb": True,
+        "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_hard,
+        "forbidden_jungle_elevator_skip": True,
+        "misty_island_early_far_side_orb_cache": True,
+        "misty_island_arena_fight_skip": True,
+        "misty_island_far_side_cliff_seesaw_skip": True,
+        "rock_village_early_orb_cache": True,
+        "rock_village_pontoon_skip": True,
+        "klaww_cliff_climb": True,
+        "klaww_boulder_skip": True,
+        "boggy_swamp_precise_movement": True,
+        "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
+        "snowy_mountain_flut_flut_skip": True,
+
+        "boosted_and_extended_uppercuts": True,
+        "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
+        "misty_island_attackless_scout_flies": True,
+        "boggy_swamp_flut_flut_escape": True,
+        "boggy_swamp_attackless_ambush": True,
+        "boggy_swamp_flut_flut_skip": True,
+        "lost_precursor_city_single_jump_slide_tube_climb": True,
+        "snowy_mountain_flut_flut_escape": True,
+    }
+}
