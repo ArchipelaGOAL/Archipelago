@@ -4,7 +4,7 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_free_scout_flies, can_fight, can_reach_orbs_level
+from ..rules import can_fight, can_reach_orbs_level
 
 
 # God help me... here we go.
@@ -26,7 +26,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                 or state.has_all(("Punch", "Punch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
-    main_area.add_fly_locations([65], access_rule=lambda state: can_free_scout_flies(state, player))
+    main_area.add_fly_locations([65], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # We need a few virtual regions like we had for Dark Crystals in Spider Cave.
     # First, a virtual region for the glacier lurkers.
@@ -59,7 +59,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     frozen_box_cave = JakAndDaxterRegion("Frozen Box Cave", player, multiworld, level_name, 12)
     frozen_box_cave.add_fly_locations([327745], access_rule=lambda state:
                                       state.has("Yellow Eco Switch", player)
-                                      or can_free_scout_flies(state, player))
+                                      or world.can_free_scout_flies(state, player))
 
     # This region has crates that can *only* be broken with YES.
     frozen_box_cave_crates = JakAndDaxterRegion("Frozen Box Cave Orb Crates", player, multiworld, level_name, 8)
@@ -68,7 +68,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # Include 6 orbs on the twin elevator ice ramp.
     ice_skating_rink = JakAndDaxterRegion("Ice Skating Rink", player, multiworld, level_name, 20)
-    ice_skating_rink.add_fly_locations([131137], access_rule=lambda state: can_free_scout_flies(state, player))
+    ice_skating_rink.add_fly_locations([131137], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     flut_flut_course = JakAndDaxterRegion("Flut Flut Course", player, multiworld, level_name, 15)
     flut_flut_course.add_cell_locations([63], access_rule=lambda state: state.has("Flut Flut", player))
@@ -77,7 +77,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Includes the bridge from snowball_canyon, the area beneath that bridge, and the areas around the fort.
     fort_exterior = JakAndDaxterRegion("Fort Exterior", player, multiworld, level_name, 20)
     fort_exterior.add_fly_locations([65601, 393281], access_rule=lambda state:
-                                    can_free_scout_flies(state, player))
+                                    world.can_free_scout_flies(state, player))
 
     # Includes the icy island and bridge outside the cave entrance.
     bunny_cave_start = JakAndDaxterRegion("Bunny Cave (Start)", player, multiworld, level_name, 10)
@@ -101,7 +101,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Need higher jump.
     fort_interior_base = JakAndDaxterRegion("Fort Interior (Base)", player, multiworld, level_name, 0)
     fort_interior_base.add_fly_locations([262209], access_rule=lambda state:
-                                         can_free_scout_flies(state, player))
+                                         world.can_free_scout_flies(state, player))
 
     # Need farther jump.
     fort_interior_course_end = JakAndDaxterRegion("Fort Interior (Course End)", player, multiworld, level_name, 2)
@@ -237,7 +237,7 @@ def build_regions_with_flut_flut(level_name: str, world: "JakAndDaxterWorld") ->
                 or state.has_all(("Punch", "Punch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
-    main_area.add_fly_locations([65], access_rule=lambda state: can_free_scout_flies(state, player))
+    main_area.add_fly_locations([65], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # We need a few virtual regions like we had for Dark Crystals in Spider Cave.
     # First, a virtual region for the glacier lurkers.
@@ -270,7 +270,7 @@ def build_regions_with_flut_flut(level_name: str, world: "JakAndDaxterWorld") ->
     frozen_box_cave = JakAndDaxterRegion("Frozen Box Cave", player, multiworld, level_name, 12)
     frozen_box_cave.add_fly_locations([327745], access_rule=lambda state:
                                       state.has_any(("Flut Flut", "Yellow Eco Switch"), player)
-                                      or can_free_scout_flies(state, player))
+                                      or world.can_free_scout_flies(state, player))
 
     # This region has crates that can *only* be broken with YES.
     frozen_box_cave_crates = JakAndDaxterRegion("Frozen Box Cave Orb Crates", player, multiworld, level_name, 8)
@@ -279,7 +279,7 @@ def build_regions_with_flut_flut(level_name: str, world: "JakAndDaxterWorld") ->
 
     # Include 6 orbs on the twin elevator ice ramp.
     ice_skating_rink = JakAndDaxterRegion("Ice Skating Rink", player, multiworld, level_name, 20)
-    ice_skating_rink.add_fly_locations([131137], access_rule=lambda state: can_free_scout_flies(state, player))
+    ice_skating_rink.add_fly_locations([131137], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     flut_flut_course = JakAndDaxterRegion("Flut Flut Course", player, multiworld, level_name, 15)
     flut_flut_course.add_cell_locations([63], access_rule=lambda state: state.has("Flut Flut", player))
@@ -289,7 +289,7 @@ def build_regions_with_flut_flut(level_name: str, world: "JakAndDaxterWorld") ->
     fort_exterior = JakAndDaxterRegion("Fort Exterior", player, multiworld, level_name, 20)
     fort_exterior.add_fly_locations([65601, 393281], access_rule=lambda state:
                                     state.has("Flut Flut", player)
-                                    or can_free_scout_flies(state, player))
+                                    or world.can_free_scout_flies(state, player))
 
     # Includes the icy island and bridge outside the cave entrance.
     bunny_cave_start = JakAndDaxterRegion("Bunny Cave (Start)", player, multiworld, level_name, 10)
@@ -314,7 +314,7 @@ def build_regions_with_flut_flut(level_name: str, world: "JakAndDaxterWorld") ->
     fort_interior_base = JakAndDaxterRegion("Fort Interior (Base)", player, multiworld, level_name, 0)
     fort_interior_base.add_fly_locations([262209], access_rule=lambda state:
                                          state.has("Flut Flut", player)
-                                         or can_free_scout_flies(state, player))
+                                         or world.can_free_scout_flies(state, player))
 
     # Need farther jump.
     fort_interior_course_end = JakAndDaxterRegion("Fort Interior (Course End)", player, multiworld, level_name, 2)
