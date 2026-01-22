@@ -3,13 +3,14 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_free_scout_flies, can_reach_orbs_level
+from ..rules import can_reach_orbs_level
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDaxterRegion, ...]:
     multiworld = world.multiworld
     options = world.options
     player = world.player
+
 
     # This includes most of the area surrounding LPC as well, for orb_count purposes. You can swim and single jump.
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 23)
@@ -22,7 +23,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     # These 2 scout fly boxes can be broken by running with nearby blue eco.
     main_area.add_fly_locations([196684, 262220])
     main_area.add_fly_locations([76, 131148, 65612, 327756], access_rule=lambda state:
-                                can_free_scout_flies(state, player))
+                                world.can_free_scout_flies(state, player))
 
     # Warrior Pontoon check. You just talk to him and get his introduction.
     main_area.add_special_locations([33])
