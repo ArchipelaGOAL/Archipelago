@@ -326,6 +326,14 @@ class BoostedAndExtendedUppercuts(Toggle):
     display_name = "Boosted and Extended Uppercuts"
 
 
+class PunchUppercutScoutFlies(Toggle):
+    """
+    Treat punch uppercut as a valid move to break scout fly boxes. Enabling this setting may require Jak to break scout
+    fly boxes using only Punch Uppercut, even in confined spaces. This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Punch Uppercut Scout Flies"
+
+
 class GeyserRockCliffClimb(Toggle):
     """
     Remove the movement requirement for the Geyser Rock Cliff. Enabling this setting may require Jak to use uneven
@@ -334,12 +342,19 @@ class GeyserRockCliffClimb(Toggle):
     display_name = "Geyser Rock Cliff Climb"
 
 
-class SentinelBeachCannonTowerClimb(Toggle):
+class SentinelBeachCannonTowerClimb(Choice):
     """
     Create an alternate path to the Sentinel Beach Cannon Tower. Enabling this setting may require Jak to use uneven
-    geometry to reach the cannon tower with only Double Jump. This only applies if "Enable Move Randomizer" is ON.
+    geometry to reach the cannon tower without having the Blue Eco Switch unlocked.
+    This only applies if "Enable Move Randomizer" is ON.
+
+    Medium: Tower is climbable with only Double Jump
+    Hard: Tower is climbable with only Jump Kick too
     """
     display_name = "Sentinel Beach Cannon Tower Climb"
+    option_off = 0
+    option_medium = 1
+    option_hard = 2
 
 
 class SnowyMountainEntranceClimb(Toggle):
@@ -554,6 +569,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     trap_effect_duration: TrapEffectDuration
     trap_weights: TrapWeights
     boosted_and_extended_uppercuts: BoostedAndExtendedUppercuts
+    punch_uppercut_scout_flies: PunchUppercutScoutFlies
     geyser_rock_cliff_climb: GeyserRockCliffClimb
     sentinel_beach_cannon_tower_climb: SentinelBeachCannonTowerClimb
     snowy_mountain_entrance_climb: SnowyMountainEntranceClimb
