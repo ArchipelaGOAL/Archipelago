@@ -4,24 +4,13 @@ from ..options import EnableOrbsanity, SentinelBeachCannonTowerClimb
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
+from ..rules import can_reach_orbs_level
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
     multiworld = world.multiworld
     options = world.options
     player = world.player
-
-    can_free_scout_flies = get_can_free_scout_flies_fn(options)
-
-    # Define a helper function for all locations that can be acquired by regular fight moves or roll jump
-    # We do not want to check the options each time we call those functions for performance reasons
-    if options.attack_with_roll_jump:
-        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
-            return can_fight(state, p) or state.has_all(("Roll", "Roll Jump"), p)
-    else:
-        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
-            return can_fight(state, p)
 
     if options.sentinel_beach_cannon_tower_climb == SentinelBeachCannonTowerClimb.option_hard:
         def can_climb_cannon_tower(state: CollectionState, p: int) -> bool:
@@ -46,7 +35,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # This scout fly box can be broken with the locked blue eco vent, or by normal combat tricks.
     main_area.add_fly_locations([393236], access_rule=lambda state:
                                 state.has("Blue Eco Switch", player)
-                                or can_free_scout_flies(state, player))
+                                or world.can_free_scout_flies(state, player))
 
     # No need for the blue eco vent for either of the orb caches.
     main_area.add_cache_locations([12634, 12635])
@@ -55,9 +44,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     if options.sentinel_beach_attackless_pelican:
         # Pelican power cell can be acquired by shooting the Pelican if the tower is accessible (no fight abilities needed)
         pelican.add_cell_locations([16], access_rule=lambda state:
-                                   can_fight_or_roll_jump(state, player) or can_reach_cannon(state, player))
+                                   world.can_fight_or_roll_jump(state, player) or can_reach_cannon(state, player))
     else:
-        pelican.add_cell_locations([16], access_rule=lambda state: can_fight_or_roll_jump(state, player))
+        pelican.add_cell_locations([16], access_rule=lambda state: world.can_fight_or_roll_jump(state, player))
 
     # Only these specific attacks can push the flut flut egg off the cliff.
     flut_flut_egg = JakAndDaxterRegion("Flut Flut Egg", player, multiworld, level_name, 0)
@@ -67,15 +56,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                         state.has_any(("Punch", "Kick", "Jump Kick"), player))
 
     eco_harvesters = JakAndDaxterRegion("Eco Harvesters", player, multiworld, level_name, 0)
-    eco_harvesters.add_cell_locations([15], access_rule=lambda state: can_fight_or_roll_jump(state, player))
+    eco_harvesters.add_cell_locations([15], access_rule=lambda state: world.can_fight_or_roll_jump(state, player))
 
     green_ridge = JakAndDaxterRegion("Ridge Near Green Vents", player, multiworld, level_name, 5)
-    green_ridge.add_fly_locations([131092], access_rule=lambda state: can_free_scout_flies(state, player))
+    green_ridge.add_fly_locations([131092], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     blue_ridge = JakAndDaxterRegion("Ridge Near Blue Vent", player, multiworld, level_name, 5)
     blue_ridge.add_fly_locations([196628], access_rule=lambda state:
                                  state.has("Blue Eco Switch", player)
-                                 or can_free_scout_flies(state, player))
+                                 or world.can_free_scout_flies(state, player))
 
     rock_spires = JakAndDaxterRegion("Rock Spires", player, multiworld, level_name, 12)
 
@@ -84,7 +73,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         # It's possible to shoot the lurkers with their own cannon (or jump on them with the blue eco launcher)
         cannon_tower.add_cell_locations([19])
     else:
-        cannon_tower.add_cell_locations([19], access_rule=lambda state: can_fight_or_roll_jump(state, player))
+        cannon_tower.add_cell_locations([19], access_rule=lambda state: world.can_fight_or_roll_jump(state, player))
 
     main_area.connect(pelican)           # Swim and jump.
     main_area.connect(flut_flut_egg)     # Run and jump.

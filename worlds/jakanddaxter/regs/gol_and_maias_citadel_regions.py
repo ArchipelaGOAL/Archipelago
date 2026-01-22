@@ -4,7 +4,7 @@ from ..options import EnableOrbsanity, CompletionCondition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
+from ..rules import can_fight, can_reach_orbs_level
 
 
 # God help me... here we go.
@@ -12,8 +12,6 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     multiworld = world.multiworld
     options = world.options
     player = world.player
-
-    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     # This level is full of short-medium gaps that cannot be crossed by single jump alone. If you have the boosted
     # and extended uppercut option on, those moves are added as part of the function definition. We do NOT want to
@@ -34,10 +32,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
                 or state.has_all(("Crouch", "Crouch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
-    main_area.add_fly_locations([91], access_rule=lambda state: can_free_scout_flies(state, player))
+    main_area.add_fly_locations([91], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     robot_scaffolding = JakAndDaxterRegion("Scaffolding Around Robot", player, multiworld, level_name, 3)
-    robot_scaffolding.add_fly_locations([196699], access_rule=lambda state: can_free_scout_flies(state, player))
+    robot_scaffolding.add_fly_locations([196699], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     jump_pad_room = JakAndDaxterRegion("Jump Pad Chamber", player, multiworld, level_name, 88)
     jump_pad_room.add_cell_locations([73], access_rule=lambda state: can_fight(state, player))
@@ -48,7 +46,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     yellow_sage_scaffolding = JakAndDaxterRegion("Scaffolding Around Yellow Sage",
                                                  player, multiworld, level_name, 0)
     yellow_sage_scaffolding.add_fly_locations([65627], access_rule=lambda state:
-                                              can_free_scout_flies(state, player))
+                                              world.can_free_scout_flies(state, player))
 
     blast_furnace = JakAndDaxterRegion("Blast Furnace", player, multiworld, level_name, 44)
     blast_furnace.add_cell_locations([71], access_rule=lambda state: can_fight(state, player))
@@ -58,7 +56,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # Does not include the orbs in the U turn itself, those belong to bunny room.
     u_turn_room = JakAndDaxterRegion("U-Turn Room", player, multiworld, level_name, 0)
-    u_turn_room.add_fly_locations([262235], access_rule=lambda state: can_free_scout_flies(state, player))
+    u_turn_room.add_fly_locations([262235], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     bunny_room = JakAndDaxterRegion("Bunny Chamber", player, multiworld, level_name, 45)
     bunny_room.add_cell_locations([72], access_rule=lambda state: can_fight(state, player))
@@ -67,7 +65,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     rotating_tower = JakAndDaxterRegion("Rotating Tower", player, multiworld, level_name, 20)
     rotating_tower.add_cell_locations([70], access_rule=lambda state: can_fight(state, player))
     rotating_tower.add_special_locations([70], access_rule=lambda state: can_fight(state, player))
-    rotating_tower.add_fly_locations([327771], access_rule=lambda state: can_free_scout_flies(state, player))
+    rotating_tower.add_fly_locations([327771], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     final_boss = JakAndDaxterRegion("Final Boss", player, multiworld, level_name, 0)
 

@@ -21,7 +21,7 @@ if typing.TYPE_CHECKING:
     from . import JakAndDaxterWorld
 
 
-def set_orb_trade_rule(world: "JakAndDaxterWorld"):
+def set_option_driven_rules(world: "JakAndDaxterWorld"):
     options = world.options
     player = world.player
 
@@ -31,6 +31,23 @@ def set_orb_trade_rule(world: "JakAndDaxterWorld"):
     else:
         world.can_trade = lambda state, required_orbs, required_previous_trade: (
             can_trade_orbsanity(state, player, world, required_orbs, required_previous_trade))
+
+    if options.punch_uppercut_scout_flies:
+        world.can_free_scout_flies = lambda state, p: (
+            state.has("Jump Dive", p)
+            or state.has_all(("Crouch", "Crouch Uppercut"), p)
+            or state.has_all(("Punch", "Punch Uppercut"), p))
+    else:
+        world.can_free_scout_flies = lambda state, p: (
+            state.has("Jump Dive", p)
+            or state.has_all(("Crouch", "Crouch Uppercut"), p))
+
+    if options.attack_with_roll_jump:
+        world.can_fight_or_roll_jump = lambda state, p: (
+            can_fight(state, p)
+            or state.has_all(("Roll", "Roll Jump"), p))
+    else:
+        world.can_fight_or_roll_jump = can_fight
 
 
 def recalculate_reachable_orbs(state: CollectionState, player: int, world: "JakAndDaxterWorld") -> None:
@@ -125,25 +142,6 @@ def can_trade_orbsanity(state: CollectionState,
         return (state.has("Tradeable Orbs", player, required_orbs)
                 and state.can_reach_location(name_of_previous_trade, player=player))
     return state.has("Tradeable Orbs", player, required_orbs)
-
-
-def get_can_free_scout_flies_fn(options: JakAndDaxterOptions) -> Callable[[CollectionState, int], bool]:
-    """
-    Returns a function that can be used in access rules to check whether Jak can break scout fly boxes.
-    Depending on the options chosen, this function may allow different moves.
-    """
-
-    # We do not want to check the options every time the function is called, so we define different functions based on
-    # the options.
-    if options.punch_uppercut_scout_flies:
-        def can_free_scout_flies(state: CollectionState, player: int) -> bool:
-            return (state.has("Jump Dive", player) or state.has_all(("Crouch", "Crouch Uppercut"), player)
-                    or state.has_all(("Punch", "Punch Uppercut"), player))
-    else:
-        def can_free_scout_flies(state: CollectionState, player: int) -> bool:
-            return state.has("Jump Dive", player) or state.has_all(("Crouch", "Crouch Uppercut"), player)
-
-    return can_free_scout_flies
 
 
 def can_fight(state: CollectionState, player: int) -> bool:

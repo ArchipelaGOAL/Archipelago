@@ -3,15 +3,13 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
+from ..rules import can_fight, can_reach_orbs_level
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
     multiworld = world.multiworld
     options = world.options
     player = world.player
-
-    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 9)
 
@@ -21,7 +19,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         # Grabbing blue eco orbs and running back can reach this scout fly
         muse_course.add_fly_locations([327708])
     else:
-        muse_course.add_fly_locations([327708], access_rule=lambda state: can_free_scout_flies(state, player))
+        muse_course.add_fly_locations([327708], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     zoomer = JakAndDaxterRegion("Zoomer", player, multiworld, level_name, 32)
     zoomer.add_cell_locations([27, 29])
@@ -29,13 +27,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     ship = JakAndDaxterRegion("Ship", player, multiworld, level_name, 10)
     ship.add_cell_locations([24])
-    ship.add_fly_locations([131100], access_rule=lambda state: can_free_scout_flies(state, player))
+    ship.add_fly_locations([131100], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     far_side = JakAndDaxterRegion("Far Side", player, multiworld, level_name, 16)
 
     # In order to even reach this fly, you must use the seesaw or crouch jump.
     far_side_cliff = JakAndDaxterRegion("Far Side Cliff", player, multiworld, level_name, 5)
-    far_side_cliff.add_fly_locations([28], access_rule=lambda state: can_free_scout_flies(state, player))
+    far_side_cliff.add_fly_locations([28], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # To carry the blue eco fast enough to open this cache, you need to break the bone bridges along the way.
     far_side_cache = JakAndDaxterRegion("Far Side Orb Cache", player, multiworld, level_name, 15)
@@ -50,7 +48,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         # It's possible to break the scout fly by running into the explosive box next to it.
         barrel_course.add_fly_locations([196636])
     else:
-        barrel_course.add_fly_locations([196636], access_rule=lambda state: can_free_scout_flies(state, player))
+        barrel_course.add_fly_locations([196636], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # 14 orbs for the boxes you can only break with the cannon.
     cannon = JakAndDaxterRegion("Cannon", player, multiworld, level_name, 14)
@@ -66,7 +64,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         upper_approach.add_fly_locations([65564, 262172])
     else:
         upper_approach.add_fly_locations([65564, 262172], access_rule=lambda state:
-                                         can_free_scout_flies(state, player))
+                                         world.can_free_scout_flies(state, player))
 
     lower_approach = JakAndDaxterRegion("Lower Arena Approach", player, multiworld, level_name, 7)
     lower_approach.add_cell_locations([30])

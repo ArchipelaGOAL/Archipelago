@@ -37,7 +37,7 @@ from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
                     enforce_sp_limits,
-                    set_orb_trade_rule)
+                    set_option_driven_rules)
 from .locs import (cell_locations as cells,
                    scout_locations as scouts,
                    special_locations as specials,
@@ -248,6 +248,13 @@ class JakAndDaxterWorld(World):
     # These functions and variables are Options-driven, keep them as instance variables here so that we don't clog up
     # the seed generation routines with options checking. So we set these once, and then just use them as needed.
     can_trade: Callable[[CollectionState, int, int | None], bool]
+
+    can_fight_or_roll_jump: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can fight, including Roll Jump if the respective option is enabled."""
+
+    can_free_scout_flies: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can break scout fly boxes, depending on the chosen options."""
+
     total_orbs: int = 2000
     orb_bundle_item_name: str = ""
     orb_bundle_size: int = 0
@@ -352,8 +359,8 @@ class JakAndDaxterWorld(World):
 
         self.trap_weights = self.options.trap_weights.weights_pair
 
-        # Options drive which trade rules to use, so they need to be setup before we create_regions.
-        set_orb_trade_rule(self)
+        # Options drive which trade rules to use and advanced logic, so they need to be setup before we create_regions.
+        set_option_driven_rules(self)
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:

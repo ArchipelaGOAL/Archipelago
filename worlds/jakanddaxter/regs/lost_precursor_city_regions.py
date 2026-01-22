@@ -3,7 +3,7 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
+from ..rules import can_fight, can_reach_orbs_level
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
@@ -11,15 +11,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     options = world.options
     player = world.player
 
-    can_free_scout_flies = get_can_free_scout_flies_fn(options)
-
     # Just the starting area.
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 4)
 
     first_room_upper = JakAndDaxterRegion("First Chamber (Upper)", player, multiworld, level_name, 21)
 
     first_room_lower = JakAndDaxterRegion("First Chamber (Lower)", player, multiworld, level_name, 0)
-    first_room_lower.add_fly_locations([262193], access_rule=lambda state: can_free_scout_flies(state, player))
+    first_room_lower.add_fly_locations([262193], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     first_room_orb_cache = JakAndDaxterRegion("First Chamber Orb Cache", player, multiworld, level_name, 22)
 
@@ -28,7 +26,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                              state.has_all(("Jump Dive", "Double Jump"), player))
 
     first_hallway = JakAndDaxterRegion("First Hallway", player, multiworld, level_name, 10)
-    first_hallway.add_fly_locations([131121], access_rule=lambda state: can_free_scout_flies(state, player))
+    first_hallway.add_fly_locations([131121], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # This entire room is accessible with floating platforms and single jump.
     second_room = JakAndDaxterRegion("Second Chamber", player, multiworld, level_name, 28)
@@ -38,7 +36,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     second_room.add_fly_locations([49, 65585], access_rule=lambda state: state.has("Jump Dive", player))
 
     # This is the scout fly on the way to the pipe cell, requires normal breaking moves.
-    second_room.add_fly_locations([196657], access_rule=lambda state: can_free_scout_flies(state, player))
+    second_room.add_fly_locations([196657], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # This orb vent and scout fly are right next to each other, can be gotten with blue eco and the floating platforms.
     second_room.add_fly_locations([393265])

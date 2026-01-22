@@ -1,10 +1,9 @@
-from BaseClasses import CollectionState
 from .region_base import JakAndDaxterRegion
 from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_fight, can_reach_orbs_level, get_can_free_scout_flies_fn
+from ..rules import can_fight, can_reach_orbs_level
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDaxterRegion, ...]:
@@ -12,16 +11,6 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     options = world.options
     player = world.player
 
-    can_free_scout_flies = get_can_free_scout_flies_fn(options)
-
-    # Define a helper function for all locations that can be acquired by regular fight moves or roll jump
-    # We do not want to check the options each time we call those functions for performance reasons
-    if options.attack_with_roll_jump:
-        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
-            return can_fight(state, p) or state.has_all(("Roll", "Roll Jump"), p)
-    else:
-        def can_fight_or_roll_jump(state: CollectionState, p: int) -> bool:
-            return can_fight(state, p)
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 25)
 
@@ -30,7 +19,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     main_area.add_fly_locations([393223])
 
     lurker_machine = JakAndDaxterRegion("Lurker Machine", player, multiworld, level_name, 5)
-    lurker_machine.add_cell_locations([3], access_rule=lambda state: can_fight_or_roll_jump(state, player))
+    lurker_machine.add_cell_locations([3], access_rule=lambda state: world.can_fight_or_roll_jump(state, player))
 
     # This cell and this scout fly can both be gotten with the blue eco clusters near the jump pad.
     lurker_machine.add_cell_locations([9])
@@ -51,7 +40,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
         temple_exit.add_fly_locations([262151])
     else:
         # This fly is too far from accessible blue eco sources.
-        temple_exit.add_fly_locations([262151], access_rule=lambda state: can_free_scout_flies(state, player))
+        temple_exit.add_fly_locations([262151], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     temple_exterior = JakAndDaxterRegion("Temple Exterior", player, multiworld, level_name, 10)
 

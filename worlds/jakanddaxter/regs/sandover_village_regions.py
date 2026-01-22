@@ -3,15 +3,13 @@ from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
-from ..rules import can_reach_orbs_level, get_can_free_scout_flies_fn
+from ..rules import can_reach_orbs_level
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
     multiworld = world.multiworld
     options = world.options
     player = world.player
-
-    can_free_scout_flies = get_can_free_scout_flies_fn(options)
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 26)
 
@@ -31,13 +29,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         main_area.add_fly_locations([196683], access_rule=lambda state:
                                     state.has("Double Jump", player)
                                     or state.has_all(("Crouch", "Crouch Jump"), player)
-                                    or can_free_scout_flies(state, player))
+                                    or world.can_free_scout_flies(state, player))
 
     orb_cache_cliff = JakAndDaxterRegion("Orb Cache Cliff", player, multiworld, level_name, 15)
     orb_cache_cliff.add_cache_locations([10344])
 
     yakow_cliff = JakAndDaxterRegion("Yakow Cliff", player, multiworld, level_name, 3)
-    yakow_cliff.add_fly_locations([75], access_rule=lambda state: can_free_scout_flies(state, player))
+    yakow_cliff.add_fly_locations([75], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     oracle_platforms = JakAndDaxterRegion("Oracle Platforms", player, multiworld, level_name, 6)
     oracle_platforms.add_cell_locations([13], access_rule=lambda state:
@@ -45,7 +43,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     oracle_platforms.add_cell_locations([14], access_rule=lambda state:
                                         world.can_trade(state, world.total_trade_orbs, 13))
     oracle_platforms.add_fly_locations([393291], access_rule=lambda state:
-                                       can_free_scout_flies(state, player))
+                                       world.can_free_scout_flies(state, player))
 
     if options.sandover_village_cliff_orb_cache_climb:
         # It is possible to reach this cliff (and the blue Eco next to it) with a single jump
