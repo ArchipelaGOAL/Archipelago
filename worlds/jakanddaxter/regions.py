@@ -78,11 +78,7 @@ def create_regions(world: "JakAndDaxterWorld"):
     mp, mpr = mountain_pass.build_regions("Mountain Pass", world)
     vc = volcanic_crater.build_regions("Volcanic Crater", world)
     sc = spider_cave.build_regions("Spider Cave", world)
-
-    if options.snowy_mountain_flut_flut_escape:
-        sm = snowy_mountain.build_regions_with_flut_flut("Snowy Mountain", world)
-    else:
-        sm = snowy_mountain.build_regions("Snowy Mountain", world)
+    sm = snowy_mountain.build_regions("Snowy Mountain", world)
 
     lt = lava_tube.build_regions("Lava Tube", world)
     gmc, fb, fd = gol_and_maias_citadel.build_regions("Gol and Maia's Citadel", world)

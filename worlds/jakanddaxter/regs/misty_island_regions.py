@@ -37,11 +37,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # To carry the blue eco fast enough to open this cache, you need to break the bone bridges along the way.
     far_side_cache = JakAndDaxterRegion("Far Side Orb Cache", player, multiworld, level_name, 15)
-    if options.misty_island_early_far_side_orb_cache:
-        # It's possible to reach the orb cache without any attacks.
-        far_side_cache.add_cache_locations([11072])
-    else:
-        far_side_cache.add_cache_locations([11072], access_rule=lambda state: can_fight(state, player))
+    # All rules are already needed to reach the cache region (with the orbs in them).
+    far_side_cache.add_cache_locations([11072])
 
     barrel_course = JakAndDaxterRegion("Barrel Course", player, multiworld, level_name, 10)
     if options.misty_island_attackless_scout_flies:
@@ -101,8 +98,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                      state.has("Jump Dive", player)
                      or state.has_all(("Crouch", "Crouch Jump"), player))
 
-    # Only if you can break the bone bridges to carry blue eco over the mud pit.
-    far_side.connect(far_side_cache, rule=lambda state: can_fight(state, player))
+    if options.misty_island_early_far_side_orb_cache:
+        # Only if you can break the bone bridges to carry blue eco over the mud pit.
+        far_side.connect(far_side_cache, rule=lambda state: can_fight(state, player))
+    else:
+        # It's possible to reach the orb cache without any attacks.
+        far_side.connect(far_side_cache)
 
     far_side_cliff.connect(far_side)           # Run and jump down.
 
