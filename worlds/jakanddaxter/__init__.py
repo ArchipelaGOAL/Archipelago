@@ -96,6 +96,8 @@ class JakAndDaxterWebWorld(WebWorld):
     tutorials = [setup_en]
     bug_report_page = "https://github.com/ArchipelaGOAL/Archipelago/issues"
 
+    rich_text_options_doc = True
+
     option_groups = [
         OptionGroup("Orbsanity", [
             options.EnableOrbsanity,

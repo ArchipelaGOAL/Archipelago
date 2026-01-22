@@ -100,7 +100,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     rock_spires.connect(cannon_tower)
 
     # An advanced way of reaching the cannon tower without Blue Eco Switch.
-    if options.sentinel_beach_cannon_tower_climb != SentinelBeachCannonTowerClimb.option_off:
+    if options.sentinel_beach_cannon_tower_climb != SentinelBeachCannonTowerClimb.option_no:
         main_area.connect(cannon_tower, rule=lambda state: can_climb_cannon_tower(state, player))
 
     # All these can go back to main_area immediately.
