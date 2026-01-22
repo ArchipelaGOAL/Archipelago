@@ -96,6 +96,8 @@ class JakAndDaxterWebWorld(WebWorld):
     tutorials = [setup_en]
     bug_report_page = "https://github.com/ArchipelaGOAL/Archipelago/issues"
 
+    rich_text_options_doc = True
+
     option_groups = [
         OptionGroup("Orbsanity", [
             options.EnableOrbsanity,
@@ -113,35 +115,36 @@ class JakAndDaxterWebWorld(WebWorld):
             options.OracleOrbTradeAmount,
         ]),
         OptionGroup("Tricks & Glitches - Easy", [
-            options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets
-            options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon
-            options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon
+            options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
+            options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
+            options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon.
         ]),
         OptionGroup("Tricks & Glitches - Medium", [
-            options.PunchUppercutScoutFlies,  # Some may be a little tricky
-            options.GeyserRockCliffClimb, # You have to know where to jump, but the jump is not terribly difficult
-            options.SandoverVillageCliffOrbCacheClimb, # Same here
-            options.SentinelBeachCannonTowerClimb, # Medium with Double Jump, hard with Jump Kick only
-            options.ForbiddenJungleElevatorSkip, # Deload glitch is easy, but hitting the loading zone can be tricky
-            options.MistyIslandEarlyFarSideOrbCache, # Precise movement, but not too hard
-            options.MistyIslandArenaFightSkip, # Drop down from top or use cannon to shoot enemies
-            options.MistyIslandFarSideCliffSeesawSkip, # Relatively easy, but route is not obvious
-            options.RockVillageEarlyOrbCache, # Precise movement, but not too hard, fast retries possible
-            options.RockVillagePontoonSkip, # May require fast swimming, but not too tight
-            options.KlawwCliffClimb, # Easy when out of bounds spot is known
-            options.KlawwBoulderSkip, # Same trick as above
-            options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint
-            options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over
-            options.SnowyMountainFlutFlutEscape,
+            options.PunchUppercutScoutFlies,  # Some may be a little tricky.
+            options.GeyserRockCliffClimb, # You have to know where to jump, but the jump is not terribly difficult.
+            options.SandoverVillageCliffOrbCacheClimb, # Same here.
+            options.SentinelBeachCannonTowerClimb, # Medium with Double Jump, hard with Jump Kick only.
+            options.ForbiddenJungleElevatorSkip, # Deload glitch is easy, but hitting the loading zone can be tricky.
+            options.MistyIslandEarlyFarSideOrbCache, # Precise movement, but not too hard.
+            options.MistyIslandArenaFightSkip, # Drop down from top or use cannon to shoot enemies.
+            options.MistyIslandFarSideCliffSeesawSkip, # Relatively easy, but route is not obvious.
+            options.RockVillageEarlyOrbCache, # Precise movement, but not too hard, fast retries possible.
+            options.RockVillagePontoonSkip, # May require fast swimming, but not too tight.
+            options.KlawwCliffClimb, # Easy when out of bounds spot is known.
+            options.KlawwBoulderSkip, # Same trick as above.
+            options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint.
+            options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over.
+            options.SnowyMountainFlutFlutSkip, # Easily reachable by Zoom Walking.
         ]),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
-            options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell
-            options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback
-            options.BoggySwampFlutFlutEscape, # Harder trick, long runback
-            options.BoggySwampAttacklessAmbush, # Doing the lurker ambush without attacks is annoying (and hard)
-            options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping
-            options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard
+            options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell.
+            options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback.
+            options.BoggySwampFlutFlutEscape, # Harder trick, long runback.
+            options.BoggySwampAttacklessAmbush, # Doing the lurker ambush without attacks is annoying (and hard).
+            options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping.
+            options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard.
+            options.SnowyMountainFlutFlutEscape,  # Escaping is easy, doing the whole level can be tricky though.
         ]),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,
