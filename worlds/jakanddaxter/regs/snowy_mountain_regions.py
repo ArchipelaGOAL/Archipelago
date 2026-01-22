@@ -28,10 +28,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     elif options.snowy_mountain_entrance_climb == SnowyMountainEntranceClimb.option_medium:
         # Double Jump or Crouch Jump to slide on the left ledge.
         def can_cross_first_gap(state: CollectionState, p: int) -> bool:
-            return (state.has("Double Jump", p)
+            return (state.has("Double Jump", p) # Includes Double Jump + Jump Kick from default logic.
                     or state.has_all(("Crouch", "Crouch Jump"), p)
                     or state.has_all(("Roll", "Roll Jump"), p)
-                    or state.has_all(("Double Jump", "Jump Kick"), p)
                     or can_do_boosted(state, p))
     else:
         # Cross the gap by jumping over it.
@@ -109,10 +108,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Flut Flut Course, only reachable when Flut Flut is unlocked.
     flut_flut_course = JakAndDaxterRegion("Flut Flut Course", player, multiworld, level_name, 15)
 
-    # Flut Flut course finish may be reached early with advanced movement, without collecting orbs on the course.
-    flut_flut_course_finish = JakAndDaxterRegion("Flut Flut Course Finish", player, multiworld, level_name, 0)
-    flut_flut_course_finish.add_cell_locations([63])
-    flut_flut_course_finish.add_special_locations([63])
+    # Fort Gate Button may be reached early with advanced movement, without collecting orbs on the course.
+    fort_gate_button = JakAndDaxterRegion("Fort Gate Button", player, multiworld, level_name, 0)
+    fort_gate_button.add_cell_locations([63])
+    fort_gate_button.add_special_locations([63])
 
     # Includes the bridge from snowball_canyon, the area beneath that bridge, and the areas around the fort.
     fort_exterior = JakAndDaxterRegion("Fort Exterior", player, multiworld, level_name, 20)
@@ -198,7 +197,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                           or can_free_flut_flut(state, player))
 
     if options.snowy_mountain_flut_flut_skip:
-        fort_exterior.connect(flut_flut_course_finish)                          # Zoom walk down.
+        fort_exterior.connect(fort_gate_button)                          # Zoom walk down.
 
     fort_interior.connect(fort_interior_caches, rule=lambda state:              # Just need a little height.
                           state.has("Double Jump", player)
@@ -213,8 +212,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                           or state.has_all(("Punch", "Punch Uppercut"), player)
                           or can_free_flut_flut(state, player))
 
-    flut_flut_course.connect(flut_flut_course_finish)                           # One way only.
-    flut_flut_course_finish.connect(fort_exterior)                              # Ride the elevator.
+    flut_flut_course.connect(fort_gate_button)                           # One way only.
+    fort_gate_button.connect(fort_exterior)                              # Ride the elevator.
 
     # Must fight way through cave, but there is also a grab-less ledge we must jump over.
     bunny_cave_start.connect(bunny_cave_end, rule=lambda state:
@@ -239,7 +238,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     world.level_to_regions[level_name].append(frozen_box_cave_crates)
     world.level_to_regions[level_name].append(ice_skating_rink)
     world.level_to_regions[level_name].append(flut_flut_course)
-    world.level_to_regions[level_name].append(flut_flut_course_finish)
+    world.level_to_regions[level_name].append(fort_gate_button)
     world.level_to_regions[level_name].append(fort_exterior)
     world.level_to_regions[level_name].append(bunny_cave_start)
     world.level_to_regions[level_name].append(bunny_cave_end)

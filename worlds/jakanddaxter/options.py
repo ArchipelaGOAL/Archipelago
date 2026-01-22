@@ -391,7 +391,7 @@ class SnowyMountainFlutFlutEscape(Toggle):
 class SnowyMountainFlutFlutSkip(Toggle):
     """
     Create an alternative path to the end of the Flut Flut course in Snowy Mountain. Enabling this setting may require
-    Jak to use advanced movement tricks to reach the end of the Flut Flut course with only Single Jump and no Flut Flut.
+    Jak to use advanced movement tricks to reach the Fort Gate Button with only Single Jump and no Flut Flut.
     """
     display_name = "Snowy Mountain Flut Flut Skip"
 
