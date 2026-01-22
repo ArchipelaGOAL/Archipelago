@@ -19,11 +19,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     if options.boosted_and_extended_uppercuts:
         def can_jump_farther(state: CollectionState, p: int) -> bool:
             return (state.has_any(("Double Jump", "Jump Kick"), p)
+                    or state.has_all(("Punch", "Punch Uppercut"), p)
                     or state.has_all(("Roll", "Roll Jump"), p))
     else:
         def can_jump_farther(state: CollectionState, p: int) -> bool:
             return (state.has_any(("Double Jump", "Jump Kick"), p)
-                    or state.has_all(("Punch", "Punch Uppercut"), p)
                     or state.has_all(("Roll", "Roll Jump"), p))
 
     def can_jump_stairs(state: CollectionState, p: int) -> bool:
