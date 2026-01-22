@@ -33,6 +33,7 @@ from .locations import (JakAndDaxterLocation,
                         special_location_table,
                         cache_location_table,
                         orb_location_table)
+from .options import jakanddaxter_option_presets
 from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
@@ -98,6 +99,7 @@ class JakAndDaxterWebWorld(WebWorld):
 
     rich_text_options_doc = True
 
+    options_presets = jakanddaxter_option_presets
     option_groups = [
         OptionGroup("Orbsanity", [
             options.EnableOrbsanity,
