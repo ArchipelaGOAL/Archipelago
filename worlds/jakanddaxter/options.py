@@ -333,6 +333,8 @@ class BoostedAndExtendedUppercuts(Toggle):
 
     Enabling this setting may require Jak to use boosted and extended uppercuts as opposed to regular movement options.
 
+    It may also require Jak to use uneven geometry, or missing collision boxes to reach unintended locations.
+
     This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "Boosted and Extended Uppercuts"
@@ -632,6 +634,25 @@ class LostPrecursorCitySingleJumpSlideTubeClimb(Toggle):
     display_name = "Lost Precursor City Single Jump Slide Tube Climb"
 
 
+class SnowyMountainFortGateSkip(Choice):
+    """
+    Create an alternative path into the Snowy Mountain Fort Gate without having *Snowy Fort Gate* unlocked.
+
+    Enabling this setting may require Jak to use uneven geometry and precise movement, or *Flut Flut* to enter the Fort
+    in Snowy Mountain.
+
+    **On Foot**: Fort is reachable after many movement options are unlocked.
+
+    **Flut Flut**: Fort is reachable after *Flut Flut* is unlocked.
+    """
+    display_name = "Snowy Mountain Fort Gate Skip"
+
+    option_no = 0
+    option_on_foot = 1
+    option_flut_flut = 2
+    option_both = 3
+
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -688,6 +709,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     boggy_swamp_attackless_ambush: BoggySwampAttacklessAmbush
     boggy_swamp_flut_flut_skip: BoggySwampFlutFlutSkip
     lost_precursor_city_single_jump_slide_tube_climb: LostPrecursorCitySingleJumpSlideTubeClimb
+    snowy_mountain_fort_gate_skip: SnowyMountainFortGateSkip
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 
@@ -750,5 +772,6 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_flut_flut_skip": True,
         "lost_precursor_city_single_jump_slide_tube_climb": True,
         "snowy_mountain_flut_flut_escape": True,
+        "snowy_mountain_fort_gate_skip": SnowyMountainFortGateSkip.option_both,
     }
 }
