@@ -1,6 +1,6 @@
 from BaseClasses import CollectionState
 from .region_base import JakAndDaxterRegion
-from ..options import EnableOrbsanity, SnowyMountainEntranceClimb
+from ..options import EnableOrbsanity, SnowyMountainEntranceClimb, SnowyMountainFortGateSkip
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
@@ -43,7 +43,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # When Flut Flut can be reached, it can reach everything in the whole level.
     if options.snowy_mountain_flut_flut_escape:
         def can_free_flut_flut(state: CollectionState, p: int) -> bool:
-            return can_cross_first_gap(state, p)
+            return can_cross_first_gap(state, p) and state.has("Flut Flut", p)
     else:
         def can_free_flut_flut(_: CollectionState, __: int) -> bool:
             return False
@@ -189,8 +189,30 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     fort_exterior.connect(ice_skating_rink)                                     # Twin elevators OR scout fly ledge
                                                                                 # Elevators can be done with Single Jump
     fort_exterior.connect(snowball_canyon)                                      # Run across bridge.
-    fort_exterior.connect(fort_interior, rule=lambda state:                     # Duh.
-                          state.has("Snowy Fort Gate", player))
+
+    # Alternative ways to enter the Fort.
+    gate_skip_option = options.snowy_mountain_fort_gate_skip
+    has_both_gate_skips = gate_skip_option == SnowyMountainFortGateSkip.option_both
+    # Enter Fort on foot.
+    if has_both_gate_skips or gate_skip_option == SnowyMountainFortGateSkip.option_on_foot:
+        def can_enter_fort_on_foot(state: CollectionState, p: int) -> bool:
+            return state.has_all(("Crouch", "Crouch Jump", "Jump Kick", "Double Jump", "Punch", "Punch Uppercut"), p)
+    else:
+        def can_enter_fort_on_foot(_: CollectionState, __: int) -> bool:
+            return False
+    # Enter Fort with Flut Flut.
+    if has_both_gate_skips or gate_skip_option == SnowyMountainFortGateSkip.option_flut_flut:
+        def can_enter_fort_with_flut_flut(state: CollectionState, p: int) -> bool:
+            return can_free_flut_flut(state, p)
+    else:
+        def can_enter_fort_with_flut_flut(_: CollectionState, __: int) -> bool:
+            return False
+
+    fort_exterior.connect(fort_interior, rule=lambda state:
+                          state.has("Snowy Fort Gate", player)
+                          or can_enter_fort_on_foot(state, player)
+                          or can_enter_fort_with_flut_flut(state, player))
+
     fort_exterior.connect(bunny_cave_start)                                     # Run across bridge.
     fort_exterior.connect(switch_cave, rule=lambda state:                       # Yes, blocker jumps work here.
                           can_jump_blockers(state, player)

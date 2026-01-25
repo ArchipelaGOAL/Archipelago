@@ -120,7 +120,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
             options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon.
-        ]),
+        ], True),
         OptionGroup("Tricks & Glitches - Medium", [
             options.PunchUppercutScoutFlies,  # Some may be a little tricky.
             options.GeyserRockCliffClimb, # You have to know where to jump, but the jump is not terribly difficult.
@@ -137,7 +137,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint.
             options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over.
             options.SnowyMountainFlutFlutSkip, # Easily reachable by Zoom Walking.
-        ]),
+        ], True),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
             options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell.
@@ -147,7 +147,8 @@ class JakAndDaxterWebWorld(WebWorld):
             options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping.
             options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard.
             options.SnowyMountainFlutFlutEscape,  # Escaping is easy, doing the whole level can be tricky though.
-        ]),
+            options.SnowyMountainFortGateSkip, # Getting into the Fort without an open gate is always hard.
+        ], True),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,
             options.FillerOrbBundlesReplacedWithTraps,
@@ -551,5 +552,33 @@ class JakAndDaxterWorld(World):
                                             "trap_weights",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
+                                            # Tricks & Glitches
+                                            "boosted_and_extended_uppercuts",
+                                            "punch_uppercut_scout_flies",
+                                            "geyser_rock_cliff_climb",
+                                            "sentinel_beach_cannon_tower_climb",
+                                            "snowy_mountain_entrance_climb",
+                                            "boggy_swamp_flut_flut_escape",
+                                            "snowy_mountain_flut_flut_escape",
+                                            "snowy_mountain_flut_flut_skip",
+                                            "sandover_village_cliff_orb_cache_climb",
+                                            "attackless_lurker_cannons",
+                                            "sentinel_beach_attackless_pelican",
+                                            "attack_with_roll_jump",
+                                            "forbidden_jungle_attackless_spiral_stumps_scout_fly",
+                                            "forbidden_jungle_elevator_skip",
+                                            "misty_island_early_far_side_orb_cache",
+                                            "misty_island_attackless_scout_flies",
+                                            "misty_island_arena_fight_skip",
+                                            "misty_island_far_side_cliff_seesaw_skip",
+                                            "rock_village_early_orb_cache",
+                                            "rock_village_pontoon_skip",
+                                            "klaww_cliff_climb",
+                                            "klaww_boulder_skip",
+                                            "boggy_swamp_precise_movement",
+                                            "boggy_swamp_attackless_ambush",
+                                            "boggy_swamp_flut_flut_skip",
+                                            "lost_precursor_city_single_jump_slide_tube_climb",
+                                            "snowy_mountain_fort_gate_skip",
                                             )
         return options_dict
