@@ -303,10 +303,11 @@ class FillerOrbBundlesReplacedWithTraps(Range):
 
 class TrapEffectDuration(Range):
     """
-    The length of time, in seconds, that a trap effect lasts.
+    The length of time, in seconds, that a trap effect lasts. If set to 0, trap items will still be created to replace
+    filler items, but they will have no effect ingame.
     """
     display_name = "Trap Effect Duration"
-    range_start = 5
+    range_start = 0
     range_end = 60
     default = 30
 
