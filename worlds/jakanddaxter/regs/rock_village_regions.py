@@ -30,7 +30,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     orb_cache = JakAndDaxterRegion("Orb Cache", player, multiworld, level_name, 20)
 
-    if options.rock_village_early_orb_cache:
+    if options.rock_village_single_jump_orb_cache:
         # It is possible to just reach the orb cache with blue eco without roll jump.
         orb_cache.add_cache_locations([10945])
     else:
@@ -46,7 +46,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     klaww_cliff = JakAndDaxterRegion("Klaww's Cliff", player, multiworld, level_name, 0)
 
-    if options.rock_village_early_orb_cache:
+    if options.rock_village_single_jump_orb_cache:
         # It is possible to just reach the orb cache with blue eco without roll jump.
         main_area.connect(orb_cache)
     else:

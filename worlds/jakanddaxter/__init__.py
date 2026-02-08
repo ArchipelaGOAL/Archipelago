@@ -127,10 +127,10 @@ class JakAndDaxterWebWorld(WebWorld):
             options.SandoverVillageCliffOrbCacheClimb, # Same here.
             options.SentinelBeachCannonTowerClimb, # Medium with Double Jump, hard with Jump Kick only.
             options.ForbiddenJungleElevatorSkip, # Deload glitch is easy, but hitting the loading zone can be tricky.
-            options.MistyIslandEarlyFarSideOrbCache, # Precise movement, but not too hard.
+            options.MistyIslandSingleJumpFarSideOrbCache, # Precise movement, but not too hard.
             options.MistyIslandArenaFightSkip, # Drop down from top or use cannon to shoot enemies.
             options.MistyIslandFarSideCliffSeesawSkip, # Relatively easy, but route is not obvious.
-            options.RockVillageEarlyOrbCache, # Precise movement, but not too hard, fast retries possible.
+            options.RockVillageSingleJumpOrbCache, # Precise movement, but not too hard, fast retries possible.
             options.RockVillagePontoonSkip, # May require fast swimming, but not too tight.
             options.KlawwCliffClimb, # Easy when out of bounds spot is known.
             options.KlawwBoulderSkip, # Same trick as above.
@@ -140,14 +140,17 @@ class JakAndDaxterWebWorld(WebWorld):
         ], True),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
+            options.SentinelBeachBlueEcoSwitchSkip, # Precise movement required.
             options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell.
             options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback.
             options.BoggySwampFlutFlutEscape, # Harder trick, long runback.
-            options.BoggySwampAttacklessAmbush, # Doing the lurker ambush without attacks is annoying (and hard).
             options.BoggySwampFlutFlutSkip, # Flut Flut course with only Roll Jump requires precise jumping.
-            options.LostPrecursorCitySingleJumpSlideTubeClimb, # Climbing the tube without attacks/moves is hard.
             options.SnowyMountainFlutFlutEscape,  # Escaping is easy, doing the whole level can be tricky though.
-            options.SnowyMountainFortGateSkip, # Getting into the Fort without an open gate is always hard.
+        ], True),
+        OptionGroup("Tricks & Glitches - Very Hard", [
+            options.BoggySwampAttacklessAmbush,  # Doing the lurker ambush without attacks is annoying (and hard).
+            options.LostPrecursorCitySingleJumpSlideTubeClimb,  # Climbing the tube without attacks/moves is hard.
+            options.SnowyMountainFortGateSkip,  # Getting into the Fort without an open gate is always very hard.
         ], True),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,
@@ -260,6 +263,12 @@ class JakAndDaxterWorld(World):
 
     can_free_scout_flies: Callable[[CollectionState, int], bool]
     """Returns true if Jak can break scout fly boxes, depending on the chosen options."""
+
+    can_do_boosted: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can do a boosted, using Punch + Punch Uppercut."""
+
+    can_do_boosted_extended: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can do a boosted, using Punch + Punch Uppercut + Jump Kick."""
 
     total_orbs: int = 2000
     orb_bundle_item_name: str = ""
@@ -567,11 +576,11 @@ class JakAndDaxterWorld(World):
                                             "attack_with_roll_jump",
                                             "forbidden_jungle_attackless_spiral_stumps_scout_fly",
                                             "forbidden_jungle_elevator_skip",
-                                            "misty_island_early_far_side_orb_cache",
+                                            "misty_island_single_jump_far_side_orb_cache",
                                             "misty_island_attackless_scout_flies",
                                             "misty_island_arena_fight_skip",
                                             "misty_island_far_side_cliff_seesaw_skip",
-                                            "rock_village_early_orb_cache",
+                                            "rock_village_single_jump_orb_cache",
                                             "rock_village_pontoon_skip",
                                             "klaww_cliff_climb",
                                             "klaww_boulder_skip",
@@ -580,5 +589,6 @@ class JakAndDaxterWorld(World):
                                             "boggy_swamp_flut_flut_skip",
                                             "lost_precursor_city_single_jump_slide_tube_climb",
                                             "snowy_mountain_fort_gate_skip",
+                                            "sentinel_beach_blue_eco_switch_skip",
                                             )
         return options_dict
