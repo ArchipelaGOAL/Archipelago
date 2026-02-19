@@ -86,15 +86,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
         # Requires Jungle Elevator.
         temple_exterior.connect(temple_int_pre_blue, rule=lambda state: state.has("Jungle Elevator", player))
 
-    if options.boosted_and_extended_uppercuts:
-        # It is possible to reach the boss by jumping through a collision hole above the door.
-        # After defeating the boss, it's possible to go back with blue eco and grab everything (including jump pads).
-        temple_int_pre_blue.connect(temple_int_post_blue, rule=lambda state:
-                                    state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player)
-                                    or state.has("Blue Eco Switch", player))
-    else:
-        # Requires Blue Eco Switch.
-        temple_int_pre_blue.connect(temple_int_post_blue, rule=lambda state: state.has("Blue Eco Switch", player))
+    # It is possible to reach the boss by jumping through a collision hole above the door, using boosteds.
+    # After defeating the boss, it's possible to go back with blue eco and grab everything (including jump pads).
+    temple_int_pre_blue.connect(temple_int_post_blue, rule=lambda state:
+                                world.can_do_boosted_extended(state, player)
+                                or state.has("Blue Eco Switch", player))
 
     # Requires defeating the plant boss (combat).
     temple_int_post_blue.connect(temple_plant_boss_defeated, rule=lambda state: can_fight(state, player))

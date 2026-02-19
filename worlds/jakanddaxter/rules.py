@@ -49,6 +49,17 @@ def set_option_driven_rules(world: "JakAndDaxterWorld"):
     else:
         world.can_fight_or_roll_jump = can_fight
 
+    if options.boosted_and_extended_uppercuts:
+        world.can_do_boosted = lambda state, p: (
+            state.has_all(("Punch", "Punch Uppercut"), p)
+        )
+        world.can_do_boosted_extended = lambda state, p: (
+            state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), p)
+        )
+    else:
+        world.can_do_boosted = lambda state, p: False
+        world.can_do_boosted_extended = lambda state, p: False
+
 
 def recalculate_reachable_orbs(state: CollectionState, player: int, world: "JakAndDaxterWorld") -> None:
 
