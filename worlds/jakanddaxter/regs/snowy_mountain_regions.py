@@ -14,13 +14,6 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     player = world.player
 
     # First, define helper functions to determine if Jak can actually get anywhere.
-    if options.boosted_and_extended_uppercuts:
-        def can_do_boosted(state: CollectionState, p: int) -> bool:
-            return state.has_all(("Punch", "Punch Uppercut"), p)
-    else:
-        def can_do_boosted(_: CollectionState, __: int) -> bool:
-            return False
-
     if options.snowy_mountain_entrance_climb == SnowyMountainEntranceClimb.option_hard:
         # Single Jump is enough to slide on the left ledge by getting attacked while jumping next to it.
         def can_cross_first_gap(_: CollectionState, __: int) -> bool:
@@ -31,13 +24,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
             return (state.has("Double Jump", p) # Includes Double Jump + Jump Kick from default logic.
                     or state.has_all(("Crouch", "Crouch Jump"), p)
                     or state.has_all(("Roll", "Roll Jump"), p)
-                    or can_do_boosted(state, p))
+                    or world.can_do_boosted(state, p))
     else:
         # Cross the gap by jumping over it.
         def can_cross_first_gap(state: CollectionState, p: int) -> bool:
             return (state.has_all(("Roll", "Roll Jump"), p)
                     or state.has_all(("Double Jump", "Jump Kick"), p)
-                    or can_do_boosted(state, p))
+                    or world.can_do_boosted(state, p))
 
     # Helper function that returns true if Jak can reach and free Flut Flut.
     # When Flut Flut can be reached, it can reach everything in the whole level.
@@ -51,7 +44,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     def can_cross_medium_gap(state: CollectionState, p: int) -> bool:
         return (state.has_any(("Double Jump", "Jump Kick"), p)
                 or state.has_all(("Roll", "Roll Jump"), p)
-                or can_do_boosted(state, p))
+                or world.can_do_boosted(state, p))
 
     def can_jump_blockers(state: CollectionState, p: int) -> bool:
         return (state.has_any(("Double Jump", "Jump Kick"), p)

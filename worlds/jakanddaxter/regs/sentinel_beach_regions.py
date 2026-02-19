@@ -25,17 +25,22 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     def can_reach_cannon(state: CollectionState, p: int) -> bool:
         return state.has("Blue Eco Switch", p) or can_climb_cannon_tower(state, p)
 
-    # There is an open blue eco vent on the rock spires, which will allow you to open all the orb crates on the spires,
-    # the scout fly on "blue ridge", and the scout fly on the sentinel. You can get on the spires one of two ways:
-    # use the locked blue eco vent on the beach, or you can climb the cannon tower and boosted uppercut to the spires.
-    if options.boosted_and_extended_uppercuts:
-        def can_reach_rock_spires(state: CollectionState, p: int) -> bool:
+    if options.sentinel_beach_blue_eco_switch_skip:
+        # It's possible to grab the Blue Eco Vent with just Punch or Roll Jump by using an optimized route from the
+        # blue eco to the Flut Flut egg.
+        def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
             return (state.has("Blue Eco Switch", p)
-                    or (can_climb_cannon_tower(state, p)
-                        and state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), p)))
+                    or (can_climb_cannon_tower(state, p) and world.can_do_boosted_extended(state, p))
+                    or state.has("Punch", p)
+                    or state.has_all(("Roll", "Roll Jump"), p))
     else:
-        def can_reach_rock_spires(state: CollectionState, p: int) -> bool:
-            return state.has("Blue Eco Switch", p)
+        # There is an open blue eco vent on the rock spires, which will allow you to open all the orb crates on the spires,
+        # the scout fly on "blue ridge", and the scout fly on the sentinel. You can get on the spires one of two ways:
+        # use the locked blue eco vent on the beach, or you can climb the cannon tower and boosted uppercut to the spires.
+
+        def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
+            return (state.has("Blue Eco Switch", p)
+                    or (can_climb_cannon_tower(state, p) and world.can_do_boosted_extended(state, p)))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 128)
     main_area.add_cell_locations([18, 21, 22])
@@ -47,7 +52,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # This scout fly box can be broken with an open blue eco vent (locked one on beach or open one on rock spires),
     # or by normal combat tricks.
     main_area.add_fly_locations([393236], access_rule=lambda state:
-                                can_reach_rock_spires(state, player)
+                                can_reach_blue_eco_vent(state, player)
                                 or world.can_free_scout_flies(state, player))
 
     # No need for the blue eco vent for either of the orb caches.
@@ -76,9 +81,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     green_ridge = JakAndDaxterRegion("Ridge Near Green Vents", player, multiworld, level_name, 5)
     green_ridge.add_fly_locations([131092], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
-    # If you can get onto "blue ridge" then there's no way you don't have a move/blue eco to open the scout fly box.
     blue_ridge = JakAndDaxterRegion("Ridge Near Blue Vent", player, multiworld, level_name, 5)
-    blue_ridge.add_fly_locations([196628])
+    blue_ridge.add_fly_locations([196628], access_rule=lambda state:
+                                 can_reach_blue_eco_vent(state, player)
+                                 or world.can_free_scout_flies(state, player))
 
     rock_spires = JakAndDaxterRegion("Rock Spires", player, multiworld, level_name, 12)
 
@@ -107,10 +113,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # You can use an open blue eco vent, or you can use the logs, to reach this place.
     main_area.connect(blue_ridge, rule=lambda state:
-                      can_reach_rock_spires(state, player)
+                      can_reach_blue_eco_vent(state, player)
                       or can_uppercut_and_jump_logs(state, player))
 
-    main_area.connect(rock_spires, rule=lambda state: can_reach_rock_spires(state, player))
+    main_area.connect(rock_spires, rule=lambda state: can_reach_blue_eco_vent(state, player))
     rock_spires.connect(cannon_tower)
 
     # An advanced way of reaching the cannon tower without Blue Eco Switch.

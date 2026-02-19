@@ -90,9 +90,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Orbs collectable here with yellow eco and goggles.
     flut_flut_pad = JakAndDaxterRegion("Flut Flut Pad", player, multiworld, level_name, 36)
 
-    flut_flut_course = JakAndDaxterRegion("Flut Flut Course", player, multiworld, level_name, 23)
+    # This region contains the first scout fly + orbs, when going towards the region entrance.
+    early_flut_flut_course = JakAndDaxterRegion("Early Flut Flut Course", player, multiworld, level_name, 6)
+    # This scout fly box can be broken using yellow eco.
+    early_flut_flut_course.add_fly_locations([327723])
+
+    flut_flut_course = JakAndDaxterRegion("Flut Flut Course", player, multiworld, level_name, 17)
     flut_flut_course.add_cell_locations([37])
-    flut_flut_course.add_fly_locations([327723, 131115])
+    # This scout fly box can be broken using yellow eco.
+    flut_flut_course.add_fly_locations([131115])
 
     # Includes some orbs on the way to the cabin, blue+yellow eco to collect.
     farthy_snacks = JakAndDaxterRegion("Farthy's Snacks", player, multiworld, level_name, 7)
@@ -152,29 +158,31 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     flut_flut_pad.connect(second_bats)
 
-    if options.boosted_and_extended_uppercuts:
-        if options.boggy_swamp_flut_flut_skip:
-            # Allow both uppercuts and Roll Jump.
-            flut_flut_pad.connect(flut_flut_course, rule=lambda state:
-                                  state.has("Flut Flut", player)
-                                  or state.has_all(("Roll", "Roll Jump"), player)
-                                  or state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player))
-        else:
-            # Uppercuts only.
-            flut_flut_pad.connect(flut_flut_course, rule=lambda state:
-                                  state.has("Flut Flut", player)
-                                  or state.has_all(("Punch", "Punch Uppercut", "Jump Kick"), player))
-    elif options.boggy_swamp_flut_flut_skip:
-        # Roll Jump only.
+    if options.boggy_swamp_flut_flut_skip:
+        # The course is doable with only Roll Jump, or by using boosteds with Jump Kick.
         flut_flut_pad.connect(flut_flut_course, rule=lambda state:
                               state.has("Flut Flut", player)
-                              or state.has_all(("Roll", "Roll Jump"), player))
+                              or state.has_all(("Roll", "Roll Jump"), player)
+                              or world.can_do_boosted_extended(state, player))
     else:
-        flut_flut_pad.connect(flut_flut_course, rule=lambda state: state.has("Flut Flut", player))  # Naturally.
+        flut_flut_pad.connect(flut_flut_course, rule=lambda state:
+                              state.has("Flut Flut", player)
+                              or world.can_do_boosted_extended(state, player))
+
+    if options.boggy_swamp_flut_flut_skip:
+        # It's possible to reach the early parts by zoom walking with momentum, followed by a Double Jump or Jump Kick.
+        flut_flut_pad.connect(early_flut_flut_course, rule=lambda state:
+                              state.has_any(("Double Jump", "Jump Kick"), player)
+                              or world.can_do_boosted(state, player))
+    else:
+        flut_flut_pad.connect(early_flut_flut_course, rule=lambda state: world.can_do_boosted(state, player))
 
     flut_flut_pad.connect(farthy_snacks)
 
     flut_flut_course.connect(flut_flut_pad)
+    # When Jak can reach the whole Flut Flut course, he can always reach the early parts as well.
+    flut_flut_course.connect(early_flut_flut_course)
+    early_flut_flut_course.connect(flut_flut_pad)
 
     farthy_snacks.connect(flut_flut_pad)
 
@@ -217,6 +225,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     world.level_to_regions[level_name].append(third_jump_pad)
     world.level_to_regions[level_name].append(fourth_jump_pad)
     world.level_to_regions[level_name].append(flut_flut_pad)
+    world.level_to_regions[level_name].append(early_flut_flut_course)
     world.level_to_regions[level_name].append(flut_flut_course)
     world.level_to_regions[level_name].append(farthy_snacks)
     world.level_to_regions[level_name].append(box_field)

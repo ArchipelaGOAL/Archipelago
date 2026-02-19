@@ -98,7 +98,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                      state.has("Jump Dive", player)
                      or state.has_all(("Crouch", "Crouch Jump"), player))
 
-    if options.misty_island_early_far_side_orb_cache:
+    if options.misty_island_single_jump_far_side_orb_cache:
         # Only if you can break the bone bridges to carry blue eco over the mud pit.
         far_side.connect(far_side_cache, rule=lambda state: can_fight(state, player))
     else:

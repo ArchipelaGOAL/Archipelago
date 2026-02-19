@@ -496,7 +496,7 @@ class ForbiddenJungleElevatorSkip(Toggle):
     display_name = "Forbidden Jungle Elevator Skip"
 
 
-class MistyIslandEarlyFarSideOrbCache(Toggle):
+class MistyIslandSingleJumpFarSideOrbCache(Toggle):
     """
     Create an alternative path to the Far Side Orb Cache in Misty Island.
 
@@ -504,7 +504,7 @@ class MistyIslandEarlyFarSideOrbCache(Toggle):
 
     This only applies if "Enable Move Randomizer" is ON.
     """
-    display_name = "Misty Island Early Far Side Orb Cache"
+    display_name = "Misty Island Single Jump Far Side Orb Cache"
 
 
 class MistyIslandAttacklessScoutFlies(Toggle):
@@ -544,7 +544,7 @@ class MistyIslandFarSideCliffSeesawSkip(Toggle):
     display_name = "Misty Island Far Side Cliff Seesaw Skip"
 
 
-class RockVillageEarlyOrbCache(Toggle):
+class RockVillageSingleJumpOrbCache(Toggle):
     """
     Remove requirements from the orb cache in Rock Village.
 
@@ -552,7 +552,7 @@ class RockVillageEarlyOrbCache(Toggle):
 
     This only applies if "Enable Move Randomizer" is ON.
     """
-    display_name = "Rock Village Early Orb Cache"
+    display_name = "Rock Village Single Jump Orb Cache"
 
 
 class RockVillagePontoonSkip(Toggle):
@@ -618,7 +618,8 @@ class BoggySwampFlutFlutSkip(Toggle):
     """
     Create an alternative path through the Flut Flut course in Boggy Swamp without having *Flut Flut* unlocked.
 
-    Enabling this setting may require Jak to complete the whole course with only *Roll Jump*.
+    Enabling this setting may require Jak to complete the whole course with only *Roll Jump*, and reach the scout fly
+    "Overlooking Flut Flut" with only *Double Jump* or *Jump Kick*.
     """
     display_name = "Boggy Swamp Flut Flut Skip"
 
@@ -653,6 +654,14 @@ class SnowyMountainFortGateSkip(Choice):
     option_flut_flut = 2
     option_both = 3
 
+class SentinelBeachBlueEcoSwitchSkip(Toggle):
+    """
+    Create an alternative path to the blue eco jump pad in Sentinel Beach without having *Blue Eco Switch* unlocked.
+
+    Enabling this setting may require Jak to use precise movement to reach the jump pad with enough blue eco, using
+    only *Punch* or only *Roll Jump*.
+    """
+    display_name = "Sentinel Beach Blue Eco Switch Skip"
 
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
@@ -698,11 +707,11 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     attack_with_roll_jump: AttackWithRollJump
     forbidden_jungle_attackless_spiral_stumps_scout_fly: ForbiddenJungleAttacklessSpiralStumpsScoutFly
     forbidden_jungle_elevator_skip: ForbiddenJungleElevatorSkip
-    misty_island_early_far_side_orb_cache: MistyIslandEarlyFarSideOrbCache
+    misty_island_single_jump_far_side_orb_cache: MistyIslandSingleJumpFarSideOrbCache
     misty_island_attackless_scout_flies: MistyIslandAttacklessScoutFlies
     misty_island_arena_fight_skip: MistyIslandArenaFightSkip
     misty_island_far_side_cliff_seesaw_skip: MistyIslandFarSideCliffSeesawSkip
-    rock_village_early_orb_cache: RockVillageEarlyOrbCache
+    rock_village_single_jump_orb_cache: RockVillageSingleJumpOrbCache
     rock_village_pontoon_skip: RockVillagePontoonSkip
     klaww_cliff_climb: KlawwCliffClimb
     klaww_boulder_skip: KlawwBoulderSkip
@@ -711,6 +720,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     boggy_swamp_flut_flut_skip: BoggySwampFlutFlutSkip
     lost_precursor_city_single_jump_slide_tube_climb: LostPrecursorCitySingleJumpSlideTubeClimb
     snowy_mountain_fort_gate_skip: SnowyMountainFortGateSkip
+    sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 
@@ -732,10 +742,10 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "sandover_village_cliff_orb_cache_climb": True,
         "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_medium,
         "forbidden_jungle_elevator_skip": True,
-        "misty_island_early_far_side_orb_cache": True,
+        "misty_island_single_jump_far_side_orb_cache": True,
         "misty_island_arena_fight_skip": True,
         "misty_island_far_side_cliff_seesaw_skip": True,
-        "rock_village_early_orb_cache": True,
+        "rock_village_single_jump_orb_cache": True,
         "rock_village_pontoon_skip": True,
         "klaww_cliff_climb": True,
         "klaww_boulder_skip": True,
@@ -754,10 +764,10 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "sandover_village_cliff_orb_cache_climb": True,
         "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_hard,
         "forbidden_jungle_elevator_skip": True,
-        "misty_island_early_far_side_orb_cache": True,
+        "misty_island_single_jump_far_side_orb_cache": True,
         "misty_island_arena_fight_skip": True,
         "misty_island_far_side_cliff_seesaw_skip": True,
-        "rock_village_early_orb_cache": True,
+        "rock_village_single_jump_orb_cache": True,
         "rock_village_pontoon_skip": True,
         "klaww_cliff_climb": True,
         "klaww_boulder_skip": True,
@@ -766,13 +776,45 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "snowy_mountain_flut_flut_skip": True,
 
         "boosted_and_extended_uppercuts": True,
+        "sentinel_beach_blue_eco_switch_skip": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
         "misty_island_attackless_scout_flies": True,
         "boggy_swamp_flut_flut_escape": True,
-        "boggy_swamp_attackless_ambush": True,
         "boggy_swamp_flut_flut_skip": True,
-        "lost_precursor_city_single_jump_slide_tube_climb": True,
         "snowy_mountain_flut_flut_escape": True,
+    },
+    "Move Randomizer + All Tricks & Glitches": {
+        "enable_move_randomizer": True,
+        "attack_with_roll_jump": True,
+        "attackless_lurker_cannons": True,
+        "sentinel_beach_attackless_pelican": True,
+
+        "punch_uppercut_scout_flies": True,
+        "geyser_rock_cliff_climb": True,
+        "sandover_village_cliff_orb_cache_climb": True,
+        "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_hard,
+        "forbidden_jungle_elevator_skip": True,
+        "misty_island_single_jump_far_side_orb_cache": True,
+        "misty_island_arena_fight_skip": True,
+        "misty_island_far_side_cliff_seesaw_skip": True,
+        "rock_village_single_jump_orb_cache": True,
+        "rock_village_pontoon_skip": True,
+        "klaww_cliff_climb": True,
+        "klaww_boulder_skip": True,
+        "boggy_swamp_precise_movement": True,
+        "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
+        "snowy_mountain_flut_flut_skip": True,
+
+        "boosted_and_extended_uppercuts": True,
+        "sentinel_beach_blue_eco_switch_skip": True,
+        "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
+        "misty_island_attackless_scout_flies": True,
+        "boggy_swamp_flut_flut_escape": True,
+        "boggy_swamp_flut_flut_skip": True,
+        "snowy_mountain_flut_flut_escape": True,
+
+        "boggy_swamp_attackless_ambush": True,
+        "lost_precursor_city_single_jump_slide_tube_climb": True,
         "snowy_mountain_fort_gate_skip": SnowyMountainFortGateSkip.option_both,
     }
 }
