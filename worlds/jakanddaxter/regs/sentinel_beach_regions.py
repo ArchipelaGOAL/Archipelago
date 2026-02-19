@@ -25,14 +25,20 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     def can_reach_cannon(state: CollectionState, p: int) -> bool:
         return state.has("Blue Eco Switch", p) or can_climb_cannon_tower(state, p)
 
-    def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
-        # It's possible to grab the Blue Eco Vent with an extended boosted after climbing the tower.
-        if options.sentinel_beach_blue_eco_switch_skip:
+    if options.sentinel_beach_blue_eco_switch_skip:
+        # It's possible to grab the Blue Eco Vent with just Punch or Roll Jump by using an optimized route from the
+        # blue eco to the Flut Flut egg.
+        def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
             return (state.has("Blue Eco Switch", p)
                     or (can_climb_cannon_tower(state, p) and world.can_do_boosted_extended(state, p))
-                    or state.has("Kick", p)
+                    or state.has("Punch", p)
                     or state.has_all(("Roll", "Roll Jump"), p))
-        else:
+    else:
+        # There is an open blue eco vent on the rock spires, which will allow you to open all the orb crates on the spires,
+        # the scout fly on "blue ridge", and the scout fly on the sentinel. You can get on the spires one of two ways:
+        # use the locked blue eco vent on the beach, or you can climb the cannon tower and boosted uppercut to the spires.
+
+        def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
             return (state.has("Blue Eco Switch", p)
                     or (can_climb_cannon_tower(state, p) and world.can_do_boosted_extended(state, p)))
 
