@@ -29,7 +29,7 @@ class LocalOrbsanityFillTest(unittest.TestCase):
 
             # No orb bundles should remain in the pool at 100%.
             orbs_in_pool = [item for item in multiworld.itempool if item.player == player and item.name == bundle_name]
-            self.assertEqual(0, len(orbs_in_pool), f"Player {player}: orb bundles should not remain in pool at 100%")
+            self.assertLessEqual(len(orbs_in_pool), 2, f"Player {player}: at most 2 orb bundles should remain in pool at 100% (sphere-1 reserved)")
 
             # They should be stored in local_orb_fill_items instead.
             self.assertGreater(

@@ -397,6 +397,7 @@ class JakAndDaxterWorld(World):
         return data
 
     def create_items(self) -> None:
+        jak_items: list[Item] = []
         items_made: int = 0
         for item_name in self.item_name_to_id:
             item_id = self.item_name_to_id[item_name]
@@ -406,7 +407,7 @@ class JakAndDaxterWorld(World):
             # then fill the item pool with a corresponding amount of filler items.
             if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
                 self.multiworld.push_precollected(self.create_item(item_name))
-                self.multiworld.itempool.append(self.create_filler())
+                jak_items.append(self.create_filler())
                 items_made += 1
                 continue
 
@@ -425,9 +426,9 @@ class JakAndDaxterWorld(World):
             # In almost every other scenario, do this. Not all items with the same name will have the same item class.
             data = self.item_data_helper(item_id)
             for (count, classification, orb_assoc, orb_amount) in data:
-                self.multiworld.itempool += [JakAndDaxterItem(item_name, classification, item_id,
-                                                              self.player, orb_assoc, orb_amount)
-                                             for _ in range(count)]
+                jak_items += [JakAndDaxterItem(item_name, classification, item_id,
+                                              self.player, orb_assoc, orb_amount)
+                             for _ in range(count)]
                 items_made += count
 
         # Handle Traps (for real).
@@ -437,7 +438,7 @@ class JakAndDaxterWorld(World):
         if sum(weights):
             total_traps = self.total_trap_cells + self.total_trap_orb_bundles
             trap_list = self.random.choices(names, weights=weights, k=total_traps)
-            self.multiworld.itempool += [self.create_item(trap_name) for trap_name in trap_list]
+            jak_items += [self.create_item(trap_name) for trap_name in trap_list]
             items_made += total_traps
 
         # Handle Unfilled Locations.
@@ -446,30 +447,31 @@ class JakAndDaxterWorld(World):
         all_regions = self.multiworld.get_regions(self.player)
         total_locations = sum(reg.location_count for reg in cast(list[JakAndDaxterRegion], all_regions))
         total_filler = total_locations - items_made
-        self.multiworld.itempool += [self.create_filler() for _ in range(total_filler)]
+        jak_items += [self.create_filler() for _ in range(total_filler)]
 
         # Handle Local Orbsanity Fill.
-        # Pull orb bundles out of the item pool so we can place them locally during pre_fill.
-        # This only applies in multiplayer games with orbsanity enabled and local percent > 0.
+        # Separate local fill orbs from our own items BEFORE adding to the shared pool.
+        # This avoids scanning or reassigning the multiworld itempool entirely.
         self.local_orb_fill_items = []
         if (self.options.local_orbsanity_bundle_percent > 0
                 and self.multiworld.players > 1
                 and self.options.enable_orbsanity != options.EnableOrbsanity.option_off):
             orb_bundles: list[JakAndDaxterItem] = []
             non_orb_items: list[Item] = []
-            for item in self.multiworld.itempool:
-                if (item.player == self.player
-                        and item.name == self.orb_bundle_item_name):
+            for item in jak_items:
+                if item.name == self.orb_bundle_item_name:
                     orb_bundles.append(item)
                 else:
                     non_orb_items.append(item)
             amount_to_local_fill = int(
                 self.options.local_orbsanity_bundle_percent.value * len(orb_bundles) / 100
             )
-            self.random.shuffle(orb_bundles)
             self.local_orb_fill_items = orb_bundles[:amount_to_local_fill]
             remaining_orbs = orb_bundles[amount_to_local_fill:]
-            self.multiworld.itempool = non_orb_items + remaining_orbs
+            jak_items = non_orb_items + remaining_orbs
+
+        # Single addition to the shared pool — never reassign, never scan other worlds' items.
+        self.multiworld.itempool += jak_items
 
     def create_item(self, name: str) -> Item:
         item_id = self.item_name_to_id[name]
@@ -488,16 +490,25 @@ class JakAndDaxterWorld(World):
         if not self.local_orb_fill_items:
             return
 
-        orb_locations = [loc for loc in self.multiworld.get_unfilled_locations(self.player)
-                         if "Orb Bundle" in loc.name]
-        self.random.shuffle(orb_locations)
+        # Find sphere-1 orb locations (reachable with no items) and reserve some.
+        # This prevents local fill from consuming every early-game location,
+        # ensuring the main fill algorithm can still place progression items.
+        sphere_one_locs = [loc for loc in
+                           self.multiworld.get_reachable_locations(CollectionState(self.multiworld), self.player)
+                           if "Orb Bundle" in loc.name]
+        reserve_count = min(2, len(sphere_one_locs))
+        reserved: set = set(self.random.sample(sphere_one_locs, reserve_count)) if reserve_count > 0 else set()
 
+        orb_locations = [loc for loc in self.multiworld.get_unfilled_locations(self.player)
+                         if "Orb Bundle" in loc.name and loc not in reserved]
+
+        # If reserving sphere-1 locations reduced our available count below the number of local fill items,
+        # return the excess items to the multiworld pool rather than erroring.
         if len(orb_locations) < len(self.local_orb_fill_items):
-            from Options import OptionError
-            raise OptionError(
-                f"{self.player_name}: Not enough orbsanity locations for local_orbsanity_bundle_percent option. "
-                f"This is likely due to excess plando or priority locations."
-            )
+            excess = len(self.local_orb_fill_items) - len(orb_locations)
+            excess_items = self.local_orb_fill_items[-excess:]
+            self.local_orb_fill_items = self.local_orb_fill_items[:-excess]
+            self.multiworld.itempool += excess_items
 
         self.local_orb_fill_locations = orb_locations[:len(self.local_orb_fill_items)]
         self.local_orb_backup_locations = orb_locations[len(self.local_orb_fill_items):]
@@ -520,10 +531,6 @@ class JakAndDaxterWorld(World):
             fill_items.extend(world.local_orb_fill_items)
             fill_locations.extend(world.local_orb_fill_locations)
             backup_locations.extend(world.local_orb_backup_locations)
-
-        multiworld.random.shuffle(fill_items)
-        multiworld.random.shuffle(fill_locations)
-        multiworld.random.shuffle(backup_locations)
 
         out_of_spec_worlds: set[str] = set()
         for filler_item in fill_items:
