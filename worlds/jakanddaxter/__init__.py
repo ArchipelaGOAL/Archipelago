@@ -8,6 +8,7 @@ import settings
 from worlds.AutoWorld import World, WebWorld
 from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 from BaseClasses import (Item,
+                         MultiWorld,
                          ItemClassification as ItemClass,
                          Tutorial,
                          CollectionState)
@@ -101,6 +102,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.EnableOrbsanity,
             options.GlobalOrbsanityBundleSize,
             options.PerLevelOrbsanityBundleSize,
+            options.LocalOrbsanityBundlePercent,
         ]),
         OptionGroup("Power Cell Counts", [
             options.EnableOrderedCellCounts,
@@ -231,6 +233,11 @@ class JakAndDaxterWorld(World):
     power_cell_thresholds: list[int]
     power_cell_thresholds_minus_one: list[int]
     trap_weights: tuple[list[str], list[int]]
+
+    # For the local_orbsanity_bundle_percent option (Tunic-style local fill).
+    local_orb_fill_items: list[JakAndDaxterItem]
+    local_orb_fill_locations: list[JakAndDaxterLocation]
+    local_orb_backup_locations: list[JakAndDaxterLocation]
 
     # Store these dictionaries for speed improvements.
     level_to_regions: dict[str, list[JakAndDaxterRegion]]  # Contains all levels and regions.
@@ -441,6 +448,29 @@ class JakAndDaxterWorld(World):
         total_filler = total_locations - items_made
         self.multiworld.itempool += [self.create_filler() for _ in range(total_filler)]
 
+        # Handle Local Orbsanity Fill.
+        # Pull orb bundles out of the item pool so we can place them locally during pre_fill.
+        # This only applies in multiplayer games with orbsanity enabled and local percent > 0.
+        self.local_orb_fill_items = []
+        if (self.options.local_orbsanity_bundle_percent > 0
+                and self.multiworld.players > 1
+                and self.options.enable_orbsanity != options.EnableOrbsanity.option_off):
+            orb_bundles: list[JakAndDaxterItem] = []
+            non_orb_items: list[Item] = []
+            for item in self.multiworld.itempool:
+                if (item.player == self.player
+                        and item.name == self.orb_bundle_item_name):
+                    orb_bundles.append(item)
+                else:
+                    non_orb_items.append(item)
+            amount_to_local_fill = int(
+                self.options.local_orbsanity_bundle_percent.value * len(orb_bundles) / 100
+            )
+            self.random.shuffle(orb_bundles)
+            self.local_orb_fill_items = orb_bundles[:amount_to_local_fill]
+            remaining_orbs = orb_bundles[amount_to_local_fill:]
+            self.multiworld.itempool = non_orb_items + remaining_orbs
+
     def create_item(self, name: str) -> Item:
         item_id = self.item_name_to_id[name]
 
@@ -450,6 +480,77 @@ class JakAndDaxterWorld(World):
 
     def get_filler_item_name(self) -> str:
         return "Green Eco Pill"
+
+    def pre_fill(self) -> None:
+        # Gather viable orbsanity locations for local fill placement.
+        self.local_orb_fill_locations = []
+        self.local_orb_backup_locations = []
+        if not self.local_orb_fill_items:
+            return
+
+        orb_locations = [loc for loc in self.multiworld.get_unfilled_locations(self.player)
+                         if "Orb Bundle" in loc.name]
+        self.random.shuffle(orb_locations)
+
+        if len(orb_locations) < len(self.local_orb_fill_items):
+            from Options import OptionError
+            raise OptionError(
+                f"{self.player_name}: Not enough orbsanity locations for local_orbsanity_bundle_percent option. "
+                f"This is likely due to excess plando or priority locations."
+            )
+
+        self.local_orb_fill_locations = orb_locations[:len(self.local_orb_fill_items)]
+        self.local_orb_backup_locations = orb_locations[len(self.local_orb_fill_items):]
+
+    @classmethod
+    def stage_pre_fill(cls, multiworld: MultiWorld) -> None:
+        from logging import warning
+
+        jak_fill_worlds: list["JakAndDaxterWorld"] = [
+            world for world in multiworld.get_game_worlds(jak1_name)
+            if world.local_orb_fill_items
+        ]
+        if not jak_fill_worlds or multiworld.players <= 1:
+            return
+
+        fill_items: list[JakAndDaxterItem] = []
+        fill_locations: list[JakAndDaxterLocation] = []
+        backup_locations: list[JakAndDaxterLocation] = []
+        for world in jak_fill_worlds:
+            fill_items.extend(world.local_orb_fill_items)
+            fill_locations.extend(world.local_orb_fill_locations)
+            backup_locations.extend(world.local_orb_backup_locations)
+
+        multiworld.random.shuffle(fill_items)
+        multiworld.random.shuffle(fill_locations)
+        multiworld.random.shuffle(backup_locations)
+
+        out_of_spec_worlds: set[str] = set()
+        for filler_item in fill_items:
+            loc_to_fill = fill_locations.pop()
+            try:
+                loc_to_fill.place_locked_item(filler_item)
+            except Exception:
+                if loc_to_fill.item:
+                    out_of_spec_worlds.add(multiworld.worlds[loc_to_fill.item.player].game)
+                for loc in backup_locations:
+                    if not loc.item:
+                        loc.place_locked_item(filler_item)
+                        break
+                else:
+                    raise Exception(
+                        f"Jak and Daxter: Could not fulfill local_orbsanity_bundle_percent option. "
+                        f"This issue is caused by another world filling Jak and Daxter locations during pre_fill.\n"
+                        f"This is likely caused by the following world(s): {out_of_spec_worlds}.\n"
+                        f"As a workaround, try setting local_orbsanity_bundle_percent lower."
+                    )
+
+        if out_of_spec_worlds:
+            warning(
+                f"Jak and Daxter: At least one other world has filled Jak and Daxter locations during pre_fill. "
+                f"This may cause issues for the local orbsanity fill option.\n"
+                f"This is likely caused by the following world(s): {out_of_spec_worlds}."
+            )
 
     def collect(self, state: CollectionState, item: JakAndDaxterItem) -> bool:
         change = super().collect(state, item)
@@ -497,6 +598,7 @@ class JakAndDaxterWorld(World):
                                             "enable_orbsanity",
                                             "global_orbsanity_bundle_size",
                                             "level_orbsanity_bundle_size",
+            "local_orbsanity_bundle_percent",
                                             "fire_canyon_cell_count",
                                             "mountain_pass_cell_count",
                                             "lava_tube_cell_count",

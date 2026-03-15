@@ -279,6 +279,19 @@ class FillerPowerCellsReplacedWithTraps(Range):
     default = 0
 
 
+class LocalOrbsanityBundlePercent(Range):
+    """The percentage of orb bundles that will be kept in your own world.
+    This only applies if "Enable Orbsanity" is set to "Per Level" or "Global."
+    This option does nothing in single player games.
+
+    At 0%, all orb bundles go into the multiworld item pool as normal.
+    At 100%, all orb bundles stay in your world."""
+    display_name = "Local Orbsanity Bundle Percent"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
 class FillerOrbBundlesReplacedWithTraps(Range):
     """
     The number of filler orb bundles that will be replaced with traps. This does not affect the number of progression
@@ -337,6 +350,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     enable_orbsanity: EnableOrbsanity
     global_orbsanity_bundle_size: GlobalOrbsanityBundleSize
     level_orbsanity_bundle_size: PerLevelOrbsanityBundleSize
+    local_orbsanity_bundle_percent: LocalOrbsanityBundlePercent
     fire_canyon_cell_count: FireCanyonCellCount
     mountain_pass_cell_count: MountainPassCellCount
     lava_tube_cell_count: LavaTubeCellCount
