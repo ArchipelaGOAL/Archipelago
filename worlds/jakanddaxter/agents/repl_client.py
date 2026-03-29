@@ -502,18 +502,21 @@ class JakAndDaxterReplClient:
         return ok
 
     async def save_data(self):
-        with open("jakanddaxter_item_inbox.json", "w+") as f:
-            dump = {
-                "inbox_index": self.inbox_index,
-                "item_inbox": [{
-                    "item": self.item_inbox[k].item,
-                    "location": self.item_inbox[k].location,
-                    "player": self.item_inbox[k].player,
-                    "flags": self.item_inbox[k].flags
-                    } for k in self.item_inbox
-                ]
-            }
-            json.dump(dump, f, indent=4)
+        try:
+            with open("jakanddaxter_item_inbox.json", "w+") as f:
+                dump = {
+                    "inbox_index": self.inbox_index,
+                    "item_inbox": [{
+                        "item": self.item_inbox[k].item,
+                        "location": self.item_inbox[k].location,
+                        "player": self.item_inbox[k].player,
+                        "flags": self.item_inbox[k].flags
+                        } for k in self.item_inbox
+                    ]
+                }
+                json.dump(dump, f, indent=4)
+        except PermissionError:
+            pass
 
     def load_data(self):
         try:
@@ -528,4 +531,6 @@ class JakAndDaxterReplClient:
                     ) for k in range(0, len(load["item_inbox"]))
                 }
         except FileNotFoundError:
+            pass
+        except PermissionError:
             pass

@@ -482,12 +482,15 @@ class JakAndDaxterMemoryReader:
             signed=False)
 
     def save_data(self):
-        with open("jakanddaxter_location_outbox.json", "w+") as f:
-            dump = {
-                "outbox_index": self.outbox_index,
-                "location_outbox": self.location_outbox
-            }
-            json.dump(dump, f, indent=4)
+        try:
+            with open("jakanddaxter_location_outbox.json", "w+") as f:
+                dump = {
+                    "outbox_index": self.outbox_index,
+                    "location_outbox": self.location_outbox
+                }
+                json.dump(dump, f, indent=4)
+        except PermissionError:
+            pass
 
     def load_data(self):
         try:
@@ -496,4 +499,6 @@ class JakAndDaxterMemoryReader:
                 self.outbox_index = load["outbox_index"]
                 self.location_outbox = load["location_outbox"]
         except FileNotFoundError:
+            pass
+        except PermissionError:
             pass
