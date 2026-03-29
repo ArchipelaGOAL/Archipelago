@@ -346,8 +346,9 @@ class JakAndDaxterContext(CommonContext):
                 await self.repl.main_tick()
                 await asyncio.sleep(0.1)
             # This catch re-engages the memr loop, enabling the client to re-connect on losing the process
-            except NoSuchProcess:
+            except NoSuchProcess as e:
                 self.on_log_info(logger, "Compiler process lost. Restarting Compiler loop.")
+                self.on_log_info(logger, f"({e.pid}) ({e.name}): {e.msg}")  # TODO - Temp log for debugging.
 
     async def run_memr_loop(self):
         while True:
@@ -355,8 +356,9 @@ class JakAndDaxterContext(CommonContext):
                 await self.memr.main_tick()
                 await asyncio.sleep(0.1)
             # This catch re-engages the memr loop, enabling the client to re-connect on losing the process
-            except NoSuchProcess:
+            except NoSuchProcess as e:
                 self.on_log_info(logger, "Memory reader process lost. Restarting Memory reader loop.")
+                self.on_log_info(logger, f"({e.pid}) ({e.name}): {e.msg}")  # TODO - Temp log for debugging.
 
 
 def find_root_directory(ctx: JakAndDaxterContext):
