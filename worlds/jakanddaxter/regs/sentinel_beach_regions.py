@@ -23,13 +23,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
             return False
 
     def can_reach_cannon(state: CollectionState, p: int) -> bool:
-        return state.has("Blue Eco Switch", p) or can_climb_cannon_tower(state, p)
+        return state.has_all(("Blue Eco Switch", "Blue Eco"), p) or can_climb_cannon_tower(state, p)
 
     if options.sentinel_beach_blue_eco_switch_skip:
         # It's possible to grab the Blue Eco Vent with just Punch or Roll Jump by using an optimized route from the
         # blue eco to the Flut Flut egg.
         def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
-            return (state.has("Blue Eco Switch", p)
+            return (state.has_all(("Blue Eco Switch", "Blue Eco"), p)
                     or (can_climb_cannon_tower(state, p) and world.can_do_boosted_extended(state, p))
                     or state.has("Punch", p)
                     or state.has_all(("Roll", "Roll Jump"), p))
@@ -39,15 +39,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         # use the locked blue eco vent on the beach, or you can climb the cannon tower and boosted uppercut to the spires.
 
         def can_reach_blue_eco_vent(state: CollectionState, p: int) -> bool:
-            return (state.has("Blue Eco Switch", p)
+            return (state.has_all(("Blue Eco Switch", "Blue Eco"), p)
                     or (can_climb_cannon_tower(state, p) and world.can_do_boosted_extended(state, p)))
 
-    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 128)
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 108)
     main_area.add_cell_locations([18, 21, 22])
 
     # These scout fly boxes can be broken by running with freely accessible blue eco.
     # The 3 clusters by the Flut Flut egg can go surprisingly far.
-    main_area.add_fly_locations([327700, 20, 65556, 262164])
+    main_area.add_fly_locations([327700, 65556, 262164], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
+
+    # This scout fly box can be broken by the lurker tower.
+    main_area.add_fly_locations([20])
 
     # This scout fly box can be broken with an open blue eco vent (locked one on beach or open one on rock spires),
     # or by normal combat tricks.
@@ -55,8 +59,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                 can_reach_blue_eco_vent(state, player)
                                 or world.can_free_scout_flies(state, player))
 
-    # No need for the blue eco vent for either of the orb caches.
-    main_area.add_cache_locations([12634, 12635])
+    # No need for the blue eco vent for either of the orb caches (10 orbs per cache).
+    orb_caches = JakAndDaxterRegion("Orb Caches", player, multiworld, level_name, 20)
+    orb_caches.add_cache_locations([12634, 12635])
 
     pelican = JakAndDaxterRegion("Pelican", player, multiworld, level_name, 0)
     if options.sentinel_beach_attackless_pelican:
@@ -111,6 +116,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                       or state.has_all(("Crouch", "Crouch Jump"), player)
                       or can_uppercut_and_jump_logs(state, player))
 
+    # Jak can only collect the orbs from the cache if he can use Blue Eco.
+    main_area.connect(orb_caches, rule=lambda state: state.has("Blue Eco", player))
+
     # You can use an open blue eco vent, or you can use the logs, to reach this place.
     main_area.connect(blue_ridge, rule=lambda state:
                       can_reach_blue_eco_vent(state, player)
@@ -133,6 +141,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     cannon_tower.connect(main_area)
 
     world.level_to_regions[level_name].append(main_area)
+    world.level_to_regions[level_name].append(orb_caches)
     world.level_to_regions[level_name].append(pelican)
     world.level_to_regions[level_name].append(flut_flut_egg)
     world.level_to_regions[level_name].append(eco_harvesters)
