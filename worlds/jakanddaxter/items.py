@@ -119,9 +119,14 @@ move_item_table = {
     23348: "Punch",
     23349: "Punch Uppercut",
     23350: "Kick",
-    # 24038: "Orb Cache at End of Blast Furnace",  # Hold onto these ID's for future use.
-    # 24039: "Orb Cache at End of Launch Pad Room",
-    # 24040: "Orb Cache at Start of Launch Pad Room",
+}
+
+# Same as above, but contains the eco items for eco randomizer. These are treated like moves in GOAL,
+# but defined separately to correctly pre-collect them depending on the player options.
+eco_item_table = {
+    24038: "Blue Eco",
+    24039: "Red Eco",
+    24040: "Yellow Eco",
 }
 
 # These are trap items. Their Item ID is to be subtracted from the base game ID. They do not have corresponding
@@ -150,6 +155,7 @@ item_table = {
     **{scouts.to_ap_id(k): name for k, name in scout_item_table.items()},
     **{specials.to_ap_id(k): name for k, name in special_item_table.items()},
     **{caches.to_ap_id(k): name for k, name in move_item_table.items()},
+    **{caches.to_ap_id(k): name for k, name in eco_item_table.items()},
     **{orbs.to_ap_id(k): name for k, name in orb_item_table.items()},
     **{jak1_max - k: name for k, name in trap_item_table.items()},
     jak1_max: "Green Eco Pill"  # Filler item.

@@ -15,7 +15,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # This is basically just Klaww.
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
-    main_area.add_cell_locations([86])
+    main_area.add_cell_locations([86], access_rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))
 
     # Some folks prefer firing Yellow Eco from the hip, so optionally put this rule before Klaww. Klaww is the only
     # location in main_area, so he's at index 0.
@@ -33,14 +33,18 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # Of course, in order to make it to the race region, you must defeat Klaww. He's not optional.
     # So we need to set up this inter-region rule as well (or make it free if the setting is off).
-    if world.options.require_punch_for_klaww:
+
+    if options.klaww_fight_skip:
+        # Actually, Klaww is optional with this setting and can be skipped using lava walking or idle deload.
+        main_area.connect(race)
+    elif world.options.require_punch_for_klaww:
         main_area.connect(race, rule=lambda state: state.has("Punch", player))
     else:
         main_area.connect(race)
 
     # You actually can go backwards from the race back to Klaww's area.
     race.connect(main_area)
-    race.connect(shortcut, rule=lambda state: state.has("Yellow Eco Switch", player))
+    race.connect(shortcut, rule=lambda state: state.has_all(("Yellow Eco", "Yellow Eco Switch"), player))
 
     shortcut.connect(race)
 
