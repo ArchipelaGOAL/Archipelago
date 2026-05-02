@@ -62,7 +62,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     temple_int_pre_blue.add_cell_locations([2])
     temple_int_pre_blue.add_special_locations([2])
 
-    temple_int_post_blue = JakAndDaxterRegion("Temple Interior (Post Blue Eco)", player, multiworld, level_name, 29)
+    # This region contains everything from the door to the boss.
+    temple_int_post_blue = JakAndDaxterRegion("Temple Interior (Post Blue Eco)", player, multiworld, level_name, 2)
+
+    # This region contains all reachable orbs when Jak can get behind the door and can collect blue eco.
+    # This allows Jak to use the Jump Pads (2x 10 orbs) and unlock the door to the blue eco switch (7 orbs).
+    # The 7 orbs can probably be collected using a boosted as well, but I haven't confirmed this.
+    temple_int_post_blue_eco_unlocked = JakAndDaxterRegion("Temple Interior (Post Blue Eco, Eco unlocked)", player,
+                                                           multiworld, level_name, 27)
 
     # 5 orbs from Plant Boss + 5 orbs from leaving via jump pad. Only reachable when Jak can fight the plant boss.
     temple_plant_boss_defeated = JakAndDaxterRegion("Temple (Plant Boss defeated)", player, multiworld, level_name, 10)
@@ -101,11 +108,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
         temple_exterior.connect(temple_int_pre_blue, rule=lambda state: state.has("Jungle Elevator", player))
 
     # It is possible to reach the boss by jumping through a collision hole above the door, using boosteds.
-    # After defeating the boss, it's possible to go back with blue eco and grab everything (including jump pads).
-    # TODO - Jump pads are not reachable if Blue Eco has not been unlocked
+    # After defeating the boss (which is always possible with the boosted moveset), it's possible to go back with
+    # blue eco and grab everything (including jump pads).
     temple_int_pre_blue.connect(temple_int_post_blue, rule=lambda state:
                                 world.can_do_boosted_extended(state, player)
                                 or state.has_all(("Blue Eco Switch", "Blue Eco"), player))
+
+    temple_int_post_blue.connect(temple_int_post_blue_eco_unlocked, rule=lambda state: state.has("Blue Eco", player))
 
     # Requires defeating the plant boss (combat).
     temple_int_post_blue.connect(temple_plant_boss_defeated, rule=lambda state: can_fight(state, player))
@@ -119,6 +128,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     world.level_to_regions[level_name].append(temple_exterior)
     world.level_to_regions[level_name].append(temple_int_pre_blue)
     world.level_to_regions[level_name].append(temple_int_post_blue)
+    world.level_to_regions[level_name].append(temple_int_post_blue_eco_unlocked)
     world.level_to_regions[level_name].append(temple_plant_boss_defeated)
 
     # If Per-Level Orbsanity is enabled, build the special Orbsanity Region. This is a virtual region always

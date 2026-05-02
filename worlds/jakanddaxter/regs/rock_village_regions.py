@@ -21,7 +21,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     main_area.add_cell_locations([35], access_rule=lambda state: world.can_trade(state, world.total_trade_orbs, 34))
 
     # These 2 scout fly boxes can be broken by running with nearby blue eco.
-    main_area.add_fly_locations([196684, 262220])
+    main_area.add_fly_locations([196684, 262220], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
     main_area.add_fly_locations([76, 131148, 65612, 327756], access_rule=lambda state:
                                 world.can_free_scout_flies(state, player))
 
@@ -29,17 +30,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     main_area.add_special_locations([33])
 
     orb_cache = JakAndDaxterRegion("Orb Cache", player, multiworld, level_name, 20)
-
-    if options.rock_village_single_jump_orb_cache:
-        # It is possible to just reach the orb cache with blue eco without roll jump.
-        orb_cache.add_cache_locations([10945])
-    else:
-        # You need roll jump to be able to reach this before the blue eco runs out.
-        orb_cache.add_cache_locations([10945], access_rule=lambda state: state.has_all(("Roll", "Roll Jump"), player))
+    orb_cache.add_cache_locations([10945])
 
     # Fly here can be gotten with Yellow Eco from Boggy, goggles, and no extra movement options (see fly ID 43).
     pontoon_bridge = JakAndDaxterRegion("Pontoon Bridge", player, multiworld, level_name, 2)
-    pontoon_bridge.add_fly_locations([393292])
+    pontoon_bridge.add_fly_locations([393292], access_rule=lambda state:
+                                     world.can_free_scout_flies(state, player) or state.has("Yellow Eco", player))
 
     # Orbs that are not directly over the pontoons if Warrior's Pontoons is not unlocked.
     pontoon_bridge_high_orbs = JakAndDaxterRegion("Pontoon Bridge High Orbs", player, multiworld, level_name, 5)
@@ -48,22 +44,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     if options.rock_village_single_jump_orb_cache:
         # It is possible to just reach the orb cache with blue eco without roll jump.
-        main_area.connect(orb_cache)
+        main_area.connect(orb_cache, rule=lambda state: state.has("Blue Eco", player))
     else:
-        main_area.connect(orb_cache, rule=lambda state: state.has_all(("Roll", "Roll Jump"), player))
+        main_area.connect(orb_cache, rule=lambda state: state.has_all(("Blue Eco", "Roll", "Roll Jump"), player))
 
     if options.rock_village_pontoon_skip:
         # Reachable with Jump/Swim
         main_area.connect(pontoon_bridge)
-    else:
-        main_area.connect(pontoon_bridge, rule=lambda state: state.has("Warrior's Pontoons", player))
-
-    orb_cache.connect(main_area)
-
-    if options.rock_village_pontoon_skip:
         pontoon_bridge.connect(main_area)
     else:
+        main_area.connect(pontoon_bridge, rule=lambda state: state.has("Warrior's Pontoons", player))
         pontoon_bridge.connect(main_area, rule=lambda state: state.has("Warrior's Pontoons", player))
+
+    orb_cache.connect(main_area)
 
     # Some orbs can only be reached by using the Pontoon Bridge or having Double Jump.
     pontoon_bridge.connect(pontoon_bridge_high_orbs, rule=lambda state:
