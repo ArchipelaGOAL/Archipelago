@@ -12,9 +12,17 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     player = world.player
 
     # A large amount of this area can be covered by single jump, floating platforms, web trampolines, and goggles.
-    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 63)
-    main_area.add_cell_locations([78, 84])
-    main_area.add_fly_locations([327765, 393301, 196693, 131157])
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 36)
+    # Yellow eco is required to shoot the lurkers.
+    main_area.add_cell_locations([78], access_rule=lambda state: state.has("Yellow Eco", player))
+    main_area.add_cell_locations([84])
+    main_area.add_fly_locations([327765, 393301, 196693, 131157], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player) or state.has("Yellow Eco", player))
+
+    # 6 orbs in crates towards dark cave.
+    # 6 orbs in crates towards robot cave.
+    # 15 orbs by shooting the lurkers.
+    main_area_yellow_eco_orbs = JakAndDaxterRegion("Main Area (Yellow Eco)", player, multiworld, level_name, 27)
 
     # This is a virtual region describing what you need to DO to get the Dark Crystal power cell,
     # rather than describing where each of the crystals ARE, because you can destroy them in any order,
@@ -24,8 +32,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # can_fight = The underwater crystal in dark cave.
     # Roll Jump = The underwater crystal across a long dark eco pool.
     # The rest of the crystals can be destroyed with yellow eco in main_area.
+    # TODO - Figure out if yellow eco is actually required
     dark_crystals.add_cell_locations([79], access_rule=lambda state:
-                                     can_fight(state, player)
+                                     state.has("Yellow Eco", player)
+                                     and can_fight(state, player)
                                      and state.has_all(("Roll", "Roll Jump"), player))
 
     dark_cave = JakAndDaxterRegion("Dark Cave", player, multiworld, level_name, 5)
@@ -58,7 +68,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     spider_tunnel_crates = JakAndDaxterRegion("Spider Tunnel Orb Crates", player, multiworld, level_name, 12)
 
     main_area.connect(dark_crystals)
-    main_area.connect(robot_cave)
+    main_area.connect(main_area_yellow_eco_orbs, rule=lambda state: state.has("Yellow Eco", player))
+    # TODO - Split up robot cave and figure out which eco is required for which collectables.
+    # To make it easier for now, robot cave is only in-logic once Jak has access to Yellow and Blue Eco.
+    main_area.connect(robot_cave, rule=lambda state: state.has_all(("Yellow Eco", "Blue Eco"), player))
     main_area.connect(dark_cave, rule=lambda state:
                       can_fight(state, player)
                       and (state.has("Double Jump", player)
@@ -95,9 +108,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     spider_tunnel.connect(main_area)                                # Escape with jump pad.
 
     # Requires yellow eco switch.
-    spider_tunnel.connect(spider_tunnel_crates, rule=lambda state: state.has("Yellow Eco Switch", player))
+    spider_tunnel.connect(spider_tunnel_crates, rule=lambda state:
+                          state.has_all(("Yellow Eco Switch", "Yellow Eco"), player))
 
     world.level_to_regions[level_name].append(main_area)
+    world.level_to_regions[level_name].append(main_area_yellow_eco_orbs)
     world.level_to_regions[level_name].append(dark_crystals)
     world.level_to_regions[level_name].append(dark_cave)
     world.level_to_regions[level_name].append(robot_cave)

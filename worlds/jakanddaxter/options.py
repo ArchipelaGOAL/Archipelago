@@ -355,6 +355,7 @@ class KlawwFightSkip(Toggle):
     Enabling this setting may require Jak to reach Mountain Pass by skipping the Klaww fight, without *Blue Eco* or
     *Yellow Eco* unlocked.
     """
+    display_name = "Klaww Fight Skip"
 # endregion
 
 # region Advanced Movement
