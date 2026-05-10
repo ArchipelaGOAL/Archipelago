@@ -129,6 +129,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     lower_approach.connect(upper_approach, rule=lambda state: state.has_all(("Crouch", "Crouch Jump"), player))
 
     # Requires breaking bone bridges.
+    # Arena door doesn't require blue eco when opened from the inside, and it's always possible to get inside.
     lower_approach.connect(arena, rule=lambda state: can_fight(state, player))
 
     arena.connect(lower_approach)              # Run.

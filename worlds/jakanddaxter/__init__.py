@@ -120,6 +120,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.EnableEcoRandomizer,
             options.GeyserRockDoorSkip,
             options.KlawwFightSkip,
+            options.LavaTubeOrangesSkip,
         ], True),
         OptionGroup("Tricks & Glitches - Easy", [
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.

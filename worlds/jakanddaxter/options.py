@@ -356,6 +356,15 @@ class KlawwFightSkip(Toggle):
     *Yellow Eco* unlocked.
     """
     display_name = "Klaww Fight Skip"
+
+class LavaTubeOrangesSkip(Toggle):
+    """
+    Create an alternative path through Lava Tube.
+
+    Enabling this setting may require Jak to skip the door in the room with the "oranges" in lava tube, without using
+    *Yellow Eco*.
+    """
+    display_name = "Lava Tube Oranges Skip"
 # endregion
 
 # region Advanced Movement
@@ -730,6 +739,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     enable_eco_randomizer: EnableEcoRandomizer
     geyser_rock_door_skip: GeyserRockDoorSkip
     klaww_fight_skip: KlawwFightSkip
+    lava_tube_oranges_skip: LavaTubeOrangesSkip
     boosted_and_extended_uppercuts: BoostedAndExtendedUppercuts
     punch_uppercut_scout_flies: PunchUppercutScoutFlies
     geyser_rock_cliff_climb: GeyserRockCliffClimb

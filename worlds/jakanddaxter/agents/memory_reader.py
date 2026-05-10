@@ -111,6 +111,9 @@ slot_seed_offset = offsets.define(sizeof_uint8, 8)
 # Trap information.
 trap_duration_offset = offsets.define(sizeof_float)
 
+# Eco randomizer information.
+ecorando_enabled_offset = offsets.define(sizeof_uint8)
+
 # The End.
 end_marker_offset = offsets.define(sizeof_uint8, 4)
 
