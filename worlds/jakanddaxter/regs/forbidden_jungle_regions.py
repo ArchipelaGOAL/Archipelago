@@ -12,38 +12,46 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     player = world.player
 
 
-    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 25)
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 27)
 
     # You can get this scout fly by running from the blue eco vent across the temple bridge,
     # falling onto the river, collecting the 3 blue clusters, using the jump pad, and running straight to the box.
-    main_area.add_fly_locations([393223])
+    main_area.add_fly_locations([393223], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
 
     lurker_machine = JakAndDaxterRegion("Lurker Machine", player, multiworld, level_name, 5)
     lurker_machine.add_cell_locations([3], access_rule=lambda state: world.can_fight_or_roll_jump(state, player))
 
     # This cell and this scout fly can both be gotten with the blue eco clusters near the jump pad.
-    lurker_machine.add_cell_locations([9])
-    lurker_machine.add_fly_locations([131079])
+    lurker_machine.add_cell_locations([9], access_rule=lambda state: state.has("Blue Eco", player))
+    lurker_machine.add_fly_locations([131079], access_rule=lambda state:
+                                     world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
 
-    river = JakAndDaxterRegion("River", player, multiworld, level_name, 42)
+    river = JakAndDaxterRegion("River", player, multiworld, level_name, 22)
 
     # All of these can be gotten with blue eco, hitting the dark eco boxes, or by running.
     river.add_cell_locations([5, 8])
-    river.add_fly_locations([7, 196615])
+    # Can be gotten by running into the dark eco boxes.
+    river.add_fly_locations([7])
+    river.add_fly_locations([196615], access_rule=lambda state:
+                            world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
     river.add_special_locations([5])
-    river.add_cache_locations([10369])
+    # 20 orbs
+    river_cache = JakAndDaxterRegion("River Cache", player, multiworld, level_name, 20)
+    river_cache.add_cache_locations([10369])
 
     # 12 orbs around temple exit, excluding those directly above (which are in temple_plant_boss_defeated).
     temple_exit = JakAndDaxterRegion("Temple Exit", player, multiworld, level_name, 12)
 
     if options.forbidden_jungle_attackless_spiral_stumps_scout_fly:
         # This fly can be reached using the blue eco vent inside the temple (easiest with Fall Damage Animation Cancel).
-        temple_exit.add_fly_locations([262151])
+        temple_exit.add_fly_locations([262151], access_rule=lambda state:
+                                      world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
     else:
         # This fly is too far from accessible blue eco sources.
         temple_exit.add_fly_locations([262151], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
-    temple_exterior = JakAndDaxterRegion("Temple Exterior", player, multiworld, level_name, 10)
+    temple_exterior = JakAndDaxterRegion("Temple Exterior", player, multiworld, level_name, 8)
 
     # All of these can be gotten with blue eco and running.
     temple_exterior.add_cell_locations([4])
@@ -54,7 +62,14 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     temple_int_pre_blue.add_cell_locations([2])
     temple_int_pre_blue.add_special_locations([2])
 
-    temple_int_post_blue = JakAndDaxterRegion("Temple Interior (Post Blue Eco)", player, multiworld, level_name, 29)
+    # This region contains everything from the door to the boss.
+    temple_int_post_blue = JakAndDaxterRegion("Temple Interior (Post Blue Eco)", player, multiworld, level_name, 2)
+
+    # This region contains all reachable orbs when Jak can get behind the door and can collect blue eco.
+    # This allows Jak to use the Jump Pads (2x 10 orbs) and unlock the door to the blue eco switch (7 orbs).
+    # The 7 orbs can probably be collected using a boosted as well, but I haven't confirmed this.
+    temple_int_post_blue_eco_unlocked = JakAndDaxterRegion("Temple Interior (Post Blue Eco, Eco unlocked)", player,
+                                                           multiworld, level_name, 27)
 
     # 5 orbs from Plant Boss + 5 orbs from leaving via jump pad. Only reachable when Jak can fight the plant boss.
     temple_plant_boss_defeated = JakAndDaxterRegion("Temple (Plant Boss defeated)", player, multiworld, level_name, 10)
@@ -66,16 +81,22 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     lurker_machine.connect(main_area)               # Jump down.
     lurker_machine.connect(river)                   # Jump down.
-    lurker_machine.connect(temple_exterior)         # Jump down (ledge).
 
     river.connect(main_area)                        # Jump up (ledges near fisherman).
     river.connect(lurker_machine)                   # Jump pad (aim toward machine).
     river.connect(temple_exit)                      # Run and jump (trampolines).
-    river.connect(temple_exterior)                  # Jump pad (aim toward temple door).
+    river.connect(temple_exterior,                  # Jump pad (aim toward temple door).
+                  rule=lambda state:
+                  state.has("Blue Eco", player))
+    river.connect(river_cache,                      # Use Blue eco to get the orbs in the cache.
+                  rule=lambda state:
+                  state.has("Blue Eco", player))
 
     temple_exit.connect(main_area)                  # Run and jump (bridges).
     temple_exit.connect(river)                      # Jump down.
-    temple_exit.connect(temple_exterior)            # Run and jump (bridges, dodge spikes).
+    temple_exit.connect(temple_exterior,            # Run and jump (bridges, dodge spikes).
+                        rule=lambda state:
+                        state.has("Blue Eco", player))
 
     if options.forbidden_jungle_elevator_skip:
         # With a deload, it's possible to skip the Elevator, but Jak has to hit the loading zone while falling down.
@@ -87,10 +108,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
         temple_exterior.connect(temple_int_pre_blue, rule=lambda state: state.has("Jungle Elevator", player))
 
     # It is possible to reach the boss by jumping through a collision hole above the door, using boosteds.
-    # After defeating the boss, it's possible to go back with blue eco and grab everything (including jump pads).
+    # After defeating the boss (which is always possible with the boosted moveset), it's possible to go back with
+    # blue eco and grab everything (including jump pads).
     temple_int_pre_blue.connect(temple_int_post_blue, rule=lambda state:
                                 world.can_do_boosted_extended(state, player)
-                                or state.has("Blue Eco Switch", player))
+                                or state.has_all(("Blue Eco Switch", "Blue Eco"), player))
+
+    temple_int_post_blue.connect(temple_int_post_blue_eco_unlocked, rule=lambda state: state.has("Blue Eco", player))
 
     # Requires defeating the plant boss (combat).
     temple_int_post_blue.connect(temple_plant_boss_defeated, rule=lambda state: can_fight(state, player))
@@ -99,10 +123,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     world.level_to_regions[level_name].append(main_area)
     world.level_to_regions[level_name].append(lurker_machine)
     world.level_to_regions[level_name].append(river)
+    world.level_to_regions[level_name].append(river_cache)
     world.level_to_regions[level_name].append(temple_exit)
     world.level_to_regions[level_name].append(temple_exterior)
     world.level_to_regions[level_name].append(temple_int_pre_blue)
     world.level_to_regions[level_name].append(temple_int_post_blue)
+    world.level_to_regions[level_name].append(temple_int_post_blue_eco_unlocked)
     world.level_to_regions[level_name].append(temple_plant_boss_defeated)
 
     # If Per-Level Orbsanity is enabled, build the special Orbsanity Region. This is a virtual region always

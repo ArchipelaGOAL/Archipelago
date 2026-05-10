@@ -64,7 +64,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Troop in ice_skating_rink: cross main_area and fort_exterior.
     # Troop in fort_exterior: cross main_area and fort_exterior.
     glacier_lurkers.add_cell_locations([61], access_rule=lambda state:
-                                       can_fight(state, player) or can_free_flut_flut(state, player))
+                                       state.has("Red Eco", player)
+                                       and (can_fight(state, player) or can_free_flut_flut(state, player)))
 
     # Second, a virtual region for the precursor blockers. Unlike the others, this contains orbs:
     # the total number of orbs that sit on top of the blockers. Yes, there are only 8.
@@ -84,7 +85,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # The scout fly box *can* be broken without YES, so leave it in this region.
     frozen_box_cave = JakAndDaxterRegion("Frozen Box Cave", player, multiworld, level_name, 12)
     frozen_box_cave.add_fly_locations([327745], access_rule=lambda state:
-                                      state.has("Yellow Eco Switch", player)
+                                      state.has_all(("Yellow Eco Switch", "Yellow Eco"), player)
                                       or world.can_free_scout_flies(state, player)
                                       or can_free_flut_flut(state, player))
 
@@ -127,8 +128,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     fort_interior = JakAndDaxterRegion("Fort Interior (Main)", player, multiworld, level_name, 19)
 
     # Reaching the top of the watch tower, getting the fly with the blue eco, and falling down to get the caches.
-    fort_interior_caches = JakAndDaxterRegion("Fort Interior (Caches)", player, multiworld, level_name, 51)
-    fort_interior_caches.add_fly_locations([196673])
+    fort_interior_tower = JakAndDaxterRegion("Fort Interior (Tower)", player, multiworld, level_name, 6)
+    fort_interior_tower.add_fly_locations([196673], access_rule=lambda state:
+                                          world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
+
+    # The caches can only be opened with blue eco.
+    fort_interior_caches = JakAndDaxterRegion("Fort Interior (Caches)", player, multiworld, level_name, 45)
     fort_interior_caches.add_cache_locations([23348, 23349, 23350])
 
     # Need higher jump.
@@ -164,8 +169,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                             can_cross_medium_gap(state, player)
                             or can_free_flut_flut(state, player))
     frozen_box_cave.connect(frozen_box_cave_crates, rule=lambda state:          # YES to get these crates.
-                            state.has("Yellow Eco Switch", player)              # Flut Flut can break boxes as well.
-                            or can_free_flut_flut(state, player))
+                            state.has_all(("Yellow Eco Switch", "Yellow Eco"), player)
+                            or can_free_flut_flut(state, player))               # Flut Flut can break boxes as well.
     frozen_box_cave.connect(ice_skating_rink, rule=lambda state:                # Same movement to go forward.
                             can_cross_medium_gap(state, player)
                             or can_free_flut_flut(state, player))
@@ -214,10 +219,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     if options.snowy_mountain_flut_flut_skip:
         fort_exterior.connect(fort_gate_button)                          # Zoom walk down.
 
-    fort_interior.connect(fort_interior_caches, rule=lambda state:              # Just need a little height.
+    fort_interior.connect(fort_interior_tower, rule=lambda state:              # Just need a little height.
                           state.has("Double Jump", player)
                           or state.has_all(("Crouch", "Crouch Jump"), player)
                           or can_free_flut_flut(state, player))
+    fort_interior_tower.connect(fort_interior_caches, rule=lambda state: state.has("Blue Eco", player))
     fort_interior.connect(fort_interior_base, rule=lambda state:                # Just need a little height.
                           state.has("Double Jump", player)
                           or state.has_all(("Crouch", "Crouch Jump"), player)
@@ -234,6 +240,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     bunny_cave_start.connect(bunny_cave_end, rule=lambda state:
                              can_free_flut_flut(state, player)
                              or (can_fight(state, player)
+                                 and state.has("Red Eco", player)        # Not technically required.
                                  and (state.has("Double Jump", player)
                                       or state.has_all(("Crouch", "Crouch Jump"), player))))
 
@@ -259,6 +266,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     world.level_to_regions[level_name].append(bunny_cave_end)
     world.level_to_regions[level_name].append(switch_cave)
     world.level_to_regions[level_name].append(fort_interior)
+    world.level_to_regions[level_name].append(fort_interior_tower)
     world.level_to_regions[level_name].append(fort_interior_caches)
     world.level_to_regions[level_name].append(fort_interior_base)
     world.level_to_regions[level_name].append(fort_interior_course_end)

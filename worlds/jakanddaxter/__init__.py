@@ -24,7 +24,7 @@ from .items import (JakAndDaxterItem,
                     special_item_table,
                     move_item_table,
                     orb_item_table,
-                    trap_item_table)
+                    trap_item_table, eco_item_table)
 from .levels import level_table, level_table_with_global
 from .locations import (JakAndDaxterLocation,
                         location_table,
@@ -116,6 +116,12 @@ class JakAndDaxterWebWorld(WebWorld):
             options.CitizenOrbTradeAmount,
             options.OracleOrbTradeAmount,
         ]),
+        OptionGroup("Eco Randomizer", [
+            options.EnableEcoRandomizer,
+            options.GeyserRockDoorSkip,
+            options.KlawwFightSkip,
+            options.LavaTubeOrangesSkip,
+        ], True),
         OptionGroup("Tricks & Glitches - Easy", [
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
@@ -192,6 +198,7 @@ class JakAndDaxterWorld(World):
         "Scout Flies": set(scout_item_table.values()),
         "Specials": set(special_item_table.values()),
         "Moves": set(move_item_table.values()),
+        "Eco": set(eco_item_table.values()),
         "Precursor Orbs": set(orb_item_table.values()),
         "Traps": set(trap_item_table.values()),
     }
@@ -447,10 +454,10 @@ class JakAndDaxterWorld(World):
         for item_name in self.item_name_to_id:
             item_id = self.item_name_to_id[item_name]
 
-            # Handle Move Randomizer option.
+            # Handle Move/Eco Randomizer option.
             # If it is OFF, put all moves in your starting inventory instead of the item pool,
             # then fill the item pool with a corresponding amount of filler items.
-            if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
+            if (item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer) or (item_name in self.item_name_groups["Eco"] and not self.options.enable_eco_randomizer):
                 self.multiworld.push_precollected(self.create_item(item_name))
                 self.multiworld.itempool.append(self.create_filler())
                 items_made += 1
@@ -561,6 +568,10 @@ class JakAndDaxterWorld(World):
                                             "trap_weights",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
+                                            # Eco Randomizer
+                                            "enable_eco_randomizer",
+                                            "geyser_rock_door_skip",
+                                            "klaww_fight_skip",
                                             # Tricks & Glitches
                                             "boosted_and_extended_uppercuts",
                                             "punch_uppercut_scout_flies",

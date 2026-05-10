@@ -17,7 +17,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     muse_course.add_cell_locations([23])
     if options.misty_island_attackless_scout_flies:
         # Grabbing blue eco orbs and running back can reach this scout fly
-        muse_course.add_fly_locations([327708])
+        muse_course.add_fly_locations([327708], access_rule=lambda state:
+                                      world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
     else:
         muse_course.add_fly_locations([327708], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
@@ -58,13 +59,16 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     upper_approach = JakAndDaxterRegion("Upper Arena Approach", player, multiworld, level_name, 6)
     if options.misty_island_attackless_scout_flies:
         # These can be reached with blue eco.
-        upper_approach.add_fly_locations([65564, 262172])
+        upper_approach.add_fly_locations([65564, 262172], access_rule=lambda state:
+                                         world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
     else:
         upper_approach.add_fly_locations([65564, 262172], access_rule=lambda state:
                                          world.can_free_scout_flies(state, player))
 
     lower_approach = JakAndDaxterRegion("Lower Arena Approach", player, multiworld, level_name, 7)
-    lower_approach.add_cell_locations([30])
+    # Use the blue eco to reach this power cell, or do an extended boosted
+    lower_approach.add_cell_locations([30], access_rule=lambda state:
+                                      state.has("Blue Eco", player) or world.can_do_boosted_extended(state, player))
 
     arena = JakAndDaxterRegion("Arena", player, multiworld, level_name, 5)
     if options.misty_island_arena_fight_skip:
@@ -73,7 +77,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     else:
         arena.add_cell_locations([25], access_rule=lambda state: can_fight(state, player))
 
-    main_area.connect(muse_course)             # TODO - What do you need to chase the muse the whole way around?
+    main_area.connect(muse_course)             # You can catch the muse using only Single Jump.
     main_area.connect(zoomer)                  # Run and jump down.
     main_area.connect(ship)                    # Run and jump.
     main_area.connect(lower_approach)          # Run and jump.
@@ -100,10 +104,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     if options.misty_island_single_jump_far_side_orb_cache:
         # Only if you can break the bone bridges to carry blue eco over the mud pit.
-        far_side.connect(far_side_cache, rule=lambda state: can_fight(state, player))
+        far_side.connect(far_side_cache, rule=lambda state: can_fight(state, player) and state.has("Blue Eco", player))
     else:
         # It's possible to reach the orb cache without any attacks.
-        far_side.connect(far_side_cache)
+        far_side.connect(far_side_cache, rule=lambda state: state.has("Blue Eco", player))
 
     far_side_cliff.connect(far_side)           # Run and jump down.
 
@@ -125,6 +129,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     lower_approach.connect(upper_approach, rule=lambda state: state.has_all(("Crouch", "Crouch Jump"), player))
 
     # Requires breaking bone bridges.
+    # Arena door doesn't require blue eco when opened from the inside, and it's always possible to get inside.
     lower_approach.connect(arena, rule=lambda state: can_fight(state, player))
 
     arena.connect(lower_approach)              # Run.

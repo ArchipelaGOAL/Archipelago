@@ -23,7 +23,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # Hidden Power Cell: you can carry yellow eco from Spider Cave just by running and jumping
     # and using your Goggles to shoot the box (you do not need Punch to shoot from FP mode).
-    main_area.add_cell_locations([74])
+    main_area.add_cell_locations([74], access_rule=lambda state: state.has("Yellow Eco", player))
 
     # No blue eco sources in this area, all boxes must be broken by hand (yellow eco can't be carried far enough).
     main_area.add_fly_locations(scouts.locVC_scoutTable.keys(), access_rule=lambda state:

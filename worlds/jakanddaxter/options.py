@@ -327,6 +327,47 @@ class TrapWeights(OptionCounter):
     def weights_pair(self) -> tuple[list[str], list[int]]:
         return list(self.value.keys()), list(self.value.values())
 
+# region Eco Randomizer
+class EnableEcoRandomizer(Toggle):
+    """Include eco collection as items in the randomizer. Until you find other eco colors, Jak can only collect green
+    eco.
+
+    This adds 3 items to the pool."""
+    display_name = "Enable Eco Randomizer"
+
+
+class GeyserRockDoorSkip(Toggle):
+    """
+    Create an alternative path through the precursor door in geyser rock.
+
+    Enabling this setting may require Jak to reach the area behind the door with no *Blue Eco* unlocked.
+
+    If "Enable Move Randomizer" is ON, Jak may be required to do the trick with *Jump Kick* and either *Crouch Jump*
+    or *Jump Dive* + *Double Jump*.
+    """
+    display_name = "Geyser Rock Door Skip"
+
+
+class KlawwFightSkip(Toggle):
+    """
+    Create an alternative path to Mountain Pass without having to fight Klaww.
+
+    Enabling this setting may require Jak to reach Mountain Pass by skipping the Klaww fight, without *Blue Eco* or
+    *Yellow Eco* unlocked.
+    """
+    display_name = "Klaww Fight Skip"
+
+class LavaTubeOrangesSkip(Toggle):
+    """
+    Create an alternative path through Lava Tube.
+
+    Enabling this setting may require Jak to skip the door in the room with the "oranges" in lava tube, without using
+    *Yellow Eco*.
+    """
+    display_name = "Lava Tube Oranges Skip"
+# endregion
+
+# region Advanced Movement
 
 class BoostedAndExtendedUppercuts(Toggle):
     """
@@ -663,6 +704,8 @@ class SentinelBeachBlueEcoSwitchSkip(Toggle):
     """
     display_name = "Sentinel Beach Blue Eco Switch Skip"
 
+# endregion
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -693,6 +736,10 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     filler_orb_bundles_replaced_with_traps: FillerOrbBundlesReplacedWithTraps
     trap_effect_duration: TrapEffectDuration
     trap_weights: TrapWeights
+    enable_eco_randomizer: EnableEcoRandomizer
+    geyser_rock_door_skip: GeyserRockDoorSkip
+    klaww_fight_skip: KlawwFightSkip
+    lava_tube_oranges_skip: LavaTubeOrangesSkip
     boosted_and_extended_uppercuts: BoostedAndExtendedUppercuts
     punch_uppercut_scout_flies: PunchUppercutScoutFlies
     geyser_rock_cliff_climb: GeyserRockCliffClimb

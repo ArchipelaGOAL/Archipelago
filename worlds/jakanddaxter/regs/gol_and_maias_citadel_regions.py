@@ -35,7 +35,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     jump_pad_room = JakAndDaxterRegion("Jump Pad Chamber", player, multiworld, level_name, 88)
     jump_pad_room.add_cell_locations([73], access_rule=lambda state: can_fight(state, player))
     jump_pad_room.add_special_locations([73], access_rule=lambda state: can_fight(state, player))
-    jump_pad_room.add_fly_locations([131163])  # Blue eco vent is right next to it.
+
+    # The scout fly right next to the entrance is added to the main area since it can be reached without any moves,
+    # while everything in the jump pad room requires blue eco.
+    main_area.add_fly_locations([131163], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
     jump_pad_room.add_cache_locations([24039, 24040])  # First, blue eco vent, second, blue eco cluster near sage.
 
     yellow_sage_scaffolding = JakAndDaxterRegion("Scaffolding Around Yellow Sage",
@@ -68,16 +72,20 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     main_area.connect(robot_scaffolding, rule=lambda state:
                       state.has("Jump Dive", player)
                       or state.has_all(("Roll", "Roll Jump"), player))
-    main_area.connect(jump_pad_room)
+    # While this room can be reached without blue eco, there is nothing that Jak can do.
+    # The scout fly at the entrance is part of the main_area.
+    main_area.connect(jump_pad_room, rule=lambda state: state.has("Blue Eco", player))
 
     robot_scaffolding.connect(main_area, rule=lambda state: state.has("Jump Dive", player))
+    # Blue eco is required to collect anything in this room.
     robot_scaffolding.connect(blast_furnace, rule=lambda state:
-                              state.has("Jump Dive", player)
-                              and (state.has_all(("Double Jump", "Jump Kick"), player)))
+                              state.has_all(("Jump Dive", "Double Jump", "Jump Kick", "Blue Eco"), player))
     robot_scaffolding.connect(u_turn_room, rule=lambda state:
                               can_jump_farther(state, player))
+    # Eco is technically not required to beat the room (but yellow eco to destroy the boxes).
+    # It is possible to jump down to collect the last 3 orbs, even without blue eco.
     u_turn_room.connect(bunny_room, rule=lambda state:
-                        state.has("Jump Dive", player)
+                        state.has_all(("Jump Dive", "Red Eco", "Yellow Eco"), player)
                         and can_jump_farther(state, player))
 
     jump_pad_room.connect(yellow_sage_scaffolding, rule=lambda state: can_jump_farther(state, player))
@@ -102,9 +110,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     rotating_tower.connect(main_area)  # Take stairs back down.
 
     # Final elevator. Need to break boxes at summit to get blue eco for platform.
+    # Blue eco is required for the jump pad, yellow eco to shoot the boss.
     rotating_tower.connect(final_boss, rule=lambda state:
                            can_fight(state, player)
-                           and state.has("Freed The Green Sage", player))
+                           and state.has_all(("Blue Eco", "Yellow Eco", "Freed The Green Sage"), player))
 
     final_boss.connect(rotating_tower)  # Take elevator back down.
 
