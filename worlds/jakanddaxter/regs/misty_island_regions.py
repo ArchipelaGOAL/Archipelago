@@ -1,5 +1,5 @@
 from .region_base import JakAndDaxterRegion
-from ..options import EnableOrbsanity
+from ..options import EnableOrbsanity, ZoomerEscape
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
@@ -27,7 +27,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     ship = JakAndDaxterRegion("Ship", player, multiworld, level_name, 10)
     ship.add_cell_locations([24])
-    ship.add_fly_locations([131100], access_rule=lambda state: world.can_free_scout_flies(state, player))
+
+    if options.zoomer_escape == ZoomerEscape.option_misty_island or options.zoomer_escape == ZoomerEscape.option_both:
+        # It is possible to collect this cell by getting the zoomer out of the lake by making some precise jumps.
+        ship.add_fly_locations([131100])
+    else:
+        ship.add_fly_locations([131100], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     far_side = JakAndDaxterRegion("Far Side", player, multiworld, level_name, 16)
 

@@ -1,5 +1,5 @@
 from .region_base import JakAndDaxterRegion
-from ..options import EnableOrbsanity
+from ..options import EnableOrbsanity, ZoomerEscape
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
@@ -22,8 +22,16 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # These 2 scout fly boxes can be broken by running with nearby blue eco.
     main_area.add_fly_locations([196684, 262220])
-    main_area.add_fly_locations([76, 131148, 65612, 327756], access_rule=lambda state:
-                                world.can_free_scout_flies(state, player))
+
+
+    if options.zoomer_escape == ZoomerEscape.option_misty_island or options.zoomer_escape == ZoomerEscape.option_both:
+        # It is possible to get the zoomer out of PB to collect these scout fly boxes.
+        main_area.add_fly_locations([131148, 65612, 327756])
+        main_area.add_fly_locations([76], access_rule=lambda state:
+                                    world.can_free_scout_flies(state, player))
+    else:
+        main_area.add_fly_locations([76, 131148, 65612, 327756], access_rule=lambda state:
+                                    world.can_free_scout_flies(state, player))
 
     # Warrior Pontoon check. You just talk to him and get his introduction.
     main_area.add_special_locations([33])

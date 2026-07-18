@@ -120,6 +120,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
             options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon.
+            options.RockVillagePontoonSkip,  # May require fast swimming, but not too tight.
         ], True),
         OptionGroup("Tricks & Glitches - Medium", [
             options.PunchUppercutScoutFlies,  # Some may be a little tricky.
@@ -131,7 +132,6 @@ class JakAndDaxterWebWorld(WebWorld):
             options.MistyIslandArenaFightSkip, # Drop down from top or use cannon to shoot enemies.
             options.MistyIslandFarSideCliffSeesawSkip, # Relatively easy, but route is not obvious.
             options.RockVillageSingleJumpOrbCache, # Precise movement, but not too hard, fast retries possible.
-            options.RockVillagePontoonSkip, # May require fast swimming, but not too tight.
             options.KlawwCliffClimb, # Easy when out of bounds spot is known.
             options.KlawwBoulderSkip, # Same trick as above.
             options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint.
@@ -140,7 +140,6 @@ class JakAndDaxterWebWorld(WebWorld):
         ], True),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
-            options.SentinelBeachBlueEcoSwitchSkip, # Precise movement required.
             options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell.
             options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback.
             options.BoggySwampFlutFlutEscape, # Harder trick, long runback.
@@ -148,9 +147,11 @@ class JakAndDaxterWebWorld(WebWorld):
             options.SnowyMountainFlutFlutEscape,  # Escaping is easy, doing the whole level can be tricky though.
         ], True),
         OptionGroup("Tricks & Glitches - Very Hard", [
+            options.SentinelBeachBlueEcoSwitchSkip,  # Precise movement required.
             options.BoggySwampAttacklessAmbush,  # Doing the lurker ambush without attacks is annoying (and hard).
             options.LostPrecursorCitySingleJumpSlideTubeClimb,  # Climbing the tube without attacks/moves is hard.
             options.SnowyMountainFortGateSkip,  # Getting into the Fort without an open gate is always very hard.
+            options.ZoomerEscape, # Getting the zoomer out of the intended areas require precise jumps.
         ], True),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,
