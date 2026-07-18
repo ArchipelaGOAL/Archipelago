@@ -189,7 +189,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Enter Fort on foot.
     if has_both_gate_skips or gate_skip_option == SnowyMountainFortGateSkip.option_on_foot:
         def can_enter_fort_on_foot(state: CollectionState, p: int) -> bool:
-            return state.has_all(("Crouch", "Crouch Jump", "Jump Kick", "Double Jump", "Punch", "Punch Uppercut"), p)
+            return (state.has("Jump Kick", player)
+                    and (state.has("Double Jump", p) or state.has_all(("Crouch", "Crouch Jump"), p)))
     else:
         def can_enter_fort_on_foot(_: CollectionState, __: int) -> bool:
             return False
