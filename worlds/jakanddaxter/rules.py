@@ -42,6 +42,13 @@ def set_option_driven_rules(world: "JakAndDaxterWorld"):
             state.has("Jump Dive", p)
             or state.has_all(("Crouch", "Crouch Uppercut"), p))
 
+    if options.crouch_abuse:
+        world.can_free_scout_flies_crouch_abuse = lambda state, p: (
+            world.can_free_scout_flies(state, p) or state.has("Crouch Uppercut", p)
+        )
+    else:
+        world.can_free_scout_flies_crouch_abuse = world.can_free_scout_flies
+
     if options.attack_with_roll_jump:
         world.can_fight_or_roll_jump = lambda state, p: (
             can_fight(state, p)
