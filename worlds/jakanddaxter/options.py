@@ -509,7 +509,7 @@ class MistyIslandSingleJumpFarSideOrbCache(Toggle):
 
 class MistyIslandAttacklessScoutFlies(Toggle):
     """
-    Remove attack requirements to the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
+    Remove attack requirements from the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
     "Overlooking Entrance" in Misty Island.
 
     Enabling this setting may require Jak to break these scout fly boxes with precise blue eco movement or clever use
@@ -546,7 +546,7 @@ class MistyIslandFarSideCliffSeesawSkip(Toggle):
 
 class RockVillageSingleJumpOrbCache(Toggle):
     """
-    Remove requirements from the orb cache in Rock Village.
+    Remove requirements from the orb cache logic in Rock Village.
 
     Enabling this setting may require Jak to use precise movement to reach the orb cache with only *Single Jump*.
 
@@ -605,7 +605,7 @@ class BoggySwampPreciseMovement(Toggle):
 
 class BoggySwampAttacklessAmbush(Toggle):
     """
-    Remove the attack requirement from the Boggy Swamp ambush.
+    Remove the attack requirement from the Boggy Swamp ambush logic.
 
     Enabling this setting may require Jak to defeat the lurkers by only shooting yellow Eco through his goggles.
 
@@ -654,6 +654,7 @@ class SnowyMountainFortGateSkip(Choice):
     option_flut_flut = 2
     option_both = 3
 
+
 class SentinelBeachBlueEcoSwitchSkip(Toggle):
     """
     Create an alternative path to the blue eco jump pad in Sentinel Beach without having *Blue Eco Switch* unlocked.
@@ -662,6 +663,7 @@ class SentinelBeachBlueEcoSwitchSkip(Toggle):
     only *Punch* or only *Roll Jump*.
     """
     display_name = "Sentinel Beach Blue Eco Switch Skip"
+
 
 class ZoomerEscape(Choice):
     """
@@ -683,6 +685,16 @@ class ZoomerEscape(Choice):
     option_precursor_basin = 2
     option_both = 3
 
+
+class CrouchAbuse(Toggle):
+    """
+    Enabling this setting may require Jak to use uneven terrain to enter the "crouching" state without *Crouch* unlocked.
+    This allows Jak to destroy certain scout fly boxes and reach some additional places with only *Crouch Jump* or
+    only *Crouch Uppercut* unlocked.
+
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Crouch Abuse"
 
 
 class CompletionCondition(Choice):
@@ -744,6 +756,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     snowy_mountain_fort_gate_skip: SnowyMountainFortGateSkip
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     zoomer_escape: ZoomerEscape
+    crouch_abuse: CrouchAbuse
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 
@@ -776,6 +789,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_medium,
         "snowy_mountain_flut_flut_skip": True,
+        "crouch_abuse": True,
     },
     "Move Randomizer + Hard Tricks & Glitches": {
         "enable_move_randomizer": True,
@@ -798,6 +812,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
         "snowy_mountain_flut_flut_skip": True,
+        "crouch_abuse": True,
 
         "boosted_and_extended_uppercuts": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
@@ -827,6 +842,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
         "snowy_mountain_flut_flut_skip": True,
+        "crouch_abuse": True,
 
         "boosted_and_extended_uppercuts": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
