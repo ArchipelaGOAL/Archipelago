@@ -38,7 +38,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # In order to even reach this fly, you must use the seesaw or crouch jump.
     far_side_cliff = JakAndDaxterRegion("Far Side Cliff", player, multiworld, level_name, 5)
-    far_side_cliff.add_fly_locations([28], access_rule=lambda state: world.can_free_scout_flies(state, player))
+    far_side_cliff.add_fly_locations([28], access_rule=lambda state: world.can_free_scout_flies_crouch_trick(state, player))
 
     # To carry the blue eco fast enough to open this cache, you need to break the bone bridges along the way.
     far_side_cache = JakAndDaxterRegion("Far Side Orb Cache", player, multiworld, level_name, 15)
@@ -66,7 +66,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         upper_approach.add_fly_locations([65564, 262172])
     else:
         upper_approach.add_fly_locations([65564, 262172], access_rule=lambda state:
-                                         world.can_free_scout_flies(state, player))
+                                         world.can_free_scout_flies_crouch_trick(state, player))
 
     lower_approach = JakAndDaxterRegion("Lower Arena Approach", player, multiworld, level_name, 7)
     lower_approach.add_cell_locations([30])

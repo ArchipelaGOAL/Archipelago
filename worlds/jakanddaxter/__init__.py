@@ -137,7 +137,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint.
             options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over.
             options.SnowyMountainFlutFlutSkip, # Easily reachable by Zoom Walking.
-            options.CrouchAbuse, # May require some trial & error, but is generally not hard.
+            options.CrouchTrick, # May require some trial & error, but is generally not hard.
         ], True),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
@@ -266,7 +266,7 @@ class JakAndDaxterWorld(World):
     can_free_scout_flies: Callable[[CollectionState, int], bool]
     """Returns true if Jak can break scout fly boxes, depending on the chosen options."""
 
-    can_free_scout_flies_crouch_abuse: Callable[[CollectionState, int], bool]
+    can_free_scout_flies_crouch_trick: Callable[[CollectionState, int], bool]
     """Returns true if Jak can break scout fly boxes, depending on the chosen options, if the nearby terrain allows
     Jak to enter the crouching state without crouch unlocked."""
 

@@ -29,7 +29,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         main_area.add_fly_locations([196683], access_rule=lambda state:
                                     state.has("Double Jump", player)
                                     or state.has_all(("Crouch", "Crouch Jump"), player)
-                                    or world.can_free_scout_flies_crouch_abuse(state, player))
+                                    or world.can_free_scout_flies_crouch_trick(state, player))
 
     orb_cache_cliff = JakAndDaxterRegion("Orb Cache Cliff", player, multiworld, level_name, 15)
     orb_cache_cliff.add_cache_locations([10344])
@@ -43,7 +43,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     oracle_platforms.add_cell_locations([14], access_rule=lambda state:
                                         world.can_trade(state, world.total_trade_orbs, 13))
     oracle_platforms.add_fly_locations([393291], access_rule=lambda state:
-                                       world.can_free_scout_flies_crouch_abuse(state, player))
+                                       world.can_free_scout_flies_crouch_trick(state, player))
 
     if options.sandover_village_cliff_orb_cache_climb:
         # It is possible to reach this cliff (and the blue Eco next to it) with a single jump
@@ -54,7 +54,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                           or state.has_all(("Crouch", "Crouch Jump"), player)
                           or state.has_all(("Crouch", "Crouch Uppercut", "Jump Kick"), player))
 
-    if options.crouch_abuse:
+    if options.crouch_trick:
         main_area.connect(yakow_cliff, rule=lambda state:
                           state.has("Double Jump", player)
                           or state.has("Crouch Jump", player)

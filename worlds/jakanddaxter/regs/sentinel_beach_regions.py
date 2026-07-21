@@ -53,7 +53,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # or by normal combat tricks.
     main_area.add_fly_locations([393236], access_rule=lambda state:
                                 can_reach_blue_eco_vent(state, player)
-                                or world.can_free_scout_flies_crouch_abuse(state, player))
+                                or world.can_free_scout_flies_crouch_trick(state, player))
 
     # No need for the blue eco vent for either of the orb caches.
     main_area.add_cache_locations([12634, 12635])
@@ -80,7 +80,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     green_ridge = JakAndDaxterRegion("Ridge Near Green Vents", player, multiworld, level_name, 5)
     green_ridge.add_fly_locations([131092], access_rule=lambda state:
-                                  world.can_free_scout_flies_crouch_abuse(state, player))
+                                  world.can_free_scout_flies_crouch_trick(state, player))
 
     blue_ridge = JakAndDaxterRegion("Ridge Near Blue Vent", player, multiworld, level_name, 5)
     blue_ridge.add_fly_locations([196628], access_rule=lambda state:
@@ -101,7 +101,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.connect(eco_harvesters)    # Run.
 
     # We need a helper function for the uppercut logs.
-    if options.crouch_abuse:
+    if options.crouch_trick:
         def can_uppercut_and_jump_logs(state: CollectionState, p: int) -> bool:
             return (state.has_any(("Double Jump", "Jump Kick"), p)
                     and (state.has("Crouch Uppercut", p) # It's possible to enter crouch state nearby.

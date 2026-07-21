@@ -686,7 +686,7 @@ class ZoomerEscape(Choice):
     option_both = 3
 
 
-class CrouchAbuse(Toggle):
+class CrouchTrick(Toggle):
     """
     Enabling this setting may require Jak to use uneven terrain to enter the "crouching" state without *Crouch* unlocked.
     This allows Jak to destroy certain scout fly boxes and reach some additional places with only *Crouch Jump* or
@@ -694,7 +694,7 @@ class CrouchAbuse(Toggle):
 
     This only applies if "Enable Move Randomizer" is ON.
     """
-    display_name = "Crouch Abuse"
+    display_name = "Crouch Trick"
 
 
 class CompletionCondition(Choice):
@@ -756,7 +756,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     snowy_mountain_fort_gate_skip: SnowyMountainFortGateSkip
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     zoomer_escape: ZoomerEscape
-    crouch_abuse: CrouchAbuse
+    crouch_trick: CrouchTrick
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 
