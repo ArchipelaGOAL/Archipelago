@@ -597,6 +597,6 @@ class JakAndDaxterWorld(World):
                                             "snowy_mountain_fort_gate_skip",
                                             "sentinel_beach_blue_eco_switch_skip",
                                             "zoomer_escape",
-                                            "crouch_abuse",
+                                            "crouch_trick",
                                             )
         return options_dict
