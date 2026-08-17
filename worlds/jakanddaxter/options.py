@@ -789,7 +789,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_medium,
         "snowy_mountain_flut_flut_skip": True,
-        "crouch_abuse": True,
+        "crouch_trick": True,
     },
     "Move Randomizer + Hard Tricks & Glitches": {
         "enable_move_randomizer": True,
@@ -812,7 +812,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
         "snowy_mountain_flut_flut_skip": True,
-        "crouch_abuse": True,
+        "crouch_trick": True,
 
         "boosted_and_extended_uppercuts": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
@@ -842,7 +842,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
         "snowy_mountain_flut_flut_skip": True,
-        "crouch_abuse": True,
+        "crouch_trick": True,
 
         "boosted_and_extended_uppercuts": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,

@@ -113,10 +113,18 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                          or state.has_all(("Punch", "Punch Uppercut"), p)))
 
     # If you have double jump or crouch jump, you don't need the logs to reach this place.
-    main_area.connect(green_ridge, rule=lambda state:
-                      state.has("Double Jump", player)
-                      or state.has_all(("Crouch", "Crouch Jump"), player)
-                      or can_uppercut_and_jump_logs(state, player))
+    if options.crouch_trick:
+        main_area.connect(green_ridge, rule=lambda state:
+                          state.has("Double Jump", player)
+                          # It's possible to enter crouched state by jumping against the edge of the next higher
+                          # eco harvester platform.
+                          or state.has("Crouch Jump", player)
+                          or can_uppercut_and_jump_logs(state, player))
+    else:
+        main_area.connect(green_ridge, rule=lambda state:
+                          state.has("Double Jump", player)
+                          or state.has_all(("Crouch", "Crouch Jump"), player)
+                          or can_uppercut_and_jump_logs(state, player))
 
     # You can use an open blue eco vent, or you can use the logs, to reach this place.
     main_area.connect(blue_ridge, rule=lambda state:
