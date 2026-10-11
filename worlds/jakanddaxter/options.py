@@ -85,6 +85,34 @@ class EnableMoveRandomizer(Toggle):
     display_name = "Enable Move Randomizer"
 
 
+class RandomStartingMove(AllowedChoice):
+    """Enable this option to give Jak 1-2 random starting move(s).
+
+    This setting cannot be turned off to prevent generation failures, but the host can remove this restriction by
+    turning off enforce_friendly_options in host.yaml.
+
+    **If Required:** Give Jak a starting move if there are very few early checks available. This happens if
+    "Eco Randomizer" is ON and "Orbsanity" is either OFF or the bundle size is very large.
+
+    This only applies if "Enable Move Randomizer" is ON."""
+    display_name = "Random Starting Move"
+    option_no = 0
+    option_if_required = 1
+    option_yes = 2
+
+    default = option_if_required
+
+    @classmethod
+    def get_disallowed_options(cls) -> set[int]:
+        try:
+            from . import JakAndDaxterWorld
+            if JakAndDaxterWorld.settings.enforce_friendly_options:
+                return {cls.option_no}
+        except ImportError:
+            pass
+        return set()
+
+
 class EnableOrbsanity(Choice):
     """Include bundles of Precursor Orbs as checks. Every time you collect the chosen number of orbs, you will trigger
     another check.
@@ -327,6 +355,7 @@ class TrapWeights(OptionCounter):
     def weights_pair(self) -> tuple[list[str], list[int]]:
         return list(self.value.keys()), list(self.value.values())
 
+
 # region Eco Randomizer
 class EnableEcoRandomizer(Toggle):
     """Include eco collection as items in the randomizer. Until you find other eco colors, Jak can only collect green
@@ -356,6 +385,7 @@ class KlawwFightSkip(Toggle):
     *Yellow Eco* unlocked.
     """
     display_name = "Klaww Fight Skip"
+
 
 class LavaTubeOrangesSkip(Toggle):
     """
@@ -756,6 +786,7 @@ class CompletionCondition(Choice):
 @dataclass
 class JakAndDaxterOptions(PerGameCommonOptions):
     enable_move_randomizer: EnableMoveRandomizer
+    random_starting_move: RandomStartingMove
     enable_orbsanity: EnableOrbsanity
     global_orbsanity_bundle_size: GlobalOrbsanityBundleSize
     level_orbsanity_bundle_size: PerLevelOrbsanityBundleSize

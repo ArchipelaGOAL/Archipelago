@@ -33,7 +33,7 @@ from .locations import (JakAndDaxterLocation,
                         special_location_table,
                         cache_location_table,
                         orb_location_table)
-from .options import jakanddaxter_option_presets
+from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove
 from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
@@ -468,6 +468,36 @@ class JakAndDaxterWorld(World):
         return data
 
     def create_items(self) -> None:
+        starting_moves = set()
+        # If Move Rando and Eco Rando is On, then orb bundle size must not be larger than 25 to guarantee enough checks.
+        # This is arbitrary and leads to at least ~20 checks immediately accessible which seems to be enough.
+        has_low_orbsanity = (self.options.enable_orbsanity == EnableOrbsanity.option_off
+                             or (self.options.enable_orbsanity == EnableOrbsanity.option_global
+                                 and self.options.global_orbsanity_bundle_size > 25)
+                             or (self.options.enable_orbsanity == EnableOrbsanity.option_per_level
+                                 and self.options.level_orbsanity_bundle_size > 25))
+
+        if (self.options.random_starting_move == RandomStartingMove.option_yes
+                or (self.options.random_starting_move == RandomStartingMove.option_if_required
+                    and self.options.enable_move_randomizer
+                    and self.options.enable_eco_randomizer
+                    and has_low_orbsanity)):
+            # Combat moves unlock FJ Mirrors, SB Flut Flut + Harvesters for at least 4 checks.
+            possible_moves = [
+                ["Punch"],
+                ["Kick"],
+                ["Jump Kick"],
+                ["Blue Eco"],
+                ["Crouch", "Crouch Uppercut"],
+                ["Jump Dive"],
+            ]
+
+            if self.options.punch_uppercut_scout_flies:
+                possible_moves.append(["Punch", "Punch Uppercut"])
+
+            additional_starting_moves = self.random.choice(possible_moves)
+            starting_moves.update(additional_starting_moves)
+
         items_made: int = 0
         for item_name in self.item_name_to_id:
             item_id = self.item_name_to_id[item_name]
@@ -475,7 +505,9 @@ class JakAndDaxterWorld(World):
             # Handle Move/Eco Randomizer option.
             # If it is OFF, put all moves in your starting inventory instead of the item pool,
             # then fill the item pool with a corresponding amount of filler items.
-            if (item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer) or (item_name in self.item_name_groups["Eco"] and not self.options.enable_eco_randomizer):
+            if ((item_name in starting_moves)
+                    or (item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer)
+                    or (item_name in self.item_name_groups["Eco"] and not self.options.enable_eco_randomizer)):
                 self.multiworld.push_precollected(self.create_item(item_name))
                 self.multiworld.itempool.append(self.create_filler())
                 items_made += 1
