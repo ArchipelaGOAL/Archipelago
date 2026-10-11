@@ -36,7 +36,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     second_room.add_fly_locations([49, 65585], access_rule=lambda state: state.has("Jump Dive", player))
 
     # This is the scout fly on the way to the pipe cell, requires normal breaking moves.
-    second_room.add_fly_locations([196657], access_rule=lambda state: world.can_free_scout_flies(state, player))
+    # Crouch trick can be done on the moving block next to it (by sliding down crouched when it retracts).
+    second_room.add_fly_locations([196657], access_rule=lambda state: world.can_free_scout_flies_crouch_trick(state, player))
 
     # This orb vent and scout fly are right next to each other, can be gotten with blue eco and the floating platforms.
     second_room.add_fly_locations([393265])
