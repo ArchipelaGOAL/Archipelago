@@ -120,6 +120,7 @@ class JakAndDaxterWebWorld(WebWorld):
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
             options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon.
+            options.RockVillagePontoonSkip,  # May require fast swimming, but not too tight.
         ], True),
         OptionGroup("Tricks & Glitches - Medium", [
             options.PunchUppercutScoutFlies,  # Some may be a little tricky.
@@ -131,16 +132,15 @@ class JakAndDaxterWebWorld(WebWorld):
             options.MistyIslandArenaFightSkip, # Drop down from top or use cannon to shoot enemies.
             options.MistyIslandFarSideCliffSeesawSkip, # Relatively easy, but route is not obvious.
             options.RockVillageSingleJumpOrbCache, # Precise movement, but not too hard, fast retries possible.
-            options.RockVillagePontoonSkip, # May require fast swimming, but not too tight.
             options.KlawwCliffClimb, # Easy when out of bounds spot is known.
             options.KlawwBoulderSkip, # Same trick as above.
             options.BoggySwampPreciseMovement, # Mostly just taking damage on some jumps to get to the next checkpoint.
             options.SnowyMountainEntranceClimb, # Jump onto the wall on the left and simply slide over.
             options.SnowyMountainFlutFlutSkip, # Easily reachable by Zoom Walking.
+            options.CrouchTrick, # May require some trial & error, but is generally not hard.
         ], True),
         OptionGroup("Tricks & Glitches - Hard", [
             options.BoostedAndExtendedUppercuts,
-            options.SentinelBeachBlueEcoSwitchSkip, # Precise movement required.
             options.ForbiddenJungleAttacklessSpiralStumpsScoutFly, # Precise movement from temple to power cell.
             options.MistyIslandAttacklessScoutFlies, # Some require relatively precise movement with long runback.
             options.BoggySwampFlutFlutEscape, # Harder trick, long runback.
@@ -148,9 +148,11 @@ class JakAndDaxterWebWorld(WebWorld):
             options.SnowyMountainFlutFlutEscape,  # Escaping is easy, doing the whole level can be tricky though.
         ], True),
         OptionGroup("Tricks & Glitches - Very Hard", [
+            options.SentinelBeachBlueEcoSwitchSkip,  # Precise movement required.
             options.BoggySwampAttacklessAmbush,  # Doing the lurker ambush without attacks is annoying (and hard).
             options.LostPrecursorCitySingleJumpSlideTubeClimb,  # Climbing the tube without attacks/moves is hard.
             options.SnowyMountainFortGateSkip,  # Getting into the Fort without an open gate is always very hard.
+            options.ZoomerEscape, # Getting the zoomer out of the intended areas require precise jumps.
         ], True),
         OptionGroup("Traps", [
             options.FillerPowerCellsReplacedWithTraps,
@@ -263,6 +265,10 @@ class JakAndDaxterWorld(World):
 
     can_free_scout_flies: Callable[[CollectionState, int], bool]
     """Returns true if Jak can break scout fly boxes, depending on the chosen options."""
+
+    can_free_scout_flies_crouch_trick: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can break scout fly boxes, depending on the chosen options, if the nearby terrain allows
+    Jak to enter the crouching state without crouch unlocked."""
 
     can_do_boosted: Callable[[CollectionState, int], bool]
     """Returns true if Jak can do a boosted, using Punch + Punch Uppercut."""
@@ -590,5 +596,7 @@ class JakAndDaxterWorld(World):
                                             "lost_precursor_city_single_jump_slide_tube_climb",
                                             "snowy_mountain_fort_gate_skip",
                                             "sentinel_beach_blue_eco_switch_skip",
+                                            "zoomer_escape",
+                                            "crouch_trick",
                                             )
         return options_dict

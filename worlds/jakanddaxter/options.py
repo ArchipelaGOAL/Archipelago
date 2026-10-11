@@ -509,7 +509,7 @@ class MistyIslandSingleJumpFarSideOrbCache(Toggle):
 
 class MistyIslandAttacklessScoutFlies(Toggle):
     """
-    Remove attack requirements to the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
+    Remove attack requirements from the scout flies "Barrel Ramps", "Ledge Near Arena Entrance", "Near Arena Door",
     "Overlooking Entrance" in Misty Island.
 
     Enabling this setting may require Jak to break these scout fly boxes with precise blue eco movement or clever use
@@ -546,7 +546,7 @@ class MistyIslandFarSideCliffSeesawSkip(Toggle):
 
 class RockVillageSingleJumpOrbCache(Toggle):
     """
-    Remove requirements from the orb cache in Rock Village.
+    Remove requirements from the orb cache logic in Rock Village.
 
     Enabling this setting may require Jak to use precise movement to reach the orb cache with only *Single Jump*.
 
@@ -605,7 +605,7 @@ class BoggySwampPreciseMovement(Toggle):
 
 class BoggySwampAttacklessAmbush(Toggle):
     """
-    Remove the attack requirement from the Boggy Swamp ambush.
+    Remove the attack requirement from the Boggy Swamp ambush logic.
 
     Enabling this setting may require Jak to defeat the lurkers by only shooting yellow Eco through his goggles.
 
@@ -643,7 +643,7 @@ class SnowyMountainFortGateSkip(Choice):
     Enabling this setting may require Jak to use uneven geometry and precise movement, or *Flut Flut* to enter the Fort
     in Snowy Mountain.
 
-    **On Foot**: Fort is reachable after many movement options are unlocked.
+    **On Foot**: Fort is reachable with only *Jump Kick* and either *Double Jump* or *Crouch Jump*.
 
     **Flut Flut**: Fort is reachable after *Flut Flut* is unlocked.
     """
@@ -654,6 +654,7 @@ class SnowyMountainFortGateSkip(Choice):
     option_flut_flut = 2
     option_both = 3
 
+
 class SentinelBeachBlueEcoSwitchSkip(Toggle):
     """
     Create an alternative path to the blue eco jump pad in Sentinel Beach without having *Blue Eco Switch* unlocked.
@@ -662,6 +663,39 @@ class SentinelBeachBlueEcoSwitchSkip(Toggle):
     only *Punch* or only *Roll Jump*.
     """
     display_name = "Sentinel Beach Blue Eco Switch Skip"
+
+
+class ZoomerEscape(Choice):
+    """
+    Create an alternative way to collect certain scout fly boxes.
+
+    Enabling this setting may require Jak to get a zoomer out of the intended area to collect scout fly boxes without
+    any moves.
+
+    **Misty Island**: Scout Fly On Ship.
+
+    **Precursor Basin**: All nearby scout fly boxes in Rock Village.
+
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Zoomer Escape"
+
+    option_no = 0
+    option_misty_island = 1
+    option_precursor_basin = 2
+    option_both = 3
+
+
+class CrouchTrick(Toggle):
+    """
+    Enabling this setting may require Jak to use uneven terrain to enter the "crouching" state without *Crouch* unlocked.
+    This allows Jak to destroy certain scout fly boxes and reach some additional places with only *Crouch Jump* or
+    only *Crouch Uppercut* unlocked.
+
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "Crouch Trick"
+
 
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
@@ -721,6 +755,8 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     lost_precursor_city_single_jump_slide_tube_climb: LostPrecursorCitySingleJumpSlideTubeClimb
     snowy_mountain_fort_gate_skip: SnowyMountainFortGateSkip
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
+    zoomer_escape: ZoomerEscape
+    crouch_trick: CrouchTrick
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 
@@ -730,12 +766,14 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "attack_with_roll_jump": True,
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
+        "rock_village_pontoon_skip": True,
     },
     "Move Randomizer + Medium Tricks & Glitches": {
         "enable_move_randomizer": True,
         "attack_with_roll_jump": True,
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
+        "rock_village_pontoon_skip": True,
 
         "punch_uppercut_scout_flies": True,
         "geyser_rock_cliff_climb": True,
@@ -746,18 +784,19 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "misty_island_arena_fight_skip": True,
         "misty_island_far_side_cliff_seesaw_skip": True,
         "rock_village_single_jump_orb_cache": True,
-        "rock_village_pontoon_skip": True,
         "klaww_cliff_climb": True,
         "klaww_boulder_skip": True,
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_medium,
         "snowy_mountain_flut_flut_skip": True,
+        "crouch_trick": True,
     },
     "Move Randomizer + Hard Tricks & Glitches": {
         "enable_move_randomizer": True,
         "attack_with_roll_jump": True,
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
+        "rock_village_pontoon_skip": True,
 
         "punch_uppercut_scout_flies": True,
         "geyser_rock_cliff_climb": True,
@@ -768,15 +807,14 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "misty_island_arena_fight_skip": True,
         "misty_island_far_side_cliff_seesaw_skip": True,
         "rock_village_single_jump_orb_cache": True,
-        "rock_village_pontoon_skip": True,
         "klaww_cliff_climb": True,
         "klaww_boulder_skip": True,
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
         "snowy_mountain_flut_flut_skip": True,
+        "crouch_trick": True,
 
         "boosted_and_extended_uppercuts": True,
-        "sentinel_beach_blue_eco_switch_skip": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
         "misty_island_attackless_scout_flies": True,
         "boggy_swamp_flut_flut_escape": True,
@@ -788,6 +826,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "attack_with_roll_jump": True,
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
+        "rock_village_pontoon_skip": True,
 
         "punch_uppercut_scout_flies": True,
         "geyser_rock_cliff_climb": True,
@@ -798,23 +837,24 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "misty_island_arena_fight_skip": True,
         "misty_island_far_side_cliff_seesaw_skip": True,
         "rock_village_single_jump_orb_cache": True,
-        "rock_village_pontoon_skip": True,
         "klaww_cliff_climb": True,
         "klaww_boulder_skip": True,
         "boggy_swamp_precise_movement": True,
         "snowy_mountain_entrance_climb": SnowyMountainEntranceClimb.option_hard,
         "snowy_mountain_flut_flut_skip": True,
+        "crouch_trick": True,
 
         "boosted_and_extended_uppercuts": True,
-        "sentinel_beach_blue_eco_switch_skip": True,
         "forbidden_jungle_attackless_spiral_stumps_scout_fly": True,
         "misty_island_attackless_scout_flies": True,
         "boggy_swamp_flut_flut_escape": True,
         "boggy_swamp_flut_flut_skip": True,
         "snowy_mountain_flut_flut_escape": True,
 
+        "sentinel_beach_blue_eco_switch_skip": True,
         "boggy_swamp_attackless_ambush": True,
         "lost_precursor_city_single_jump_slide_tube_climb": True,
         "snowy_mountain_fort_gate_skip": SnowyMountainFortGateSkip.option_both,
+        "zoomer_escape": ZoomerEscape.option_both,
     }
 }

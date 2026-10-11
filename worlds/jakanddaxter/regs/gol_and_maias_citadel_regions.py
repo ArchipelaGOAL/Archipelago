@@ -27,7 +27,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
                 or state.has_all(("Crouch", "Crouch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
-    main_area.add_fly_locations([91], access_rule=lambda state: world.can_free_scout_flies(state, player))
+    # Crouch trick by going back through the entrance door, then jump against the wall.
+    main_area.add_fly_locations([91], access_rule=lambda state: world.can_free_scout_flies_crouch_trick(state, player))
 
     robot_scaffolding = JakAndDaxterRegion("Scaffolding Around Robot", player, multiworld, level_name, 3)
     robot_scaffolding.add_fly_locations([196699], access_rule=lambda state: world.can_free_scout_flies(state, player))
@@ -51,7 +52,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # Does not include the orbs in the U turn itself, those belong to bunny room.
     u_turn_room = JakAndDaxterRegion("U-Turn Room", player, multiworld, level_name, 0)
-    u_turn_room.add_fly_locations([262235], access_rule=lambda state: world.can_free_scout_flies(state, player))
+    # Crouch trick by jumping against the glowing wall.
+    u_turn_room.add_fly_locations([262235], access_rule=lambda state: world.can_free_scout_flies_crouch_trick(state, player))
 
     bunny_room = JakAndDaxterRegion("Bunny Chamber", player, multiworld, level_name, 45)
     bunny_room.add_cell_locations([72], access_rule=lambda state: can_fight(state, player))

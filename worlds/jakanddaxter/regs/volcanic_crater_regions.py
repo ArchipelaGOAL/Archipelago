@@ -26,8 +26,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.add_cell_locations([74])
 
     # No blue eco sources in this area, all boxes must be broken by hand (yellow eco can't be carried far enough).
-    main_area.add_fly_locations(scouts.locVC_scoutTable.keys(), access_rule=lambda state:
-                                world.can_free_scout_flies(state, player))
+    main_area.add_fly_locations([393293, 196685, 131149, 77, 65613, 327757],
+                                access_rule=lambda state: world.can_free_scout_flies(state, player))
+
+    # Scout fly in miner's cave has sloped terrain nearby. All other scout flies are on island without sloped terrain.
+    main_area.add_fly_locations([262221],
+                                access_rule=lambda state: world.can_free_scout_flies_crouch_trick(state, player))
 
     # Approach the gondola to get this check.
     main_area.add_special_locations([105])

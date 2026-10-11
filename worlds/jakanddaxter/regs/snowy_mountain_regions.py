@@ -108,9 +108,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # Includes the bridge from snowball_canyon, the area beneath that bridge, and the areas around the fort.
     fort_exterior = JakAndDaxterRegion("Fort Exterior", player, multiworld, level_name, 20)
-    fort_exterior.add_fly_locations([65601, 393281], access_rule=lambda state:
+
+    # It is technically possible to crouch trick under the bridge - but with endlessly respawning enemies and a long
+    # way that's too annoying to practically do.
+    fort_exterior.add_fly_locations([393281], access_rule=lambda state:
                                     world.can_free_scout_flies(state, player)
                                     or can_free_flut_flut(state, player))
+
+    # However, the scout fly near the YES cave has a crate right next to it that's ideal to use the crouch trick.
+    # The checkpoint is also right next to it, so it's also possible to just get lucky with enemy spawns.
+    fort_exterior.add_fly_locations([65601], access_rule=lambda state:
+                                    world.can_free_scout_flies_crouch_trick(state, player)
+                                    or can_free_flut_flut(state, player))
+
 
     # Includes the icy island and bridge outside the cave entrance.
     bunny_cave_start = JakAndDaxterRegion("Bunny Cave (Start)", player, multiworld, level_name, 10)
@@ -133,8 +143,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     # Need higher jump.
     fort_interior_base = JakAndDaxterRegion("Fort Interior (Base)", player, multiworld, level_name, 0)
+
+    # It's possible to crouch trick by jumping against the crate that contains green eco pills.
     fort_interior_base.add_fly_locations([262209], access_rule=lambda state:
-                                         world.can_free_scout_flies(state, player)
+                                         world.can_free_scout_flies_crouch_trick(state, player)
                                          or can_free_flut_flut(state, player))
 
     # Need farther jump.
@@ -189,7 +201,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Enter Fort on foot.
     if has_both_gate_skips or gate_skip_option == SnowyMountainFortGateSkip.option_on_foot:
         def can_enter_fort_on_foot(state: CollectionState, p: int) -> bool:
-            return state.has_all(("Crouch", "Crouch Jump", "Jump Kick", "Double Jump", "Punch", "Punch Uppercut"), p)
+            return (state.has("Jump Kick", player)
+                    and (state.has("Double Jump", p) or state.has_all(("Crouch", "Crouch Jump"), p)))
     else:
         def can_enter_fort_on_foot(_: CollectionState, __: int) -> bool:
             return False
