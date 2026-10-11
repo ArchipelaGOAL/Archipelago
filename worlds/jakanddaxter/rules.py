@@ -12,7 +12,7 @@ from .options import (EnableOrbsanity,
                       LavaTubeCellCount,
                       CitizenOrbTradeAmount,
                       OracleOrbTradeAmount,
-                      JakAndDaxterOptions)
+                      JakAndDaxterOptions, RandomStartingMove)
 from .locs import cell_locations as cells
 from .locations import location_table
 from .levels import level_table
@@ -271,6 +271,11 @@ def enforce_mp_friendly_limits(world: "JakAndDaxterWorld"):
                              f"{options.oracle_orb_trade_amount.display_name} must be no greater than "
                              f"{OracleOrbTradeAmount.friendly_maximum} (was {old_value}), "
                              f"changed option to appropriate value.\n")
+
+    if options.random_starting_move == RandomStartingMove.option_no:
+        options.random_starting_move.value = RandomStartingMove.option_if_required
+        friendly_message += (f"  "
+                             f"{options.random_starting_move.display_name} must not be Off, changed option to If Required.\n")
 
     friendly_message += clamp_cell_limits(world)
     friendly_message += clamp_trade_total_limits(world)
