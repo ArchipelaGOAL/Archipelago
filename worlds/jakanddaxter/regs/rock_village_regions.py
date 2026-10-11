@@ -24,7 +24,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     main_area.add_fly_locations([196684, 262220])
 
 
-    if options.zoomer_escape == ZoomerEscape.option_misty_island or options.zoomer_escape == ZoomerEscape.option_both:
+    if options.zoomer_escape == ZoomerEscape.option_precursor_basin or options.zoomer_escape == ZoomerEscape.option_both:
         # It is possible to get the zoomer out of PB to collect these scout fly boxes.
         main_area.add_fly_locations([131148, 65612, 327756])
         main_area.add_fly_locations([76], access_rule=lambda state:
