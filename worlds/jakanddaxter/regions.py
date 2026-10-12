@@ -80,7 +80,7 @@ def create_regions(world: "JakAndDaxterWorld"):
     sc = spider_cave.build_regions("Spider Cave", world)
     sm = snowy_mountain.build_regions("Snowy Mountain", world)
 
-    lt = lava_tube.build_regions("Lava Tube", world)
+    lt, lt_end = lava_tube.build_regions("Lava Tube", world)
     gmc, fb, fd = gol_and_maias_citadel.build_regions("Gol and Maia's Citadel", world)
 
     # Configurable counts of cells for connector levels.
@@ -108,7 +108,8 @@ def create_regions(world: "JakAndDaxterWorld"):
     vc.connect(sc)
     vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, lt_count))  # Normally 72.
-    lt.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
+    # lt -> lt_end connection defined internally by LavaTubeRegions.
+    lt_end.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
 
     # Set the completion condition.
     if options.jak_completion_condition == CompletionCondition.option_cross_fire_canyon:

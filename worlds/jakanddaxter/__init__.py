@@ -24,7 +24,8 @@ from .items import (JakAndDaxterItem,
                     special_item_table,
                     move_item_table,
                     orb_item_table,
-                    trap_item_table)
+                    trap_item_table,
+                    eco_item_table)
 from .levels import level_table, level_table_with_global
 from .locations import (JakAndDaxterLocation,
                         location_table,
@@ -33,7 +34,7 @@ from .locations import (JakAndDaxterLocation,
                         special_location_table,
                         cache_location_table,
                         orb_location_table)
-from .options import jakanddaxter_option_presets
+from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove
 from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
@@ -116,6 +117,12 @@ class JakAndDaxterWebWorld(WebWorld):
             options.CitizenOrbTradeAmount,
             options.OracleOrbTradeAmount,
         ]),
+        OptionGroup("Eco Randomizer", [
+            options.EnableEcoRandomizer,
+            options.GeyserRockDoorSkip,
+            options.KlawwFightSkip,
+            options.LavaTubeOrangesSkip,
+        ], True),
         OptionGroup("Tricks & Glitches - Easy", [
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
@@ -194,6 +201,7 @@ class JakAndDaxterWorld(World):
         "Scout Flies": set(scout_item_table.values()),
         "Specials": set(special_item_table.values()),
         "Moves": set(move_item_table.values()),
+        "Eco": set(eco_item_table.values()),
         "Precursor Orbs": set(orb_item_table.values()),
         "Traps": set(trap_item_table.values()),
     }
@@ -449,14 +457,64 @@ class JakAndDaxterWorld(World):
         return data
 
     def create_items(self) -> None:
+        starting_moves = set()
+        # If Move Rando and Eco Rando is On, then orb bundle size must not be larger than 25 to guarantee enough checks.
+        # This is arbitrary and leads to at least ~20 checks immediately accessible which seems to be enough.
+        has_low_orbsanity = (self.options.enable_orbsanity == EnableOrbsanity.option_off
+                             or (self.options.enable_orbsanity == EnableOrbsanity.option_global
+                                 and self.options.global_orbsanity_bundle_size > 25)
+                             or (self.options.enable_orbsanity == EnableOrbsanity.option_per_level
+                                 and self.options.level_orbsanity_bundle_size > 25))
+
+        require_high_impact_starting_move = (self.options.enable_move_randomizer
+                                             and self.options.enable_eco_randomizer
+                                             and has_low_orbsanity)
+
+        if (self.options.random_starting_move == RandomStartingMove.option_yes
+                or (self.options.random_starting_move == RandomStartingMove.option_if_required
+                    and require_high_impact_starting_move)):
+
+            if require_high_impact_starting_move:
+                # If the early check amount is really low, then we need a move that can destroy scout fly boxes to
+                # consistently unlock enough checks to prevent generation failures.
+                # Pure Movement options don't really unlock anything in Hub 1.
+                # Attack moves only unlock ~5 checks.
+                possible_moves = [
+                    ["Crouch", "Crouch Uppercut"],
+                    ["Jump Dive"],
+                ]
+                if self.options.punch_uppercut_scout_flies:
+                    possible_moves.append(["Punch", "Punch Uppercut"])
+            else:
+                possible_moves = [
+                    ["Crouch", "Crouch Jump"],
+                    ["Crouch", "Crouch Uppercut"],
+                    ["Roll", "Roll Jump"],
+                    ["Double Jump"],
+                    ["Jump Dive"],
+                    ["Jump Kick"],
+                    ["Punch"],
+                    ["Punch", "Punch Uppercut"],
+                    ["Kick"],
+                ]
+
+            # Blue Eco can be a high impact starting move, but it can also be rolled randomly if Eco Rando is enabled.
+            if self.options.enable_eco_randomizer:
+                possible_moves.append(["Blue Eco"])
+
+            additional_starting_moves = self.random.choice(possible_moves)
+            starting_moves.update(additional_starting_moves)
+
         items_made: int = 0
         for item_name in self.item_name_to_id:
             item_id = self.item_name_to_id[item_name]
 
-            # Handle Move Randomizer option.
+            # Handle Move/Eco Randomizer option.
             # If it is OFF, put all moves in your starting inventory instead of the item pool,
             # then fill the item pool with a corresponding amount of filler items.
-            if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
+            if ((item_name in starting_moves)
+                    or (item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer)
+                    or (item_name in self.item_name_groups["Eco"] and not self.options.enable_eco_randomizer)):
                 self.multiworld.push_precollected(self.create_item(item_name))
                 self.multiworld.itempool.append(self.create_filler())
                 items_made += 1
@@ -553,6 +611,7 @@ class JakAndDaxterWorld(World):
 
     def fill_slot_data(self) -> dict[str, Any]:
         options_dict = self.options.as_dict("enable_move_randomizer",
+                                            "random_starting_move",
                                             "enable_orbsanity",
                                             "global_orbsanity_bundle_size",
                                             "level_orbsanity_bundle_size",
@@ -567,6 +626,10 @@ class JakAndDaxterWorld(World):
                                             "trap_weights",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
+                                            # Eco Randomizer
+                                            "enable_eco_randomizer",
+                                            "geyser_rock_door_skip",
+                                            "klaww_fight_skip",
                                             # Tricks & Glitches
                                             "boosted_and_extended_uppercuts",
                                             "punch_uppercut_scout_flies",
