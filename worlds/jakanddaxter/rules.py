@@ -12,7 +12,8 @@ from .options import (EnableOrbsanity,
                       LavaTubeCellCount,
                       CitizenOrbTradeAmount,
                       OracleOrbTradeAmount,
-                      JakAndDaxterOptions, RandomStartingMove)
+                      JakAndDaxterOptions,
+                      RandomStartingMove)
 from .locs import cell_locations as cells
 from .locations import location_table
 from .levels import level_table

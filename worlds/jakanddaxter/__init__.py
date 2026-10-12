@@ -24,7 +24,8 @@ from .items import (JakAndDaxterItem,
                     special_item_table,
                     move_item_table,
                     orb_item_table,
-                    trap_item_table, eco_item_table)
+                    trap_item_table,
+                    eco_item_table)
 from .levels import level_table, level_table_with_global
 from .locations import (JakAndDaxterLocation,
                         location_table,
@@ -622,6 +623,7 @@ class JakAndDaxterWorld(World):
 
     def fill_slot_data(self) -> dict[str, Any]:
         options_dict = self.options.as_dict("enable_move_randomizer",
+                                            "random_starting_move",
                                             "enable_orbsanity",
                                             "global_orbsanity_bundle_size",
                                             "level_orbsanity_bundle_size",

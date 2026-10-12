@@ -32,9 +32,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # can_fight = The underwater crystal in dark cave.
     # Roll Jump = The underwater crystal across a long dark eco pool.
     # The rest of the crystals can be destroyed with yellow eco in main_area.
-    # TODO - Figure out if yellow eco is actually required
+    # It's also possible to touch them without yellow eco - then, either Double Jump or Jump Kick is required to reach
+    # the platform on the way to the dark cave.
     dark_crystals.add_cell_locations([79], access_rule=lambda state:
-                                     state.has("Yellow Eco", player)
+                                     (state.has("Yellow Eco", player)
+                                       or state.has_any(("Double Jump", "Jump Kick"), player))
                                      and can_fight(state, player)
                                      and state.has_all(("Roll", "Roll Jump"), player))
 
@@ -69,8 +71,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     main_area.connect(dark_crystals)
     main_area.connect(main_area_yellow_eco_orbs, rule=lambda state: state.has("Yellow Eco", player))
-    # TODO - Split up robot cave and figure out which eco is required for which collectables.
     # To make it easier for now, robot cave is only in-logic once Jak has access to Yellow and Blue Eco.
+    # In the future, this can be split up (especially if level rando is a thing, as Jak may visit it early in the run).
     main_area.connect(robot_cave, rule=lambda state: state.has_all(("Yellow Eco", "Blue Eco"), player))
     main_area.connect(dark_cave, rule=lambda state:
                       can_fight(state, player)
