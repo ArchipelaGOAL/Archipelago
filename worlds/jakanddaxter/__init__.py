@@ -477,23 +477,41 @@ class JakAndDaxterWorld(World):
                              or (self.options.enable_orbsanity == EnableOrbsanity.option_per_level
                                  and self.options.level_orbsanity_bundle_size > 25))
 
+        require_high_impact_starting_move = (self.options.enable_move_randomizer
+                                             and self.options.enable_eco_randomizer
+                                             and has_low_orbsanity)
+
         if (self.options.random_starting_move == RandomStartingMove.option_yes
                 or (self.options.random_starting_move == RandomStartingMove.option_if_required
-                    and self.options.enable_move_randomizer
-                    and self.options.enable_eco_randomizer
-                    and has_low_orbsanity)):
-            # Combat moves unlock FJ Mirrors, SB Flut Flut + Harvesters for at least 4 checks.
-            possible_moves = [
-                ["Punch"],
-                ["Kick"],
-                ["Jump Kick"],
-                ["Blue Eco"],
-                ["Crouch", "Crouch Uppercut"],
-                ["Jump Dive"],
-            ]
+                    and require_high_impact_starting_move)):
 
-            if self.options.punch_uppercut_scout_flies:
-                possible_moves.append(["Punch", "Punch Uppercut"])
+            if require_high_impact_starting_move:
+                # If the early check amount is really low, then we need a move that can destroy scout fly boxes to
+                # consistently unlock enough checks to prevent generation failures.
+                # Pure Movement options don't really unlock anything in Hub 1.
+                # Attack moves only unlock ~5 checks.
+                possible_moves = [
+                    ["Crouch", "Crouch Uppercut"],
+                    ["Jump Dive"],
+                ]
+                if self.options.punch_uppercut_scout_flies:
+                    possible_moves.append(["Punch", "Punch Uppercut"])
+            else:
+                possible_moves = [
+                    ["Crouch", "Crouch Jump"],
+                    ["Crouch", "Crouch Uppercut"],
+                    ["Roll", "Roll Jump"],
+                    ["Double Jump"],
+                    ["Jump Dive"],
+                    ["Jump Kick"],
+                    ["Punch"],
+                    ["Punch", "Punch Uppercut"],
+                    ["Kick"],
+                ]
+
+            # Blue Eco can be a high impact starting move, but it can also be rolled randomly if Eco Rando is enabled.
+            if self.options.enable_eco_randomizer:
+                possible_moves.append(["Blue Eco"])
 
             additional_starting_moves = self.random.choice(possible_moves)
             starting_moves.update(additional_starting_moves)
