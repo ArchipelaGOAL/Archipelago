@@ -306,6 +306,16 @@ class JakAndDaxterWorld(World):
     level_to_regions: dict[str, list[JakAndDaxterRegion]]  # Contains all levels and regions.
     level_to_orb_regions: dict[str, list[JakAndDaxterRegion]]  # Contains only regions which contain orbs.
 
+    # 0 - FJ
+    # 1 - SB
+    # 2 - MI
+    # 3 - PB
+    # 4 - LPC
+    # 5 - BS
+    # 6 - SC
+    # 7 - SM
+    levels: list[int] = [i for i in range(8)]
+
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
 
@@ -402,6 +412,10 @@ class JakAndDaxterWorld(World):
 
         # Options drive which trade rules to use and advanced logic, so they need to be setup before we create_regions.
         set_option_driven_rules(self)
+
+        # Level Randomizer
+        if self.options.randomize_levels or True:
+            self.random.shuffle(self.levels)
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
@@ -636,6 +650,7 @@ class JakAndDaxterWorld(World):
                                             "filler_orb_bundles_replaced_with_traps",
                                             "trap_effect_duration",
                                             "trap_weights",
+                                            "randomize_levels",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
                                             # Eco Randomizer
@@ -675,4 +690,5 @@ class JakAndDaxterWorld(World):
                                             "zoomer_escape",
                                             "crouch_trick",
                                             )
+        options_dict["levels"] = self.levels
         return options_dict

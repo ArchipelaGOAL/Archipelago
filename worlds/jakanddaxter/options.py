@@ -770,6 +770,12 @@ class CrouchTrick(Toggle):
 
 # endregion
 
+class RandomizeLevels(Toggle):
+    """
+    Randomize all non-hub levels.
+    """
+    display_name = "Randomize Levels"
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -835,6 +841,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     zoomer_escape: ZoomerEscape
     crouch_trick: CrouchTrick
+    randomize_levels: RandomizeLevels
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 

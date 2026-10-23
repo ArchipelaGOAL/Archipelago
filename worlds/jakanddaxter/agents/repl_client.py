@@ -464,6 +464,7 @@ class JakAndDaxterReplClient:
                             lt_count: int, ct_amount: int,
                             ot_amount: int, trap_time: int,
                             goal_id: int, ecorando: int,
+                            levels: list[int],
                             slot_name: str, slot_seed: str) -> bool:
         sanitized_name = self.sanitize_file_text(slot_name)
         sanitized_seed = self.sanitize_file_text(slot_seed)
@@ -499,6 +500,9 @@ class JakAndDaxterReplClient:
         ecorando_command = f"(ap-setup-ecorando! {'#t' if ecorando else '#f'})"
         if not await self.send_form(ecorando_command):
             self.log_error(logger, "Ecorando setup failed!")
+
+        for i, level in enumerate(levels):
+            await self.send_form(f"(set! (-> *ap-info-jak1* randomized-levels {i}) {level})")
         return ok
 
     async def send_connection_status(self, status: str) -> bool:
