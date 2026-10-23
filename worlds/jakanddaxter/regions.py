@@ -88,25 +88,29 @@ def create_regions(world: "JakAndDaxterWorld"):
     mp_count = options.mountain_pass_cell_count.value
     lt_count = options.lava_tube_cell_count.value
 
+    # All levels that can be randomized
+    base_levels = [fj, sb, mi, pb, lpc, bs, sc, sm]
+    levels = [base_levels[level] for level in world.levels]
+
     # Define the interconnecting rules.
     menu.connect(gr)
     gr.connect(sv)  # Geyser Rock modified to let you leave at any time.
-    sv.connect(fj)
-    sv.connect(sb)
-    sv.connect(mi, rule=lambda state: state.has("Fisherman's Boat", player))
+    sv.connect(levels[0])
+    sv.connect(levels[1])
+    sv.connect(levels[2], rule=lambda state: state.has("Fisherman's Boat", player))
     sv.connect(fc, rule=lambda state: state.has("Power Cell", player, fc_count))  # Normally 20.
     fc.connect(rv)
-    rv.connect(pb)
-    rv.connect(lpc)
-    rvp.connect(bs)  # rv->rvp/rvc connections defined internally by RockVillageRegions.
+    rv.connect(levels[3])
+    rv.connect(levels[4])
+    rvp.connect(levels[5])  # rv->rvp/rvc connections defined internally by RockVillageRegions.
     if options.klaww_boulder_skip:
         # With Klaww boulder skip, it is always possible to reach Mountain Pass without any power cell requirements.
         rvc.connect(mp)
     else:
         rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, mp_count))  # Normally 45.
     mpr.connect(vc)  # mp->mpr connection defined internally by MountainPassRegions.
-    vc.connect(sc)
-    vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))
+    vc.connect(levels[6])
+    vc.connect(levels[7], rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, lt_count))  # Normally 72.
     # lt -> lt_end connection defined internally by LavaTubeRegions.
     lt_end.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
