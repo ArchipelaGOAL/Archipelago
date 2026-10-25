@@ -81,17 +81,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                         or state.has_all(("Punch", "Punch Uppercut"), player))
 
     # If you can enter the helix room, you can jump or fight your way to the top. But you need some kind of movement
-    # to enter it in the first place.
-    # However, you need Blue Eco to use the jump pads.
+    # to enter it in the first place (and blue eco to use the jump pads).
     helix_room = JakAndDaxterRegion("Helix Chamber", player, multiworld, level_name, 30)
-    if options.lost_precursor_city_single_jump_slide_tube_climb:
-        # It is possible (but hard) to escape with only Single Jump unlocked.
-        helix_room.add_cell_locations([50], access_rule=lambda state: state.has("Blue Eco", player))
-    else:
-        helix_room.add_cell_locations([50], access_rule=lambda state:
-                                      state.has("Blue Eco", player)
-                                      and (state.has("Double Jump", player)
-                                           or can_fight(state, player)))
+    # Access Rule is on the room connection as the orbs are also unreachable if you cannot climb.
+    helix_room.add_cell_locations([50])
 
     main_area.connect(first_room_upper)                   # Run.
 
@@ -129,15 +122,18 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     capsule_room.connect(main_area, rule=lambda state:              # Chamber goes back to surface.
                          state.has("Jump Dive", player))            # (Assume one-way for sanity.)
 
+    # Blue Eco is always required to climb up the helix room to collect the 30 orbs.
     if options.lost_precursor_city_single_jump_slide_tube_climb:
         # It is possible to jump to the platform with only Single Jump by gathering enough momentum and jumping late.
-        second_slide.connect(helix_room)
+        second_slide.connect(helix_room, rule=lambda state: state.has("Blue Eco", player))
         # It's possible to get back with only Single Jump by taking damage once.
         helix_room.connect(quick_platforms)
     else:
-        second_slide.connect(helix_room, rule=lambda state:                           # As stated above, you need to jump
-                             state.has_any(("Double Jump", "Jump Kick"), player)      # across the dark eco pool before
-                             or state.has_all(("Punch", "Punch Uppercut"), player))   # you can climb the helix room.
+        # As stated above, you need to jump across the dark eco pool before you can climb the helix room.
+        second_slide.connect(helix_room, rule=lambda state:
+                             state.has("Blue Eco", player)
+                             and (state.has_any(("Double Jump", "Jump Kick"), player)
+                                  or state.has_all(("Punch", "Punch Uppercut"), player)))
 
         helix_room.connect(quick_platforms, rule=lambda state:          # Escape to get back to here.
                            state.has("Blue Eco", player)
