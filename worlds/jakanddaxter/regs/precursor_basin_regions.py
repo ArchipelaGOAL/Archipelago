@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
 from ..rules import can_reach_orbs_level
-from ..locs import cell_locations as cells, scout_locations as scouts
-
+from ..locs import scout_locations as scouts
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
     multiworld = world.multiworld
@@ -15,7 +14,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 200)
 
     # Everything is accessible by making contact with the zoomer.
-    main_area.add_cell_locations(cells.locPB_cellTable.keys())
+    # However, mole and DMG cells can only be gotten if Jak has access to hub 2.
+    main_area.add_cell_locations([53, 56, 55, 58, 59])
+
+    # Once Jak has enough power cells to reach hub 2, he can collect the remaining two power cells.
+    fc_count = options.fire_canyon_cell_count.value
+    main_area.add_cell_locations([54, 52], access_rule=lambda state: state.has("Power Cell", player, fc_count))
+
     main_area.add_fly_locations(scouts.locPB_scoutTable.keys())
 
     world.level_to_regions[level_name].append(main_area)

@@ -1,4 +1,5 @@
 from .region_base import JakAndDaxterRegion
+from ..game_id import jak1_level_ids
 from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -19,8 +20,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.add_cell_locations([12], access_rule=lambda state: world.can_trade(state, world.total_trade_orbs, None))
 
     # These 4 scout fly boxes can be broken by running with all the blue eco from Sentinel Beach.
-    main_area.add_fly_locations([262219, 327755, 131147, 65611], access_rule=lambda state:
-                                world.can_free_scout_flies(state, player) or (state.has("Blue Eco", player)))
+    if world.randomized_levels[jak1_level_ids["SB"]] == jak1_level_ids["SB"]:
+        main_area.add_fly_locations([262219, 327755, 131147, 65611])
+    else:
+        main_area.add_fly_locations([262219, 327755, 131147, 65611], access_rule=lambda state:
+                                    world.can_free_scout_flies(state, player))
 
     if options.sandover_village_cliff_orb_cache_climb:
         # It is possible to jump up to the blue Eco next to the Orb Cache, and take it to the Farmer's scout fly.

@@ -377,14 +377,20 @@ class GeyserRockDoorSkip(Toggle):
     display_name = "Geyser Rock Door Skip"
 
 
-class KlawwFightSkip(Toggle):
+class KlawwFightSkip(Choice):
     """
     Create an alternative path to Mountain Pass without having to fight Klaww.
 
     Enabling this setting may require Jak to reach Mountain Pass by skipping the Klaww fight, without *Blue Eco* or
     *Yellow Eco* unlocked.
+
+    **Hard** may require lava walking with *Blue Eco* unlocked if "Level Randomizer" is ON.
     """
     display_name = "Klaww Fight Skip"
+
+    option_no = 0
+    option_medium = 1
+    option_hard = 2
 
 
 class LavaTubeOrangesSkip(Toggle):
@@ -563,6 +569,8 @@ class ForbiddenJungleElevatorSkip(Toggle):
     Create an alternative path to the temple interior in Forbidden Jungle without having *Jungle Elevator* unlocked.
 
     Enabling this setting may require Jak to get inside the temple with only *Jump Kick*.
+
+    Does not apply if Forbidden Jungle has been randomized into a different level.
     """
     display_name = "Forbidden Jungle Elevator Skip"
 
