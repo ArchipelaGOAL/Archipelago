@@ -1,7 +1,7 @@
 # Python standard libraries
 from collections import defaultdict
 from math import ceil
-from typing import Any, ClassVar, Callable, Union, cast
+from typing import Any, ClassVar, Callable, Union, cast, TextIO
 
 # Archipelago imports
 import settings
@@ -15,7 +15,7 @@ from Options import OptionGroup
 
 # Jak imports
 from . import options
-from .game_id import jak1_id, jak1_name, jak1_max
+from .game_id import jak1_id, jak1_name, jak1_max, jak1_level_ids
 from .items import (JakAndDaxterItem,
                     OrbAssoc,
                     item_table,
@@ -692,3 +692,23 @@ class JakAndDaxterWorld(World):
                                             )
         options_dict["randomized_levels"] = self.randomized_levels
         return options_dict
+
+    def write_spoiler(self, spoiler_handle: TextIO) -> None:
+        if self.options.randomize_levels:
+            def get_level_name_by_id(level_id) -> str:
+                for name, existing_level_id in jak1_level_ids.items():
+                    if existing_level_id == level_id:
+                        return name
+                return "???"
+
+            spoiler_handle.write(
+                f"\nLevel Connections:\n"
+                f"\nSV ->  FJ: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["FJ"]])}"
+                f"\nSV ->  SB: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["SB"]])}"
+                f"\nSV ->  MI: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["MI"]])}"
+                f"\nRV ->  PB: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["PB"]])}"
+                f"\nRV -> LPC: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["LPC"]])}"
+                f"\nRV ->  BS: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["BS"]])}"
+                f"\nVC ->  SC: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["SC"]])}"
+                f"\nVC ->  SM: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["SM"]])}"
+            )
