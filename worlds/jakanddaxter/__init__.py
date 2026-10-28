@@ -314,7 +314,7 @@ class JakAndDaxterWorld(World):
     # 5 - BS
     # 6 - SC
     # 7 - SM
-    levels: list[int] = [i for i in range(8)]
+    randomized_levels: list[int] = [i for i in range(8)]
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -415,7 +415,7 @@ class JakAndDaxterWorld(World):
 
         # Level Randomizer
         if self.options.randomize_levels or True:
-            self.random.shuffle(self.levels)
+            self.random.shuffle(self.randomized_levels)
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
@@ -690,5 +690,5 @@ class JakAndDaxterWorld(World):
                                             "zoomer_escape",
                                             "crouch_trick",
                                             )
-        options_dict["levels"] = self.levels
+        options_dict["randomized_levels"] = self.randomized_levels
         return options_dict

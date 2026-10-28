@@ -14,3 +14,15 @@ jak1_gk = "gk" + (".exe" if Utils.is_windows else "")
 
 # The executable name of the GOAL Compiler.
 jak1_goalc = "goalc" + (".exe" if Utils.is_windows else "")
+
+# These level ids are arbitrary, and used for level randomization.
+jak1_level_ids = {
+    "FJ": 0,
+    "SB": 1,
+    "MI": 2,
+    "PB": 3,
+    "LPC": 4,
+    "BS": 5,
+    "SC": 6,
+    "SM": 7,
+}

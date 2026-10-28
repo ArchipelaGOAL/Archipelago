@@ -1,4 +1,5 @@
 from .region_base import JakAndDaxterRegion
+from ..game_id import jak1_level_ids
 from ..options import EnableOrbsanity, ZoomerEscape
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -42,14 +43,19 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # Fly here can be gotten with Yellow Eco from Boggy, goggles, and no extra movement options (see fly ID 43).
     pontoon_bridge = JakAndDaxterRegion("Pontoon Bridge", player, multiworld, level_name, 2)
-    if options.boggy_swamp_precise_movement:
-        # It is possible to run back with the blue eco to the scout fly as well
-        pontoon_bridge.add_fly_locations([393292], access_rule=lambda state:
-                                         world.can_free_scout_flies(state, player)
-                                         or state.has_any(("Yellow Eco", "Blue Eco"), player))
+    if world.randomized_levels[jak1_level_ids["BS"]] == jak1_level_ids["BS"]:
+        if options.boggy_swamp_precise_movement:
+            # It is possible to run back with the blue eco to the scout fly as well
+            pontoon_bridge.add_fly_locations([393292], access_rule=lambda state:
+                                             world.can_free_scout_flies(state, player)
+                                             or state.has_any(("Yellow Eco", "Blue Eco"), player))
+            pass
+        else:
+            pontoon_bridge.add_fly_locations([393292], access_rule=lambda state:
+                                             world.can_free_scout_flies(state, player) or state.has("Yellow Eco", player))
+            pass
     else:
-        pontoon_bridge.add_fly_locations([393292], access_rule=lambda state:
-                                         world.can_free_scout_flies(state, player) or state.has("Yellow Eco", player))
+        pontoon_bridge.add_fly_locations([393292], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # Orbs that are not directly over the pontoons if Warrior's Pontoons is not unlocked.
     pontoon_bridge_high_orbs = JakAndDaxterRegion("Pontoon Bridge High Orbs", player, multiworld, level_name, 5)
