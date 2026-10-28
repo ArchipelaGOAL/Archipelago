@@ -38,9 +38,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
         # Actually, Klaww is optional with this setting and can be skipped using lava walking or idle deload.
         main_area.connect(race)
     elif world.options.require_punch_for_klaww:
-        main_area.connect(race, rule=lambda state: state.has("Punch", player))
+        main_area.connect(race, rule=lambda state: state.has_all(("Punch", "Blue Eco", "Yellow Eco"), player))
     else:
-        main_area.connect(race)
+        main_area.connect(race, rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))
 
     # You actually can go backwards from the race back to Klaww's area.
     race.connect(main_area)
