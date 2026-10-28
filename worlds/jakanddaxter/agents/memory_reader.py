@@ -116,6 +116,9 @@ trap_duration_offset = offsets.define(sizeof_float)
 # Eco randomizer information.
 ecorando_enabled_offset = offsets.define(sizeof_uint8)
 
+# Level rando information.
+randomized_levels_offset = offsets.define(sizeof_uint8, 8)
+
 # The End.
 end_marker_offset = offsets.define(sizeof_uint8, 4)
 
