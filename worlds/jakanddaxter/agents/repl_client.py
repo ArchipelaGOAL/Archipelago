@@ -494,7 +494,7 @@ class JakAndDaxterReplClient:
         # The REPL always responds with 'OK!', even if the function doesn't exist. Outdated mod clients will therefore
         # just do nothing (except print the error into the log).
         # Ecorando setup is separate to keep compatibility between all AP + mod client versions.
-        ecorando_command = f"(ap-setup-ecorando! {"#t" if ecorando else "#f"})"
+        ecorando_command = f"(ap-setup-ecorando! {'#t' if ecorando else '#f'})"
         if not await self.send_form(ecorando_command):
             self.log_error(logger, "Ecorando setup failed!")
         return ok

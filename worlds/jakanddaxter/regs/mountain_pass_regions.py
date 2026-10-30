@@ -15,12 +15,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # This is basically just Klaww.
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
-    main_area.add_cell_locations([86], access_rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))
 
-    # Some folks prefer firing Yellow Eco from the hip, so optionally put this rule before Klaww. Klaww is the only
-    # location in main_area, so he's at index 0.
+    # Some folks prefer firing Yellow Eco from the hip, requiring Punch for Klaww.
     if world.options.require_punch_for_klaww:
-        add_rule(main_area.locations[0], lambda state: state.has("Punch", player))
+        main_area.add_cell_locations([86], access_rule=lambda state:
+                                     state.has_all(("Blue Eco", "Yellow Eco", "Punch"), player))
+    else:
+        main_area.add_cell_locations([86], access_rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))
 
     race = JakAndDaxterRegion("Race", player, multiworld, level_name, 50)
     race.add_cell_locations([87])

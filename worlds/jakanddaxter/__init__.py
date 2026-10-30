@@ -482,7 +482,7 @@ class JakAndDaxterWorld(World):
                                              and self.options.enable_eco_randomizer
                                              and has_low_orbsanity)
 
-        if (self.options.random_starting_move == RandomStartingMove.option_yes
+        if ((self.options.random_starting_move == RandomStartingMove.option_yes and self.options.enable_move_randomizer)
                 or (self.options.random_starting_move == RandomStartingMove.option_if_required
                     and require_high_impact_starting_move)):
 
@@ -642,6 +642,7 @@ class JakAndDaxterWorld(World):
                                             "enable_eco_randomizer",
                                             "geyser_rock_door_skip",
                                             "klaww_fight_skip",
+                                            "lava_tube_oranges_skip"
                                             # Tricks & Glitches
                                             "boosted_and_extended_uppercuts",
                                             "punch_uppercut_scout_flies",

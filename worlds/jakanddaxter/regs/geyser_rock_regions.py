@@ -39,7 +39,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         main_area.connect(behind_door, rule=lambda state:
                           state.has("Blue Eco", player)
                           or (state.has("Jump Kick", player)
-                              and (state.has("Crouch Jump", player)
+                              and (state.has_all(("Crouch", "Crouch Jump"), player)
                                    or state.has_all(("Jump Dive", "Double Jump"), player))))
     else:
         main_area.connect(behind_door, rule=lambda state: state.has("Blue Eco", player))
