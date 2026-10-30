@@ -642,7 +642,7 @@ class JakAndDaxterWorld(World):
                                             "enable_eco_randomizer",
                                             "geyser_rock_door_skip",
                                             "klaww_fight_skip",
-                                            "lava_tube_oranges_skip"
+                                            "lava_tube_oranges_skip",
                                             # Tricks & Glitches
                                             "boosted_and_extended_uppercuts",
                                             "punch_uppercut_scout_flies",
