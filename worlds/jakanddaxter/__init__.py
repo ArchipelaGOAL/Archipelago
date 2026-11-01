@@ -308,7 +308,7 @@ class JakAndDaxterWorld(World):
 
     # Level replacement IDs for level randomizer (by default, every level maps to itself):
     # randomized_levels[original_id] = replaced_level_id
-    randomized_levels: list[Jak1Level] = [i for i in range(8)]
+    randomized_levels: list[Jak1Level] = [Jak1Level(i) for i in range(8)]
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -407,9 +407,33 @@ class JakAndDaxterWorld(World):
         # Options drive which trade rules to use and advanced logic, so they need to be setup before we create_regions.
         set_option_driven_rules(self)
 
-        # Level Randomizer
-        if self.options.randomize_levels or True:
+        # Level Randomizer (TODO: UT support)
+        if self.options.randomize_levels:
             self.random.shuffle(self.randomized_levels)
+
+            # If connection plando is used, swap the randomized levels to match it.
+            # Later entries win if multiple choose the same level.
+            if self.options.plando_connections:
+                level_by_name = {str(level).lower(): level for level in Jak1Level}
+                for connection in self.options.plando_connections:
+                    # If the plando connection has a chance, check it first to see if we skip it.
+                    if (connection.percentage < 100) and 100 * self.random.random() >= connection.percentage:
+                        continue
+
+                    # Find entrance/exit level ID using the (case-insensitive) plando name.
+                    # The generic plando option already prints a nice error message before if an entrance/exit does not
+                    # exist (but it uses a case-insensitive comparison).
+                    entrance_level = level_by_name[connection.entrance.lower()]
+                    exit_level = level_by_name[connection.exit.lower()]
+
+                    # Determine where the exit level is currently.
+                    exit_idx = self.randomized_levels.index(exit_level)
+
+                    # Swap the exit level with the level at entrance_level.
+                    self.randomized_levels[entrance_level], self.randomized_levels[exit_idx] = (
+                        self.randomized_levels[exit_idx],
+                        self.randomized_levels[entrance_level]
+                    )
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
