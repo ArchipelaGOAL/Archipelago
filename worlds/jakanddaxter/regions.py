@@ -1,6 +1,6 @@
 import typing
 from Options import OptionError
-from .game_id import jak1_level_ids
+from .game_id import Jak1Level
 from .items import item_table
 from .options import EnableOrbsanity, CompletionCondition
 from .rules import can_reach_orbs_global
@@ -90,29 +90,40 @@ def create_regions(world: "JakAndDaxterWorld"):
     lt_count = options.lava_tube_cell_count.value
 
     # All levels that can be randomized.
-    base_levels = [fj, sb, mi, pb, lpc, bs, sc, sm]
-    levels = [base_levels[level] for level in world.randomized_levels]
+    base_levels = {
+        Jak1Level.FORBIDDEN_JUNGLE: fj,
+        Jak1Level.SENTINEL_BEACH: sb,
+        Jak1Level.MISTY_ISLAND: mi,
+        Jak1Level.PRECURSOR_BASIN: pb,
+        Jak1Level.LOST_PRECURSOR_CITY: lpc,
+        Jak1Level.BOGGY_SWAMP: bs,
+        Jak1Level.SPIDER_CAVE: sc,
+        Jak1Level.SNOWY_MOUNTAIN: sm
+    }
+
+    # Generate the actual randomized order.
+    levels = [base_levels[Jak1Level(level)] for level in world.randomized_levels]
 
     # Define the interconnecting rules.
     menu.connect(gr)
     gr.connect(sv)  # Geyser Rock modified to let you leave at any time.
-    sv.connect(levels[jak1_level_ids["FJ"]])
-    sv.connect(levels[jak1_level_ids["SB"]])
-    sv.connect(levels[jak1_level_ids["MI"]], rule=lambda state: state.has("Fisherman's Boat", player))
+    sv.connect(levels[Jak1Level.FORBIDDEN_JUNGLE])
+    sv.connect(levels[Jak1Level.SENTINEL_BEACH])
+    sv.connect(levels[Jak1Level.MISTY_ISLAND], rule=lambda state: state.has("Fisherman's Boat", player))
     sv.connect(fc, rule=lambda state: state.has("Power Cell", player, fc_count))  # Normally 20.
     fc.connect(rv)
-    rv.connect(levels[jak1_level_ids["PB"]])
-    rv.connect(levels[jak1_level_ids["LPC"]])
+    rv.connect(levels[Jak1Level.PRECURSOR_BASIN])
+    rv.connect(levels[Jak1Level.LOST_PRECURSOR_CITY])
     lpc_raised.connect(rv)  # It's possible to get to RV from the raised chamber in LPC (relevant for level rando).
-    rvp.connect(levels[jak1_level_ids["BS"]])  # rv->rvp/rvc connections defined internally by RockVillageRegions.
+    rvp.connect(levels[Jak1Level.BOGGY_SWAMP])  # rv->rvp/rvc connections defined internally by RockVillageRegions.
     if options.klaww_boulder_skip:
         # With Klaww boulder skip, it is always possible to reach Mountain Pass without any power cell requirements.
         rvc.connect(mp)
     else:
         rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, mp_count))  # Normally 45.
     mpr.connect(vc)  # mp->mpr connection defined internally by MountainPassRegions.
-    vc.connect(levels[jak1_level_ids["SC"]])
-    vc.connect(levels[jak1_level_ids["SM"]], rule=lambda state: state.has("Snowy Mountain Gondola", player))
+    vc.connect(levels[Jak1Level.SPIDER_CAVE])
+    vc.connect(levels[Jak1Level.SNOWY_MOUNTAIN], rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, lt_count))  # Normally 72.
     # lt -> lt_end connection defined internally by LavaTubeRegions.
     lt_end.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.

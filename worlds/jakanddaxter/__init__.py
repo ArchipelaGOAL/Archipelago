@@ -15,7 +15,7 @@ from Options import OptionGroup
 
 # Jak imports
 from . import options
-from .game_id import jak1_id, jak1_name, jak1_max, jak1_level_ids
+from .game_id import jak1_id, jak1_name, jak1_max, Jak1Level
 from .items import (JakAndDaxterItem,
                     OrbAssoc,
                     item_table,
@@ -306,15 +306,9 @@ class JakAndDaxterWorld(World):
     level_to_regions: dict[str, list[JakAndDaxterRegion]]  # Contains all levels and regions.
     level_to_orb_regions: dict[str, list[JakAndDaxterRegion]]  # Contains only regions which contain orbs.
 
-    # 0 - FJ
-    # 1 - SB
-    # 2 - MI
-    # 3 - PB
-    # 4 - LPC
-    # 5 - BS
-    # 6 - SC
-    # 7 - SM
-    randomized_levels: list[int] = [i for i in range(8)]
+    # Level replacement IDs for level randomizer (by default, every level maps to itself):
+    # randomized_levels[original_id] = replaced_level_id
+    randomized_levels: list[Jak1Level] = [i for i in range(8)]
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -695,20 +689,14 @@ class JakAndDaxterWorld(World):
 
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
         if self.options.randomize_levels:
-            def get_level_name_by_id(level_id) -> str:
-                for name, existing_level_id in jak1_level_ids.items():
-                    if existing_level_id == level_id:
-                        return name
-                return "???"
-
             spoiler_handle.write(
                 f"\nLevel Connections:\n"
-                f"\nSV ->  FJ: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["FJ"]])}"
-                f"\nSV ->  SB: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["SB"]])}"
-                f"\nSV ->  MI: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["MI"]])}"
-                f"\nRV ->  PB: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["PB"]])}"
-                f"\nRV -> LPC: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["LPC"]])}"
-                f"\nRV ->  BS: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["BS"]])}"
-                f"\nVC ->  SC: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["SC"]])}"
-                f"\nVC ->  SM: {get_level_name_by_id(self.randomized_levels[jak1_level_ids["SM"]])}"
+                f"\n-> Forbidden Jungle:    {Jak1Level(self.randomized_levels[Jak1Level.FORBIDDEN_JUNGLE])}"
+                f"\n-> Sentinel Beach:      {Jak1Level(self.randomized_levels[Jak1Level.SENTINEL_BEACH])}"
+                f"\n-> Misty Island:        {Jak1Level(self.randomized_levels[Jak1Level.MISTY_ISLAND])}"
+                f"\n-> Precursor Basin:     {Jak1Level(self.randomized_levels[Jak1Level.PRECURSOR_BASIN])}"
+                f"\n-> Lost Precursor City: {Jak1Level(self.randomized_levels[Jak1Level.LOST_PRECURSOR_CITY])}"
+                f"\n-> Boggy Swamp:         {Jak1Level(self.randomized_levels[Jak1Level.BOGGY_SWAMP])}"
+                f"\n-> Spider Cave:         {Jak1Level(self.randomized_levels[Jak1Level.SPIDER_CAVE])}"
+                f"\n-> Snowy Mountain:      {Jak1Level(self.randomized_levels[Jak1Level.SNOWY_MOUNTAIN])}"
             )
