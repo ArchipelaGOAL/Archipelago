@@ -3,7 +3,8 @@ from functools import cached_property
 from typing import Any
 
 from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle, OptionCounter, \
-    AssembleOptions
+    AssembleOptions, PlandoConnections
+from .game_id import Jak1Level
 from .items import trap_item_table
 
 
@@ -784,6 +785,31 @@ class RandomizeLevels(Toggle):
     """
     display_name = "Randomize Levels"
 
+
+class JakAndDaxterPlandoConnections(PlandoConnections):
+    """
+    Connections plando to set specific level randomization. Requires "Randomize Levels" to be ON.
+    Format is:
+    - entrance: "Sentinel Beach"
+      exit: "Precursor Basin"
+      percentage: 100
+
+    (when going to Sentinel Beach, Jak will end up in Precursor Basin instead)
+    Percentage is an integer from 1 to 100, and defaults to 100 when omitted.
+
+    Allowed levels are:
+    "Forbidden Jungle"
+    "Sentinel Beach"
+    "Misty Island"
+    "Precursor Basin"
+    "Lost Precursor City"
+    "Boggy Swamp"
+    "Spider Cave"
+    "Snowy Mountain"
+    """
+    display_name = "Entrance Plando"
+    entrances = exits = [str(level) for level in Jak1Level]
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -850,6 +876,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     zoomer_escape: ZoomerEscape
     crouch_trick: CrouchTrick
     randomize_levels: RandomizeLevels
+    plando_connections: JakAndDaxterPlandoConnections
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 
