@@ -407,7 +407,7 @@ class JakAndDaxterWorld(World):
         # Options drive which trade rules to use and advanced logic, so they need to be setup before we create_regions.
         set_option_driven_rules(self)
 
-        # Level Randomizer (TODO: UT support)
+        # Level Randomizer
         if self.options.randomize_levels:
             self.random.shuffle(self.randomized_levels)
 
@@ -434,6 +434,10 @@ class JakAndDaxterWorld(World):
                         self.randomized_levels[exit_idx],
                         self.randomized_levels[entrance_level]
                     )
+
+        if hasattr(self.multiworld, "re_gen_passthrough"):
+            if jak1_name in self.multiworld.re_gen_passthrough and 'randomized_levels' in self.multiworld.re_gen_passthrough[jak1_name]:
+                self.randomized_levels = self.multiworld.re_gen_passthrough[jak1_name]['randomized_levels']
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
