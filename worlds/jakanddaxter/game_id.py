@@ -1,3 +1,5 @@
+from enum import IntEnum
+
 import Utils
 
 # All Jak And Daxter Archipelago IDs must be offset by this number.
@@ -16,13 +18,15 @@ jak1_gk = "gk" + (".exe" if Utils.is_windows else "")
 jak1_goalc = "goalc" + (".exe" if Utils.is_windows else "")
 
 # These level ids are arbitrary, and used for level randomization.
-jak1_level_ids = {
-    "FJ": 0,
-    "SB": 1,
-    "MI": 2,
-    "PB": 3,
-    "LPC": 4,
-    "BS": 5,
-    "SC": 6,
-    "SM": 7,
-}
+class Jak1Level(IntEnum):
+    FORBIDDEN_JUNGLE = 0
+    SENTINEL_BEACH = 1
+    MISTY_ISLAND = 2
+    PRECURSOR_BASIN = 3
+    LOST_PRECURSOR_CITY = 4
+    BOGGY_SWAMP = 5
+    SPIDER_CAVE = 6
+    SNOWY_MOUNTAIN = 7
+
+    def __str__(self):
+        return self.name.replace("_", " ").title()

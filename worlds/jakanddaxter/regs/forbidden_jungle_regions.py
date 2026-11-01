@@ -1,5 +1,5 @@
 from .region_base import JakAndDaxterRegion
-from ..game_id import jak1_level_ids
+from ..game_id import Jak1Level
 from ..options import EnableOrbsanity
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -99,7 +99,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
                         rule=lambda state:
                         state.has("Blue Eco", player))
 
-    if options.forbidden_jungle_elevator_skip and world.randomized_levels[jak1_level_ids["FJ"]] == jak1_level_ids["FJ"]:
+    if options.forbidden_jungle_elevator_skip and world.randomized_levels[Jak1Level.FORBIDDEN_JUNGLE] == Jak1Level.FORBIDDEN_JUNGLE:
         # With a deload, it's possible to skip the Elevator, but Jak has to hit the loading zone while falling down.
         # With Jump Kick, that's definitely possible.
         # The deload only works if FJ has not been randomized.

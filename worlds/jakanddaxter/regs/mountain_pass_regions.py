@@ -1,12 +1,11 @@
 from .region_base import JakAndDaxterRegion
-from ..game_id import jak1_level_ids
+from ..game_id import Jak1Level
 from ..options import EnableOrbsanity, KlawwFightSkip
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
 from ..rules import can_reach_orbs_level
 from ..locs import scout_locations as scouts
-from worlds.generic.Rules import add_rule
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDaxterRegion, ...]:
@@ -37,7 +36,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     # So we need to set up this inter-region rule as well.
 
     if (options.klaww_fight_skip >= KlawwFightSkip.option_medium
-            and world.randomized_levels[jak1_level_ids["BS"]] == jak1_level_ids["BS"]):
+            and world.randomized_levels[Jak1Level.BOGGY_SWAMP] == Jak1Level.BOGGY_SWAMP):
         # Actually, Klaww is optional with this setting and can be skipped using idle deload.
         # This requires BS to be where it normally is.
         main_area.connect(race)
