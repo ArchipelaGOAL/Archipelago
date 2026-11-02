@@ -786,6 +786,22 @@ class RandomizeLevels(Toggle):
     display_name = "Randomize Levels"
 
 
+class CitadelRandomization(Choice):
+    """
+    This setting controls the randomization of Gol and Maia's Citadel (GMC) if "Randomize Levels" is ON.
+
+    **Final Level**: GMC is always the last level.
+    **Boss Requires Power Cells*: GMC is randomly placed, but the final boss elevator requires Jak to have collected
+    enough power cells to traverse Lava Tube.
+    """
+    display_name = "Citadel Randomization"
+
+    option_final_level = 0
+    option_boss_requires_power_cells = 1
+
+    default = option_boss_requires_power_cells
+
+
 class JakAndDaxterPlandoConnections(PlandoConnections):
     """
     Connections plando to set specific level randomization. Requires "Randomize Levels" to be ON.
@@ -806,6 +822,7 @@ class JakAndDaxterPlandoConnections(PlandoConnections):
     "Boggy Swamp"
     "Spider Cave"
     "Snowy Mountain"
+    "Gol and Maias Citadel"
     """
     display_name = "Entrance Plando"
     entrances = exits = [str(level) for level in Jak1Level]
@@ -876,6 +893,7 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     zoomer_escape: ZoomerEscape
     crouch_trick: CrouchTrick
     randomize_levels: RandomizeLevels
+    citadel_randomization: CitadelRandomization
     plando_connections: JakAndDaxterPlandoConnections
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool

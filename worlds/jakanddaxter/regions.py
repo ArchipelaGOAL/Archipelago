@@ -98,7 +98,8 @@ def create_regions(world: "JakAndDaxterWorld"):
         Jak1Level.LOST_PRECURSOR_CITY: lpc,
         Jak1Level.BOGGY_SWAMP: bs,
         Jak1Level.SPIDER_CAVE: sc,
-        Jak1Level.SNOWY_MOUNTAIN: sm
+        Jak1Level.SNOWY_MOUNTAIN: sm,
+        Jak1Level.GOL_AND_MAIAS_CITADEL: gmc,
     }
 
     # Generate the actual randomized order.
@@ -126,7 +127,8 @@ def create_regions(world: "JakAndDaxterWorld"):
     vc.connect(levels[Jak1Level.SNOWY_MOUNTAIN], rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, lt_count))  # Normally 72.
     # lt -> lt_end connection defined internally by LavaTubeRegions.
-    lt_end.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
+    lt_end.connect(levels[Jak1Level.GOL_AND_MAIAS_CITADEL])
+    # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
 
     # Set the completion condition.
     if options.jak_completion_condition == CompletionCondition.option_cross_fire_canyon:

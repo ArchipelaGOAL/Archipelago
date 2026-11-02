@@ -27,6 +27,7 @@ class Jak1Level(IntEnum):
     BOGGY_SWAMP = 5
     SPIDER_CAVE = 6
     SNOWY_MOUNTAIN = 7
+    GOL_AND_MAIAS_CITADEL = 8
 
     def __str__(self):
         return self.name.replace("_", " ").title()
