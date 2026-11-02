@@ -34,7 +34,7 @@ from .locations import (JakAndDaxterLocation,
                         special_location_table,
                         cache_location_table,
                         orb_location_table)
-from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove
+from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove, CitadelRandomization
 from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
@@ -308,7 +308,7 @@ class JakAndDaxterWorld(World):
 
     # Level replacement IDs for level randomizer (by default, every level maps to itself):
     # randomized_levels[original_id] = replaced_level_id
-    randomized_levels: list[Jak1Level] = [Jak1Level(i) for i in range(8)]
+    randomized_levels: list[Jak1Level] = [Jak1Level(i) for i in range(len(Jak1Level))]
 
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
@@ -409,7 +409,16 @@ class JakAndDaxterWorld(World):
 
         # Level Randomizer
         if self.options.randomize_levels:
-            self.random.shuffle(self.randomized_levels)
+            randomized_levels = self.randomized_levels
+            self.random.shuffle(randomized_levels)
+
+            if self.options.citadel_randomization == CitadelRandomization.option_final_level:
+                citadel_idx = randomized_levels.index(Jak1Level.GOL_AND_MAIAS_CITADEL)
+                # Swap the current level in GMC with the actual GMC to make sure it's the final level.
+                randomized_levels[Jak1Level.GOL_AND_MAIAS_CITADEL], randomized_levels[citadel_idx] = (
+                    randomized_levels[citadel_idx],
+                    randomized_levels[Jak1Level.GOL_AND_MAIAS_CITADEL]
+                )
 
             # If connection plando is used, swap the randomized levels to match it.
             # Later entries win if multiple choose the same level.
@@ -427,12 +436,12 @@ class JakAndDaxterWorld(World):
                     exit_level = level_by_name[connection.exit.lower()]
 
                     # Determine where the exit level is currently.
-                    exit_idx = self.randomized_levels.index(exit_level)
+                    exit_idx = randomized_levels.index(exit_level)
 
                     # Swap the exit level with the level at entrance_level.
-                    self.randomized_levels[entrance_level], self.randomized_levels[exit_idx] = (
-                        self.randomized_levels[exit_idx],
-                        self.randomized_levels[entrance_level]
+                    randomized_levels[entrance_level], randomized_levels[exit_idx] = (
+                        randomized_levels[exit_idx],
+                        randomized_levels[entrance_level]
                     )
 
         if hasattr(self.multiworld, "re_gen_passthrough"):
@@ -711,20 +720,16 @@ class JakAndDaxterWorld(World):
                                             "sentinel_beach_blue_eco_switch_skip",
                                             "zoomer_escape",
                                             "crouch_trick",
+                                            # Level Randomizer
+                                            "randomize_levels",
+                                            "citadel_randomization",
                                             )
         options_dict["randomized_levels"] = self.randomized_levels
         return options_dict
 
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
         if self.options.randomize_levels:
-            spoiler_handle.write(
-                f"\nLevel Connections:\n"
-                f"\n-> Forbidden Jungle:    {Jak1Level(self.randomized_levels[Jak1Level.FORBIDDEN_JUNGLE])}"
-                f"\n-> Sentinel Beach:      {Jak1Level(self.randomized_levels[Jak1Level.SENTINEL_BEACH])}"
-                f"\n-> Misty Island:        {Jak1Level(self.randomized_levels[Jak1Level.MISTY_ISLAND])}"
-                f"\n-> Precursor Basin:     {Jak1Level(self.randomized_levels[Jak1Level.PRECURSOR_BASIN])}"
-                f"\n-> Lost Precursor City: {Jak1Level(self.randomized_levels[Jak1Level.LOST_PRECURSOR_CITY])}"
-                f"\n-> Boggy Swamp:         {Jak1Level(self.randomized_levels[Jak1Level.BOGGY_SWAMP])}"
-                f"\n-> Spider Cave:         {Jak1Level(self.randomized_levels[Jak1Level.SPIDER_CAVE])}"
-                f"\n-> Snowy Mountain:      {Jak1Level(self.randomized_levels[Jak1Level.SNOWY_MOUNTAIN])}"
-            )
+            spoiler_handle.write("\nLevel Connections:\n")
+            width = max(len(str(level)) for level in Jak1Level) + 1
+            for level in Jak1Level:
+                spoiler_handle.write(f"\n-> {str(level) + ':':<{width}} {Jak1Level(self.randomized_levels[level])}")
