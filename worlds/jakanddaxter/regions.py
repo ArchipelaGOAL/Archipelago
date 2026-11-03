@@ -115,7 +115,8 @@ def create_regions(world: "JakAndDaxterWorld"):
     fc.connect(rv)
     rv.connect(levels[Jak1Level.PRECURSOR_BASIN])
     rv.connect(levels[Jak1Level.LOST_PRECURSOR_CITY])
-    lpc_raised.connect(rv)  # It's possible to get to RV from the raised chamber in LPC (relevant for level rando).
+    # TODO - Is it possible to softlock yourself out of this by raising the chamber, and then teleport to GR?
+    # lpc_raised.connect(rv)  # It's possible to get to RV from the raised chamber in LPC (relevant for level rando).
     rvp.connect(levels[Jak1Level.BOGGY_SWAMP])  # rv->rvp/rvc connections defined internally by RockVillageRegions.
     if options.klaww_boulder_skip:
         # With Klaww boulder skip, it is always possible to reach Mountain Pass without any power cell requirements.
