@@ -85,6 +85,34 @@ class EnableMoveRandomizer(Toggle):
     display_name = "Enable Move Randomizer"
 
 
+class RandomStartingMove(AllowedChoice):
+    """Enable this option to give Jak 1-2 random starting move(s).
+
+    This setting cannot be turned off to prevent generation failures, but the host can remove this restriction by
+    turning off enforce_friendly_options in host.yaml.
+
+    **If Required:** Give Jak a starting move if there are very few early checks available. This happens if
+    "Eco Randomizer" is ON and "Orbsanity" is either OFF or the bundle size is very large.
+
+    This only applies if "Enable Move Randomizer" is ON."""
+    display_name = "Random Starting Move"
+    option_no = 0
+    option_if_required = 1
+    option_yes = 2
+
+    default = option_if_required
+
+    @classmethod
+    def get_disallowed_options(cls) -> set[int]:
+        try:
+            from . import JakAndDaxterWorld
+            if JakAndDaxterWorld.settings.enforce_friendly_options:
+                return {cls.option_no}
+        except ImportError:
+            pass
+        return set()
+
+
 class EnableOrbsanity(Choice):
     """Include bundles of Precursor Orbs as checks. Every time you collect the chosen number of orbs, you will trigger
     another check.
@@ -327,6 +355,49 @@ class TrapWeights(OptionCounter):
     def weights_pair(self) -> tuple[list[str], list[int]]:
         return list(self.value.keys()), list(self.value.values())
 
+
+# region Eco Randomizer
+class EnableEcoRandomizer(Toggle):
+    """Include eco collection as items in the randomizer. Until you find other eco colors, Jak can only collect green
+    eco.
+
+    This adds 3 items to the pool."""
+    display_name = "Enable Eco Randomizer"
+
+
+class GeyserRockDoorSkip(Toggle):
+    """
+    Create an alternative path through the precursor door in geyser rock.
+
+    Enabling this setting may require Jak to reach the area behind the door with no *Blue Eco* unlocked.
+
+    If "Enable Move Randomizer" is ON, Jak may be required to do the trick with *Jump Kick* and either *Crouch Jump*
+    or *Jump Dive* + *Double Jump*.
+    """
+    display_name = "Geyser Rock Door Skip"
+
+
+class KlawwFightSkip(Toggle):
+    """
+    Create an alternative path to Mountain Pass without having to fight Klaww.
+
+    Enabling this setting may require Jak to reach Mountain Pass by skipping the Klaww fight, without *Blue Eco* or
+    *Yellow Eco* unlocked.
+    """
+    display_name = "Klaww Fight Skip"
+
+
+class LavaTubeOrangesSkip(Toggle):
+    """
+    Create an alternative path through Lava Tube.
+
+    Enabling this setting may require Jak to skip the door in the room with the "oranges" in lava tube, without using
+    *Yellow Eco*.
+    """
+    display_name = "Lava Tube Oranges Skip"
+# endregion
+
+# region Advanced Movement
 
 class BoostedAndExtendedUppercuts(Toggle):
     """
@@ -697,6 +768,8 @@ class CrouchTrick(Toggle):
     display_name = "Crouch Trick"
 
 
+# endregion
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -713,6 +786,7 @@ class CompletionCondition(Choice):
 @dataclass
 class JakAndDaxterOptions(PerGameCommonOptions):
     enable_move_randomizer: EnableMoveRandomizer
+    random_starting_move: RandomStartingMove
     enable_orbsanity: EnableOrbsanity
     global_orbsanity_bundle_size: GlobalOrbsanityBundleSize
     level_orbsanity_bundle_size: PerLevelOrbsanityBundleSize
@@ -727,6 +801,10 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     filler_orb_bundles_replaced_with_traps: FillerOrbBundlesReplacedWithTraps
     trap_effect_duration: TrapEffectDuration
     trap_weights: TrapWeights
+    enable_eco_randomizer: EnableEcoRandomizer
+    geyser_rock_door_skip: GeyserRockDoorSkip
+    klaww_fight_skip: KlawwFightSkip
+    lava_tube_oranges_skip: LavaTubeOrangesSkip
     boosted_and_extended_uppercuts: BoostedAndExtendedUppercuts
     punch_uppercut_scout_flies: PunchUppercutScoutFlies
     geyser_rock_cliff_climb: GeyserRockCliffClimb
