@@ -115,7 +115,8 @@ def create_regions(world: "JakAndDaxterWorld"):
     fc.connect(rv)
     rv.connect(levels[Jak1Level.PRECURSOR_BASIN])
     rv.connect(levels[Jak1Level.LOST_PRECURSOR_CITY])
-    # TODO - Is it possible to softlock yourself out of this by raising the chamber, and then teleport to GR?
+    # It is possible to softlock yourself out of this by raising the chamber, and then teleport to GR.
+    # Therefore, it's currently not considered in logic.
     # lpc_raised.connect(rv)  # It's possible to get to RV from the raised chamber in LPC (relevant for level rando).
     rvp.connect(levels[Jak1Level.BOGGY_SWAMP])  # rv->rvp/rvc connections defined internally by RockVillageRegions.
     if options.klaww_boulder_skip:
