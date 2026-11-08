@@ -12,9 +12,17 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     player = world.player
 
     # A large amount of this area can be covered by single jump, floating platforms, web trampolines, and goggles.
-    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 63)
-    main_area.add_cell_locations([78, 84])
-    main_area.add_fly_locations([327765, 393301, 196693, 131157])
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 36)
+    # Yellow eco is required to shoot the lurkers.
+    main_area.add_cell_locations([78], access_rule=lambda state: state.has("Yellow Eco", player))
+    main_area.add_cell_locations([84])
+    main_area.add_fly_locations([327765, 393301, 196693, 131157], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player) or state.has("Yellow Eco", player))
+
+    # 6 orbs in crates towards dark cave.
+    # 6 orbs in crates towards robot cave.
+    # 15 orbs by shooting the lurkers.
+    main_area_yellow_eco_orbs = JakAndDaxterRegion("Main Area (Yellow Eco)", player, multiworld, level_name, 27)
 
     # This is a virtual region describing what you need to DO to get the Dark Crystal power cell,
     # rather than describing where each of the crystals ARE, because you can destroy them in any order,
@@ -24,8 +32,12 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # can_fight = The underwater crystal in dark cave.
     # Roll Jump = The underwater crystal across a long dark eco pool.
     # The rest of the crystals can be destroyed with yellow eco in main_area.
+    # It's also possible to touch them without yellow eco - then, either Double Jump or Jump Kick is required to reach
+    # the platform on the way to the dark cave.
     dark_crystals.add_cell_locations([79], access_rule=lambda state:
-                                     can_fight(state, player)
+                                     (state.has("Yellow Eco", player)
+                                       or state.has_any(("Double Jump", "Jump Kick"), player))
+                                     and can_fight(state, player)
                                      and state.has_all(("Roll", "Roll Jump"), player))
 
     dark_cave = JakAndDaxterRegion("Dark Cave", player, multiworld, level_name, 5)
@@ -34,21 +46,34 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     robot_cave = JakAndDaxterRegion("Robot Cave", player, multiworld, level_name, 0)
 
-    # Need double jump for orbs.
-    scaffolding_level_zero = JakAndDaxterRegion("Robot Scaffolding Level 0", player, multiworld, level_name, 12)
+    scaffolding_level_zero = JakAndDaxterRegion("Robot Scaffolding Level 0", player, multiworld, level_name, 9)
 
-    scaffolding_level_one = JakAndDaxterRegion("Robot Scaffolding Level 1", player, multiworld, level_name, 53)
-    scaffolding_level_one.add_fly_locations([85])  # Shootable.
+    # The 3 high orbs are very hard to collect without double jump.
+    scaffolding_level_zero_high_orbs = JakAndDaxterRegion("Robot Scaffolding Level 0 High Orbs", player, multiworld, level_name, 3)
+
+    scaffolding_level_one = JakAndDaxterRegion("Robot Scaffolding Level 1", player, multiworld, level_name, 17)
+    # Shootable.
+    scaffolding_level_one.add_fly_locations([85], access_rule=lambda state:
+                                            state.has("Yellow Eco", player)
+                                            or world.can_free_scout_flies(state, player))
+
+    # Boxes require yellow eco to get the orbs.
+    scaffolding_level_one_boxes = JakAndDaxterRegion("Robot Scaffolding Level 1 Boxes", player, multiworld, level_name, 36)
 
     scaffolding_level_two = JakAndDaxterRegion("Robot Scaffolding Level 2", player, multiworld, level_name, 4)
 
-    # Using the blue eco from the pole course, you can single jump to the scout fly up here.
     scaffolding_level_three = JakAndDaxterRegion("Robot Scaffolding Level 3", player, multiworld, level_name, 29)
     scaffolding_level_three.add_cell_locations([81])
-    scaffolding_level_three.add_fly_locations([65621])
+    # Using the blue eco from the pole course, you can single jump to the scout fly up here.
+    scaffolding_level_three.add_fly_locations([65621], access_rule=lambda state:
+                                               state.has("Blue Eco", player)
+                                               or world.can_free_scout_flies(state, player))
 
     pole_course = JakAndDaxterRegion("Pole Course", player, multiworld, level_name, 18)
-    pole_course.add_cell_locations([82])
+
+    # The power cell is on a higher platform that can only be reached using Blue Eco or a boosted.
+    pole_course_cell = JakAndDaxterRegion("Pole Course Cell", player, multiworld, level_name, 0)
+    pole_course_cell.add_cell_locations([82])
 
     # You only need combat to fight through the spiders, but to collect the orb crates,
     # you will need the yellow eco vent unlocked.
@@ -58,6 +83,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     spider_tunnel_crates = JakAndDaxterRegion("Spider Tunnel Orb Crates", player, multiworld, level_name, 12)
 
     main_area.connect(dark_crystals)
+    main_area.connect(main_area_yellow_eco_orbs, rule=lambda state: state.has("Yellow Eco", player))
     main_area.connect(robot_cave)
     main_area.connect(dark_cave, rule=lambda state:
                       can_fight(state, player)
@@ -65,17 +91,26 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                            or state.has_all(("Crouch", "Crouch Jump"), player)))
 
     robot_cave.connect(main_area)
-    robot_cave.connect(pole_course)                 # Nothing special required.
+    robot_cave.connect(pole_course, rule=lambda state: state.has("Blue Eco", player)) # Blue Eco for launch pad.
     robot_cave.connect(scaffolding_level_one)       # Ramps lead to level 1.
     robot_cave.connect(spider_tunnel)               # Web trampolines (bounce twice on each to gain momentum).
 
     pole_course.connect(robot_cave)                 # Blue eco platform down.
+    pole_course.connect(pole_course_cell, rule=lambda state: state.has("Blue Eco", player))
+
+    pole_course_cell.connect(pole_course)           # Just drop down.
 
     scaffolding_level_one.connect(robot_cave)       # All scaffolding (level 1+) connects back by jumping down.
 
-    # Elevator, but the orbs need double jump or jump kick.
-    scaffolding_level_one.connect(scaffolding_level_zero, rule=lambda state:
-                                  state.has_any(("Double Jump", "Jump Kick"), player))
+    # Yellow Eco is required to shoot boxes and get the orbs.
+    scaffolding_level_one.connect(scaffolding_level_one_boxes, rule=lambda state: state.has("Yellow Eco", player))
+
+    # Elevator.
+    scaffolding_level_one.connect(scaffolding_level_zero)
+
+    # High orbs need double jump or jump kick.
+    scaffolding_level_zero.connect(scaffolding_level_zero_high_orbs, rule=lambda state:
+                                   state.has_any(("Double Jump", "Jump Kick"), player))
 
     # Narrow enough that enemies are unavoidable.
     scaffolding_level_one.connect(scaffolding_level_two, rule=lambda state: can_fight(state, player))
@@ -91,21 +126,34 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     scaffolding_level_three.connect(robot_cave)                     # Jump down.
     scaffolding_level_three.connect(scaffolding_level_two)          # Elevator.
 
+    # It's possible to jump to the pole course, but it's just out of reach of a single jump.
+    # This allows collecting all orbs without Blue Eco (but not the cell which has an additional access rule).
+    scaffolding_level_three.connect(pole_course, rule=lambda state:
+                                    state.has_any(("Double Jump", "Jump Kick"), player)
+                                    or state.has_all(("Punch", "Punch Uppercut"), player))
+    # With a boosted, it's possible to get directly from the robot cell to the pole cell platform.
+    scaffolding_level_three.connect(pole_course_cell, rule=lambda state: world.can_do_boosted_extended(state, player))
+
     spider_tunnel.connect(robot_cave)                               # Back to web trampolines.
     spider_tunnel.connect(main_area)                                # Escape with jump pad.
 
     # Requires yellow eco switch.
-    spider_tunnel.connect(spider_tunnel_crates, rule=lambda state: state.has("Yellow Eco Switch", player))
+    spider_tunnel.connect(spider_tunnel_crates, rule=lambda state:
+                          state.has_all(("Yellow Eco Switch", "Yellow Eco"), player))
 
     world.level_to_regions[level_name].append(main_area)
+    world.level_to_regions[level_name].append(main_area_yellow_eco_orbs)
     world.level_to_regions[level_name].append(dark_crystals)
     world.level_to_regions[level_name].append(dark_cave)
     world.level_to_regions[level_name].append(robot_cave)
     world.level_to_regions[level_name].append(scaffolding_level_zero)
+    world.level_to_regions[level_name].append(scaffolding_level_zero_high_orbs)
     world.level_to_regions[level_name].append(scaffolding_level_one)
+    world.level_to_regions[level_name].append(scaffolding_level_one_boxes)
     world.level_to_regions[level_name].append(scaffolding_level_two)
     world.level_to_regions[level_name].append(scaffolding_level_three)
     world.level_to_regions[level_name].append(pole_course)
+    world.level_to_regions[level_name].append(pole_course_cell)
     world.level_to_regions[level_name].append(spider_tunnel)
     world.level_to_regions[level_name].append(spider_tunnel_crates)
 

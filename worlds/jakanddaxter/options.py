@@ -3,7 +3,8 @@ from functools import cached_property
 from typing import Any
 
 from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle, OptionCounter, \
-    AssembleOptions
+    AssembleOptions, PlandoConnections
+from .game_id import Jak1Level
 from .items import trap_item_table
 
 
@@ -83,6 +84,34 @@ class EnableMoveRandomizer(Toggle):
 
     This adds 11 items to the pool."""
     display_name = "Enable Move Randomizer"
+
+
+class RandomStartingMove(AllowedChoice):
+    """Enable this option to give Jak 1-2 random starting move(s).
+
+    This setting cannot be turned off to prevent generation failures, but the host can remove this restriction by
+    turning off enforce_friendly_options in host.yaml.
+
+    **If Required:** Give Jak a starting move if there are very few early checks available. This happens if
+    "Eco Randomizer" is ON and "Orbsanity" is either OFF or the bundle size is very large.
+
+    This only applies if "Enable Move Randomizer" is ON."""
+    display_name = "Random Starting Move"
+    option_no = 0
+    option_if_required = 1
+    option_yes = 2
+
+    default = option_if_required
+
+    @classmethod
+    def get_disallowed_options(cls) -> set[int]:
+        try:
+            from . import JakAndDaxterWorld
+            if JakAndDaxterWorld.settings.enforce_friendly_options:
+                return {cls.option_no}
+        except ImportError:
+            pass
+        return set()
 
 
 class EnableOrbsanity(Choice):
@@ -328,6 +357,55 @@ class TrapWeights(OptionCounter):
         return list(self.value.keys()), list(self.value.values())
 
 
+# region Eco Randomizer
+class EnableEcoRandomizer(Toggle):
+    """Include eco collection as items in the randomizer. Until you find other eco colors, Jak can only collect green
+    eco.
+
+    This adds 3 items to the pool."""
+    display_name = "Enable Eco Randomizer"
+
+
+class GeyserRockDoorSkip(Toggle):
+    """
+    Create an alternative path through the precursor door in geyser rock.
+
+    Enabling this setting may require Jak to reach the area behind the door with no *Blue Eco* unlocked.
+
+    If "Enable Move Randomizer" is ON, Jak may be required to do the trick with *Jump Kick* and either *Crouch Jump*
+    or *Jump Dive* + *Double Jump*.
+    """
+    display_name = "Geyser Rock Door Skip"
+
+
+class KlawwFightSkip(Choice):
+    """
+    Create an alternative path to Mountain Pass without having to fight Klaww.
+
+    Enabling this setting may require Jak to reach Mountain Pass by skipping the Klaww fight, without *Blue Eco* or
+    *Yellow Eco* unlocked.
+
+    **Hard** may require lava walking with *Blue Eco* unlocked if "Level Randomizer" is ON.
+    """
+    display_name = "Klaww Fight Skip"
+
+    option_no = 0
+    option_medium = 1
+    option_hard = 2
+
+
+class LavaTubeOrangesSkip(Toggle):
+    """
+    Create an alternative path through Lava Tube.
+
+    Enabling this setting may require Jak to skip the door in the room with the "oranges" in lava tube, without using
+    *Yellow Eco*.
+    """
+    display_name = "Lava Tube Oranges Skip"
+# endregion
+
+# region Advanced Movement
+
 class BoostedAndExtendedUppercuts(Toggle):
     """
     Create alternate paths to some areas with advanced movement.
@@ -492,6 +570,8 @@ class ForbiddenJungleElevatorSkip(Toggle):
     Create an alternative path to the temple interior in Forbidden Jungle without having *Jungle Elevator* unlocked.
 
     Enabling this setting may require Jak to get inside the temple with only *Jump Kick*.
+
+    Does not apply if Forbidden Jungle has been randomized into a different level.
     """
     display_name = "Forbidden Jungle Elevator Skip"
 
@@ -697,6 +777,56 @@ class CrouchTrick(Toggle):
     display_name = "Crouch Trick"
 
 
+# endregion
+
+class RandomizeLevels(Toggle):
+    """
+    Randomize all non-hub levels.
+    """
+    display_name = "Randomize Levels"
+
+
+class CitadelRandomization(Choice):
+    """
+    This setting controls the randomization of Gol and Maia's Citadel (GMC) if "Randomize Levels" is ON.
+
+    **Final Level**: GMC is always the last level.
+    **Boss Requires Power Cells*: GMC is randomly placed, but the final boss elevator requires Jak to have collected
+    enough power cells to traverse Lava Tube.
+    """
+    display_name = "Citadel Randomization"
+
+    option_final_level = 0
+    option_boss_requires_power_cells = 1
+
+    default = option_boss_requires_power_cells
+
+
+class JakAndDaxterPlandoConnections(PlandoConnections):
+    """
+    Connections plando to set specific level randomization. Requires "Randomize Levels" to be ON.
+    Format is:
+    - entrance: "Sentinel Beach"
+      exit: "Precursor Basin"
+      percentage: 100
+
+    (when going to Sentinel Beach, Jak will end up in Precursor Basin instead)
+    Percentage is an integer from 1 to 100, and defaults to 100 when omitted.
+
+    Allowed levels are:
+    "Forbidden Jungle"
+    "Sentinel Beach"
+    "Misty Island"
+    "Precursor Basin"
+    "Lost Precursor City"
+    "Boggy Swamp"
+    "Spider Cave"
+    "Snowy Mountain"
+    "Gol and Maias Citadel"
+    """
+    display_name = "Entrance Plando"
+    entrances = exits = [str(level) for level in Jak1Level]
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -713,6 +843,7 @@ class CompletionCondition(Choice):
 @dataclass
 class JakAndDaxterOptions(PerGameCommonOptions):
     enable_move_randomizer: EnableMoveRandomizer
+    random_starting_move: RandomStartingMove
     enable_orbsanity: EnableOrbsanity
     global_orbsanity_bundle_size: GlobalOrbsanityBundleSize
     level_orbsanity_bundle_size: PerLevelOrbsanityBundleSize
@@ -727,6 +858,10 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     filler_orb_bundles_replaced_with_traps: FillerOrbBundlesReplacedWithTraps
     trap_effect_duration: TrapEffectDuration
     trap_weights: TrapWeights
+    enable_eco_randomizer: EnableEcoRandomizer
+    geyser_rock_door_skip: GeyserRockDoorSkip
+    klaww_fight_skip: KlawwFightSkip
+    lava_tube_oranges_skip: LavaTubeOrangesSkip
     boosted_and_extended_uppercuts: BoostedAndExtendedUppercuts
     punch_uppercut_scout_flies: PunchUppercutScoutFlies
     geyser_rock_cliff_climb: GeyserRockCliffClimb
@@ -757,6 +892,9 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     zoomer_escape: ZoomerEscape
     crouch_trick: CrouchTrick
+    randomize_levels: RandomizeLevels
+    citadel_randomization: CitadelRandomization
+    plando_connections: JakAndDaxterPlandoConnections
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 

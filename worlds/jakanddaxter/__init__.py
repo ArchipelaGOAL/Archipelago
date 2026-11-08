@@ -1,7 +1,7 @@
 # Python standard libraries
 from collections import defaultdict
 from math import ceil
-from typing import Any, ClassVar, Callable, Union, cast
+from typing import Any, ClassVar, Callable, Union, cast, TextIO
 
 # Archipelago imports
 import settings
@@ -15,7 +15,7 @@ from Options import OptionGroup
 
 # Jak imports
 from . import options
-from .game_id import jak1_id, jak1_name, jak1_max
+from .game_id import jak1_id, jak1_name, jak1_max, Jak1Level
 from .items import (JakAndDaxterItem,
                     OrbAssoc,
                     item_table,
@@ -24,7 +24,8 @@ from .items import (JakAndDaxterItem,
                     special_item_table,
                     move_item_table,
                     orb_item_table,
-                    trap_item_table)
+                    trap_item_table,
+                    eco_item_table)
 from .levels import level_table, level_table_with_global
 from .locations import (JakAndDaxterLocation,
                         location_table,
@@ -33,7 +34,7 @@ from .locations import (JakAndDaxterLocation,
                         special_location_table,
                         cache_location_table,
                         orb_location_table)
-from .options import jakanddaxter_option_presets
+from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove, CitadelRandomization
 from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
@@ -116,6 +117,12 @@ class JakAndDaxterWebWorld(WebWorld):
             options.CitizenOrbTradeAmount,
             options.OracleOrbTradeAmount,
         ]),
+        OptionGroup("Eco Randomizer", [
+            options.EnableEcoRandomizer,
+            options.GeyserRockDoorSkip,
+            options.KlawwFightSkip,
+            options.LavaTubeOrangesSkip,
+        ], True),
         OptionGroup("Tricks & Glitches - Easy", [
             options.AttackWithRollJump,  # Use Roll Jump instead of regular attacks to hit certain targets.
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
@@ -194,6 +201,7 @@ class JakAndDaxterWorld(World):
         "Scout Flies": set(scout_item_table.values()),
         "Specials": set(special_item_table.values()),
         "Moves": set(move_item_table.values()),
+        "Eco": set(eco_item_table.values()),
         "Precursor Orbs": set(orb_item_table.values()),
         "Traps": set(trap_item_table.values()),
     }
@@ -298,6 +306,10 @@ class JakAndDaxterWorld(World):
     level_to_regions: dict[str, list[JakAndDaxterRegion]]  # Contains all levels and regions.
     level_to_orb_regions: dict[str, list[JakAndDaxterRegion]]  # Contains only regions which contain orbs.
 
+    # Level replacement IDs for level randomizer (by default, every level maps to itself):
+    # randomized_levels[original_id] = replaced_level_id
+    randomized_levels: list[Jak1Level] = [Jak1Level(i) for i in range(len(Jak1Level))]
+
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
 
@@ -395,6 +407,47 @@ class JakAndDaxterWorld(World):
         # Options drive which trade rules to use and advanced logic, so they need to be setup before we create_regions.
         set_option_driven_rules(self)
 
+        # Level Randomizer
+        if self.options.randomize_levels:
+            randomized_levels = self.randomized_levels
+            self.random.shuffle(randomized_levels)
+
+            if self.options.citadel_randomization == CitadelRandomization.option_final_level:
+                citadel_idx = randomized_levels.index(Jak1Level.GOL_AND_MAIAS_CITADEL)
+                # Swap the current level in GMC with the actual GMC to make sure it's the final level.
+                randomized_levels[Jak1Level.GOL_AND_MAIAS_CITADEL], randomized_levels[citadel_idx] = (
+                    randomized_levels[citadel_idx],
+                    randomized_levels[Jak1Level.GOL_AND_MAIAS_CITADEL]
+                )
+
+            # If connection plando is used, swap the randomized levels to match it.
+            # Later entries win if multiple choose the same level.
+            if self.options.plando_connections:
+                level_by_name = {str(level).lower(): level for level in Jak1Level}
+                for connection in self.options.plando_connections:
+                    # If the plando connection has a chance, check it first to see if we skip it.
+                    if (connection.percentage < 100) and 100 * self.random.random() >= connection.percentage:
+                        continue
+
+                    # Find entrance/exit level ID using the (case-insensitive) plando name.
+                    # The generic plando option already prints a nice error message before if an entrance/exit does not
+                    # exist (but it uses a case-insensitive comparison).
+                    entrance_level = level_by_name[connection.entrance.lower()]
+                    exit_level = level_by_name[connection.exit.lower()]
+
+                    # Determine where the exit level is currently.
+                    exit_idx = randomized_levels.index(exit_level)
+
+                    # Swap the exit level with the level at entrance_level.
+                    randomized_levels[entrance_level], randomized_levels[exit_idx] = (
+                        randomized_levels[exit_idx],
+                        randomized_levels[entrance_level]
+                    )
+
+        if hasattr(self.multiworld, "re_gen_passthrough"):
+            if jak1_name in self.multiworld.re_gen_passthrough and 'randomized_levels' in self.multiworld.re_gen_passthrough[jak1_name]:
+                self.randomized_levels = self.multiworld.re_gen_passthrough[jak1_name]['randomized_levels']
+
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
         create_regions(self)
@@ -461,14 +514,64 @@ class JakAndDaxterWorld(World):
         return data
 
     def create_items(self) -> None:
+        starting_moves = set()
+        # If Move Rando and Eco Rando is On, then orb bundle size must not be larger than 25 to guarantee enough checks.
+        # This is arbitrary and leads to at least ~20 checks immediately accessible which seems to be enough.
+        has_low_orbsanity = (self.options.enable_orbsanity == EnableOrbsanity.option_off
+                             or (self.options.enable_orbsanity == EnableOrbsanity.option_global
+                                 and self.options.global_orbsanity_bundle_size > 25)
+                             or (self.options.enable_orbsanity == EnableOrbsanity.option_per_level
+                                 and self.options.level_orbsanity_bundle_size > 25))
+
+        require_high_impact_starting_move = (self.options.enable_move_randomizer
+                                             and self.options.enable_eco_randomizer
+                                             and has_low_orbsanity)
+
+        if ((self.options.random_starting_move == RandomStartingMove.option_yes and self.options.enable_move_randomizer)
+                or (self.options.random_starting_move == RandomStartingMove.option_if_required
+                    and require_high_impact_starting_move)):
+
+            if require_high_impact_starting_move:
+                # If the early check amount is really low, then we need a move that can destroy scout fly boxes to
+                # consistently unlock enough checks to prevent generation failures.
+                # Pure Movement options don't really unlock anything in Hub 1.
+                # Attack moves only unlock ~5 checks.
+                possible_moves = [
+                    ["Crouch", "Crouch Uppercut"],
+                    ["Jump Dive"],
+                ]
+                if self.options.punch_uppercut_scout_flies:
+                    possible_moves.append(["Punch", "Punch Uppercut"])
+            else:
+                possible_moves = [
+                    ["Crouch", "Crouch Jump"],
+                    ["Crouch", "Crouch Uppercut"],
+                    ["Roll", "Roll Jump"],
+                    ["Double Jump"],
+                    ["Jump Dive"],
+                    ["Jump Kick"],
+                    ["Punch"],
+                    ["Punch", "Punch Uppercut"],
+                    ["Kick"],
+                ]
+
+            # Blue Eco can be a high impact starting move, but it can also be rolled randomly if Eco Rando is enabled.
+            if self.options.enable_eco_randomizer:
+                possible_moves.append(["Blue Eco"])
+
+            additional_starting_moves = self.random.choice(possible_moves)
+            starting_moves.update(additional_starting_moves)
+
         items_made: int = 0
         for item_name in self.item_name_to_id:
             item_id = self.item_name_to_id[item_name]
 
-            # Handle Move Randomizer option.
+            # Handle Move/Eco Randomizer option.
             # If it is OFF, put all moves in your starting inventory instead of the item pool,
             # then fill the item pool with a corresponding amount of filler items.
-            if item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer:
+            if ((item_name in starting_moves)
+                    or (item_name in self.item_name_groups["Moves"] and not self.options.enable_move_randomizer)
+                    or (item_name in self.item_name_groups["Eco"] and not self.options.enable_eco_randomizer)):
                 self.multiworld.push_precollected(self.create_item(item_name))
                 self.multiworld.itempool.append(self.create_filler())
                 items_made += 1
@@ -565,6 +668,7 @@ class JakAndDaxterWorld(World):
 
     def fill_slot_data(self) -> dict[str, Any]:
         options_dict = self.options.as_dict("enable_move_randomizer",
+                                            "random_starting_move",
                                             "enable_orbsanity",
                                             "global_orbsanity_bundle_size",
                                             "level_orbsanity_bundle_size",
@@ -577,8 +681,14 @@ class JakAndDaxterWorld(World):
                                             "filler_orb_bundles_replaced_with_traps",
                                             "trap_effect_duration",
                                             "trap_weights",
+                                            "randomize_levels",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
+                                            # Eco Randomizer
+                                            "enable_eco_randomizer",
+                                            "geyser_rock_door_skip",
+                                            "klaww_fight_skip",
+                                            "lava_tube_oranges_skip",
                                             # Tricks & Glitches
                                             "boosted_and_extended_uppercuts",
                                             "punch_uppercut_scout_flies",
@@ -610,5 +720,16 @@ class JakAndDaxterWorld(World):
                                             "sentinel_beach_blue_eco_switch_skip",
                                             "zoomer_escape",
                                             "crouch_trick",
+                                            # Level Randomizer
+                                            "randomize_levels",
+                                            "citadel_randomization",
                                             )
+        options_dict["randomized_levels"] = self.randomized_levels
         return options_dict
+
+    def write_spoiler(self, spoiler_handle: TextIO) -> None:
+        if self.options.randomize_levels:
+            spoiler_handle.write("\nLevel Connections:\n")
+            width = max(len(str(level)) for level in Jak1Level) + 1
+            for level in Jak1Level:
+                spoiler_handle.write(f"\n-> {str(level) + ':':<{width}} {Jak1Level(self.randomized_levels[level])}")

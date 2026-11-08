@@ -188,6 +188,8 @@ class JakAndDaxterContext(CommonContext):
                                         slot_data["oracle_orb_trade_amount"],
                                         slot_data["trap_effect_duration"],
                                         slot_data["jak_completion_condition"],
+                                        slot_data.get("enable_eco_randomizer", 0),
+                                        slot_data.get("randomized_levels", []),
                                         self.auth[:16],  # The slot name
                                         self.slot_seed[:8]))
 

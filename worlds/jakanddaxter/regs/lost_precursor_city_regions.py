@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from ..rules import can_fight, can_reach_orbs_level
 
 
-def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRegion:
+def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDaxterRegion, ...]:
     multiworld = world.multiworld
     options = world.options
     player = world.player
@@ -20,16 +20,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     first_room_lower.add_fly_locations([262193], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     first_room_orb_cache = JakAndDaxterRegion("First Chamber Orb Cache", player, multiworld, level_name, 22)
-
-    # Need jump dive to activate button, double jump to reach blue eco to unlock cache.
-    first_room_orb_cache.add_cache_locations([14507], access_rule=lambda state:
-                                             state.has_all(("Jump Dive", "Double Jump"), player))
+    first_room_orb_cache.add_cache_locations([14507])
 
     first_hallway = JakAndDaxterRegion("First Hallway", player, multiworld, level_name, 10)
     first_hallway.add_fly_locations([131121], access_rule=lambda state: world.can_free_scout_flies(state, player))
 
     # This entire room is accessible with floating platforms and single jump.
-    second_room = JakAndDaxterRegion("Second Chamber", player, multiworld, level_name, 28)
+    second_room = JakAndDaxterRegion("Second Chamber", player, multiworld, level_name, 18)
 
     # These items can only be gotten with jump dive to activate a button.
     second_room.add_cell_locations([45], access_rule=lambda state: state.has("Jump Dive", player))
@@ -40,8 +37,11 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     second_room.add_fly_locations([196657], access_rule=lambda state: world.can_free_scout_flies_crouch_trick(state, player))
 
     # This orb vent and scout fly are right next to each other, can be gotten with blue eco and the floating platforms.
-    second_room.add_fly_locations([393265])
-    second_room.add_cache_locations([14838])
+    second_room.add_fly_locations([393265], access_rule=lambda state:
+                                  world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
+
+    second_room_orb_cache = JakAndDaxterRegion("Second Chamber Orb Cache", player, multiworld, level_name, 10)
+    second_room_orb_cache.add_cache_locations([14838])
 
     # Named after the cell, includes the armored lurker room.
     center_complex = JakAndDaxterRegion("Center of the Complex", player, multiworld, level_name, 17)
@@ -61,12 +61,20 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Raised chamber room, includes vent room with scout fly prior to second slide.
     capsule_room = JakAndDaxterRegion("Capsule Chamber", player, multiworld, level_name, 6)
 
-    # Use jump dive to activate button inside the capsule. Blue eco vent can ready the chamber and get the scout fly.
-    capsule_room.add_cell_locations([47], access_rule=lambda state:
-                                    state.has("Jump Dive", player)
-                                    and (state.has_any(("Double Jump", "Jump Kick"), player)
-                                         or state.has_all(("Punch", "Punch Uppercut"), player)))
-    capsule_room.add_fly_locations([327729])
+    # Blue eco vent can ready the chamber and get the scout fly.
+    capsule_room.add_fly_locations([327729], access_rule=lambda state:
+                                   world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
+
+    # This region is reachable if Jak can raise the chamber. The chamber can lead to RV, even with level rando.
+    # However, it's possible to softlock yourself out of this (by going up, then teleporting back to Geyser),
+    # therefore we don't put it in logic (but it's still separate in case that changes in the future).
+    raised_chamber = JakAndDaxterRegion("Raised Chamber", player, multiworld, level_name, 0)
+    # To reach the cell, Jak must be able to jump on top of the raised chamber and reach hub 2 (to prevent softlocking).
+    fc_count = options.fire_canyon_cell_count.value
+    raised_chamber.add_cell_locations([47], access_rule=lambda state:
+                                      state.has("Power Cell", player, fc_count)
+                                      and (state.has_any(("Double Jump", "Jump Kick"), player)
+                                           or state.has_all(("Punch", "Punch Uppercut"), player)))
 
     # You can slide to the bottom of the city, but if you spawn down there, you have no momentum from the slide.
     # So you need some kind of jump to reach this cell.
@@ -80,15 +88,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                         or state.has_all(("Punch", "Punch Uppercut"), player))
 
     # If you can enter the helix room, you can jump or fight your way to the top. But you need some kind of movement
-    # to enter it in the first place.
+    # to enter it in the first place (and blue eco to use the jump pads).
     helix_room = JakAndDaxterRegion("Helix Chamber", player, multiworld, level_name, 30)
-    if options.lost_precursor_city_single_jump_slide_tube_climb:
-        # It is possible (but hard) to escape with only Single Jump unlocked.
-        helix_room.add_cell_locations([50])
-    else:
-        helix_room.add_cell_locations([50], access_rule=lambda state:
-                                  state.has("Double Jump", player)
-                                  or can_fight(state, player))
+    # Access Rule is on the room connection as the orbs are also unreachable if you cannot climb.
+    helix_room.add_cell_locations([50])
 
     main_area.connect(first_room_upper)                   # Run.
 
@@ -98,17 +101,18 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     first_room_lower.connect(first_room_upper)            # Run and jump (floating platforms).
 
-    # Needs some movement to reach these orbs and orb cache.
+    # Need jump dive to activate button, then the blue eco can be reached by a Single Jump to unlock cache.
     first_room_lower.connect(first_room_orb_cache, rule=lambda state:
-                             state.has_all(("Jump Dive", "Double Jump"), player))
-    first_room_orb_cache.connect(first_room_lower, rule=lambda state:
-                                 state.has_all(("Jump Dive", "Double Jump"), player))
+                             state.has_all(("Blue Eco", "Jump Dive"), player))
+    first_room_orb_cache.connect(first_room_lower)
 
     first_hallway.connect(first_room_upper)                         # Run and jump down.
     first_hallway.connect(second_room)                              # Run and jump (floating platforms).
 
     second_room.connect(first_hallway)                              # Run and jump.
     second_room.connect(center_complex)                             # Run and jump down.
+
+    second_room.connect(second_room_orb_cache, rule=lambda state: state.has("Blue Eco", player))
 
     center_complex.connect(second_room)                             # Run and jump (swim).
     center_complex.connect(color_platforms)                         # Run and jump (swim).
@@ -122,22 +126,26 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     first_slide.connect(capsule_room)                               # Slide.
 
     capsule_room.connect(second_slide)                              # Slide.
-    capsule_room.connect(main_area, rule=lambda state:              # Chamber goes back to surface.
-                         state.has("Jump Dive", player))            # (Assume one-way for sanity.)
+    capsule_room.connect(raised_chamber, rule=lambda state:         # Chamber goes back to surface.
+                         state.has_all(("Jump Dive", "Blue Eco"), player))
 
+    # Blue Eco is always required to climb up the helix room to collect the 30 orbs.
     if options.lost_precursor_city_single_jump_slide_tube_climb:
         # It is possible to jump to the platform with only Single Jump by gathering enough momentum and jumping late.
-        second_slide.connect(helix_room)
+        second_slide.connect(helix_room, rule=lambda state: state.has("Blue Eco", player))
         # It's possible to get back with only Single Jump by taking damage once.
         helix_room.connect(quick_platforms)
     else:
-        second_slide.connect(helix_room, rule=lambda state:                           # As stated above, you need to jump
-                             state.has_any(("Double Jump", "Jump Kick"), player)      # across the dark eco pool before
-                             or state.has_all(("Punch", "Punch Uppercut"), player))   # you can climb the helix room.
+        # As stated above, you need to jump across the dark eco pool before you can climb the helix room.
+        second_slide.connect(helix_room, rule=lambda state:
+                             state.has("Blue Eco", player)
+                             and (state.has_any(("Double Jump", "Jump Kick"), player)
+                                  or state.has_all(("Punch", "Punch Uppercut"), player)))
 
         helix_room.connect(quick_platforms, rule=lambda state:          # Escape to get back to here.
-                           state.has("Double Jump", player)             # Capsule is a convenient exit to the level.
-                           or can_fight(state, player))
+                           state.has("Blue Eco", player)
+                           and (state.has("Double Jump", player)        # Capsule is a convenient exit to the level.
+                                or can_fight(state, player)))
 
     world.level_to_regions[level_name].append(main_area)
     world.level_to_regions[level_name].append(first_room_upper)
@@ -145,6 +153,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     world.level_to_regions[level_name].append(first_room_orb_cache)
     world.level_to_regions[level_name].append(first_hallway)
     world.level_to_regions[level_name].append(second_room)
+    world.level_to_regions[level_name].append(second_room_orb_cache)
     world.level_to_regions[level_name].append(center_complex)
     world.level_to_regions[level_name].append(color_platforms)
     world.level_to_regions[level_name].append(quick_platforms)
@@ -152,6 +161,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     world.level_to_regions[level_name].append(capsule_room)
     world.level_to_regions[level_name].append(second_slide)
     world.level_to_regions[level_name].append(helix_room)
+    world.level_to_regions[level_name].append(raised_chamber)
 
     # If Per-Level Orbsanity is enabled, build the special Orbsanity Region. This is a virtual region always
     # accessible to Main Area. The Locations within are automatically checked when you collect enough orbs.
@@ -168,4 +178,4 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         multiworld.regions.append(orbs)
         main_area.connect(orbs)
 
-    return main_area
+    return main_area, raised_chamber

@@ -1,5 +1,6 @@
 import typing
 from Options import OptionError
+from .game_id import Jak1Level
 from .items import item_table
 from .options import EnableOrbsanity, CompletionCondition
 from .rules import can_reach_orbs_global
@@ -73,14 +74,14 @@ def create_regions(world: "JakAndDaxterWorld"):
     fc = fire_canyon.build_regions("Fire Canyon", world)
     rv, rvp, rvc = rock_village.build_regions("Rock Village", world)
     pb = precursor_basin.build_regions("Precursor Basin", world)
-    lpc = lost_precursor_city.build_regions("Lost Precursor City", world)
+    lpc, lpc_raised = lost_precursor_city.build_regions("Lost Precursor City", world)
     bs = boggy_swamp.build_regions("Boggy Swamp", world)
     mp, mpr = mountain_pass.build_regions("Mountain Pass", world)
     vc = volcanic_crater.build_regions("Volcanic Crater", world)
     sc = spider_cave.build_regions("Spider Cave", world)
     sm = snowy_mountain.build_regions("Snowy Mountain", world)
 
-    lt = lava_tube.build_regions("Lava Tube", world)
+    lt, lt_end = lava_tube.build_regions("Lava Tube", world)
     gmc, fb, fd = gol_and_maias_citadel.build_regions("Gol and Maia's Citadel", world)
 
     # Configurable counts of cells for connector levels.
@@ -88,27 +89,48 @@ def create_regions(world: "JakAndDaxterWorld"):
     mp_count = options.mountain_pass_cell_count.value
     lt_count = options.lava_tube_cell_count.value
 
+    # All levels that can be randomized.
+    base_levels = {
+        Jak1Level.FORBIDDEN_JUNGLE: fj,
+        Jak1Level.SENTINEL_BEACH: sb,
+        Jak1Level.MISTY_ISLAND: mi,
+        Jak1Level.PRECURSOR_BASIN: pb,
+        Jak1Level.LOST_PRECURSOR_CITY: lpc,
+        Jak1Level.BOGGY_SWAMP: bs,
+        Jak1Level.SPIDER_CAVE: sc,
+        Jak1Level.SNOWY_MOUNTAIN: sm,
+        Jak1Level.GOL_AND_MAIAS_CITADEL: gmc,
+    }
+
+    # Generate the actual randomized order.
+    levels = [base_levels[Jak1Level(level)] for level in world.randomized_levels]
+
     # Define the interconnecting rules.
     menu.connect(gr)
     gr.connect(sv)  # Geyser Rock modified to let you leave at any time.
-    sv.connect(fj)
-    sv.connect(sb)
-    sv.connect(mi, rule=lambda state: state.has("Fisherman's Boat", player))
+    sv.connect(levels[Jak1Level.FORBIDDEN_JUNGLE])
+    sv.connect(levels[Jak1Level.SENTINEL_BEACH])
+    sv.connect(levels[Jak1Level.MISTY_ISLAND], rule=lambda state: state.has("Fisherman's Boat", player))
     sv.connect(fc, rule=lambda state: state.has("Power Cell", player, fc_count))  # Normally 20.
     fc.connect(rv)
-    rv.connect(pb)
-    rv.connect(lpc)
-    rvp.connect(bs)  # rv->rvp/rvc connections defined internally by RockVillageRegions.
+    rv.connect(levels[Jak1Level.PRECURSOR_BASIN])
+    rv.connect(levels[Jak1Level.LOST_PRECURSOR_CITY])
+    # It is possible to softlock yourself out of this by raising the chamber, and then teleport to GR.
+    # Therefore, it's currently not considered in logic.
+    # lpc_raised.connect(rv)  # It's possible to get to RV from the raised chamber in LPC (relevant for level rando).
+    rvp.connect(levels[Jak1Level.BOGGY_SWAMP])  # rv->rvp/rvc connections defined internally by RockVillageRegions.
     if options.klaww_boulder_skip:
         # With Klaww boulder skip, it is always possible to reach Mountain Pass without any power cell requirements.
         rvc.connect(mp)
     else:
         rvc.connect(mp, rule=lambda state: state.has("Power Cell", player, mp_count))  # Normally 45.
     mpr.connect(vc)  # mp->mpr connection defined internally by MountainPassRegions.
-    vc.connect(sc)
-    vc.connect(sm, rule=lambda state: state.has("Snowy Mountain Gondola", player))
+    vc.connect(levels[Jak1Level.SPIDER_CAVE])
+    vc.connect(levels[Jak1Level.SNOWY_MOUNTAIN], rule=lambda state: state.has("Snowy Mountain Gondola", player))
     vc.connect(lt, rule=lambda state: state.has("Power Cell", player, lt_count))  # Normally 72.
-    lt.connect(gmc)  # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
+    # lt -> lt_end connection defined internally by LavaTubeRegions.
+    lt_end.connect(levels[Jak1Level.GOL_AND_MAIAS_CITADEL])
+    # gmc->fb connection defined internally by GolAndMaiasCitadelRegions.
 
     # Set the completion condition.
     if options.jak_completion_condition == CompletionCondition.option_cross_fire_canyon:
