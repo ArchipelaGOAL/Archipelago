@@ -65,12 +65,16 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     capsule_room.add_fly_locations([327729], access_rule=lambda state:
                                    world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
 
-    # This region is reachable if Jak can raise the chamber. The chamber always leads to RV, even with level rando.
+    # This region is reachable if Jak can raise the chamber. The chamber can lead to RV, even with level rando.
+    # However, it's possible to softlock yourself out of this (by going up, then teleporting back to Geyser),
+    # therefore we don't put it in logic (but it's still separate in case that changes in the future).
     raised_chamber = JakAndDaxterRegion("Raised Chamber", player, multiworld, level_name, 0)
-    # To reach the cell, Jak must be able to jump on top of the raised chamber.
+    # To reach the cell, Jak must be able to jump on top of the raised chamber and reach hub 2 (to prevent softlocking).
+    fc_count = options.fire_canyon_cell_count.value
     raised_chamber.add_cell_locations([47], access_rule=lambda state:
-                                      state.has_any(("Double Jump", "Jump Kick"), player)
-                                      or state.has_all(("Punch", "Punch Uppercut"), player))
+                                      state.has("Power Cell", player, fc_count)
+                                      and (state.has_any(("Double Jump", "Jump Kick"), player)
+                                           or state.has_all(("Punch", "Punch Uppercut"), player)))
 
     # You can slide to the bottom of the city, but if you spawn down there, you have no momentum from the slide.
     # So you need some kind of jump to reach this cell.
