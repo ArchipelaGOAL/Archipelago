@@ -777,6 +777,21 @@ class CrouchTrick(Toggle):
     display_name = "Crouch Trick"
 
 
+class HighJumpDive(Toggle):
+    """
+    Enabling this setting may require Jak to jump high with only *Jump Dive*.
+
+    This only applies if "Enable Move Randomizer" is ON.
+    """
+    display_name = "High Jump Dive"
+
+
+class HighRollJump(Toggle):
+    """
+    Enabling this setting may require Jak to jump high at certain spots with only *Roll Jump*.
+    """
+    display_name = "High Roll Jump"
+
 # endregion
 
 class RandomizeLevels(Toggle):
@@ -892,6 +907,8 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     zoomer_escape: ZoomerEscape
     crouch_trick: CrouchTrick
+    high_jump_dive: HighJumpDive
+    high_roll_jump: HighRollJump
     randomize_levels: RandomizeLevels
     citadel_randomization: CitadelRandomization
     plando_connections: JakAndDaxterPlandoConnections
@@ -905,6 +922,7 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
         "rock_village_pontoon_skip": True,
+        "high_jump_dive": True,
     },
     "Move Randomizer + Medium Tricks & Glitches": {
         "enable_move_randomizer": True,
@@ -912,8 +930,10 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
         "rock_village_pontoon_skip": True,
+        "high_jump_dive": True,
 
         "punch_uppercut_scout_flies": True,
+        "high_roll_jump": True,
         "geyser_rock_cliff_climb": True,
         "sandover_village_cliff_orb_cache_climb": True,
         "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_medium,
@@ -935,8 +955,10 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
         "rock_village_pontoon_skip": True,
+        "high_jump_dive": True,
 
         "punch_uppercut_scout_flies": True,
+        "high_roll_jump": True,
         "geyser_rock_cliff_climb": True,
         "sandover_village_cliff_orb_cache_climb": True,
         "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_hard,
@@ -965,8 +987,10 @@ jakanddaxter_option_presets: dict[str, dict[str, Any]] = {
         "attackless_lurker_cannons": True,
         "sentinel_beach_attackless_pelican": True,
         "rock_village_pontoon_skip": True,
+        "high_jump_dive": True,
 
         "punch_uppercut_scout_flies": True,
+        "high_roll_jump": True,
         "geyser_rock_cliff_climb": True,
         "sandover_village_cliff_orb_cache_climb": True,
         "sentinel_beach_cannon_tower_climb": SentinelBeachCannonTowerClimb.option_hard,

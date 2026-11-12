@@ -105,6 +105,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     # Only if you can use the seesaw or Crouch Jump from the seesaw's edge.
     far_side.connect(far_side_cliff, rule=lambda state:
                      state.has("Jump Dive", player)
+                     # Roll Jump onto the high side of the seesaw.
+                     or world.can_high_jump_or_roll_jump(state, player)
                      or state.has_all(("Crouch", "Crouch Jump"), player))
 
     if options.misty_island_single_jump_far_side_orb_cache:

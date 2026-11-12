@@ -22,6 +22,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         return (state.has("Double Jump", p)
                 or state.has_all(("Crouch", "Crouch Jump"), p)
                 or state.has_all(("Crouch", "Crouch Uppercut"), p)
+                or world.can_high_jump_or_roll_jump(state, p)
                 or state.has_all(("Punch", "Punch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 5)

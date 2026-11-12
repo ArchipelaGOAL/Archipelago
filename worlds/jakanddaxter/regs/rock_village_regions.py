@@ -90,6 +90,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
         pontoon_bridge.connect(klaww_cliff, rule=lambda state:
                                state.has("Double Jump", player)
                                or state.has_all(("Crouch", "Crouch Jump"), player)
+                               # The last high jump is doable with roll jump by jumping into the cliff wall sideways
+                               # so Jak doesn't bonk, allowing him to high jump after the roll jump.
+                               or world.can_high_jump_or_roll_jump(state, player)
                                or state.has_all(("Crouch", "Crouch Uppercut", "Jump Kick"), player))
 
     pontoon_bridge_high_orbs.connect(pontoon_bridge) # Just jump/fall back down.

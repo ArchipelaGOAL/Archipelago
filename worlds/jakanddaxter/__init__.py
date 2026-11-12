@@ -128,9 +128,11 @@ class JakAndDaxterWebWorld(WebWorld):
             options.AttacklessLurkerCannons, # Shoot the lurkers with their own cannon.
             options.SentinelBeachAttacklessPelican, # Shoot the Pelican with the cannon.
             options.RockVillagePontoonSkip,  # May require fast swimming, but not too tight.
+            options.HighJumpDive, # Just hold X while jump diving.
         ], True),
         OptionGroup("Tricks & Glitches - Medium", [
             options.PunchUppercutScoutFlies,  # Some may be a little tricky.
+            options.HighRollJump,  # Jump immediately after the roll jump, a bit trickier than high jump dive.
             options.GeyserRockCliffClimb, # You have to know where to jump, but the jump is not terribly difficult.
             options.SandoverVillageCliffOrbCacheClimb, # Same here.
             options.SentinelBeachCannonTowerClimb, # Medium with Double Jump, hard with Jump Kick only.
@@ -283,6 +285,12 @@ class JakAndDaxterWorld(World):
 
     can_do_boosted_extended: Callable[[CollectionState, int], bool]
     """Returns true if Jak can do a boosted, using Punch + Punch Uppercut + Jump Kick."""
+
+    can_high_jump_dive: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can Jump Dive to make a high jump."""
+
+    can_high_jump_or_roll_jump: Callable[[CollectionState, int], bool]
+    """Returns true if Jak can Jump Dive or Roll Jump (if there's enough space) to make a high jump."""
 
     total_orbs: int = 2000
     orb_bundle_item_name: str = ""
@@ -720,6 +728,8 @@ class JakAndDaxterWorld(World):
                                             "sentinel_beach_blue_eco_switch_skip",
                                             "zoomer_escape",
                                             "crouch_trick",
+                                            "high_jump_dive",
+                                            "high_roll_jump",
                                             # Level Randomizer
                                             "randomize_levels",
                                             "citadel_randomization",

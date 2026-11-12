@@ -88,7 +88,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     main_area.connect(dark_cave, rule=lambda state:
                       can_fight(state, player)
                       and (state.has("Double Jump", player)
-                           or state.has_all(("Crouch", "Crouch Jump"), player)))
+                           or state.has_all(("Crouch", "Crouch Jump"), player)
+                           or world.can_high_jump_dive(state, player)))
 
     robot_cave.connect(main_area)
     robot_cave.connect(pole_course, rule=lambda state: state.has("Blue Eco", player)) # Blue Eco for launch pad.

@@ -125,11 +125,13 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                           # It's possible to enter crouched state by jumping against the edge of the next higher
                           # eco harvester platform.
                           or state.has("Crouch Jump", player)
+                          or world.can_high_jump_or_roll_jump(state, player)
                           or can_uppercut_and_jump_logs(state, player))
     else:
         main_area.connect(green_ridge, rule=lambda state:
                           state.has("Double Jump", player)
                           or state.has_all(("Crouch", "Crouch Jump"), player)
+                          or world.can_high_jump_or_roll_jump(state, player)
                           or can_uppercut_and_jump_logs(state, player))
 
     # Jak can only collect the orbs from the cache if he can use Blue Eco.
