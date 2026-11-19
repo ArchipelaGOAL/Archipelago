@@ -789,6 +789,8 @@ class HighJumpDive(Toggle):
 class HighRollJump(Toggle):
     """
     Enabling this setting may require Jak to jump high at certain spots with only *Roll Jump*.
+
+    This only applies if "Enable Move Randomizer" is ON.
     """
     display_name = "High Roll Jump"
 

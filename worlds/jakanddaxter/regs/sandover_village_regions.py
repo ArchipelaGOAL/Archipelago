@@ -27,17 +27,21 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                                     world.can_free_scout_flies(state, player))
 
     if options.sandover_village_cliff_orb_cache_climb:
-        # It is possible to jump up to the blue Eco next to the Orb Cache, and take it to the Farmer's scout fly.
-        main_area.add_fly_locations([196683], access_rule=lambda state:
-                                    world.can_free_scout_flies(state, player) or (state.has("Blue Eco", player)))
+        def can_get_orb_cache_cliff_blue_eco(state, p):
+            # It is possible to reach this cliff (and the blue Eco next to it) with a single jump.
+            return state.has("Blue Eco", p)
     else:
-        # The farmer's scout fly. You can either get the Orb Cache Cliff blue eco, or break it normally.
-        main_area.add_fly_locations([196683], access_rule=lambda state:
-                                    world.can_free_scout_flies_crouch_trick(state, player)
-                                    or (state.has("Blue Eco", player)
-                                        and (state.has("Double Jump", player)
-                                             or state.has_all(("Crouch", "Crouch Jump"), player)
-                                             or world.can_high_jump_or_roll_jump(state, player)), player))
+        def can_get_orb_cache_cliff_blue_eco(state, p):
+            return (state.has("Blue Eco", p)
+                    and (state.has("Double Jump", p)
+                         or state.has_all(("Crouch", "Crouch Jump"), p)
+                         or state.has_all(("Crouch", "Crouch Uppercut", "Jump Kick"), p)
+                         or world.can_high_jump_or_roll_jump(state, p)))
+
+    # The farmer's scout fly. You can either get the Orb Cache Cliff blue eco, or break it normally.
+    main_area.add_fly_locations([196683], access_rule=lambda state:
+                                world.can_free_scout_flies_crouch_trick(state, player)
+                                or can_get_orb_cache_cliff_blue_eco(state, player))
 
     orb_cache_cliff = JakAndDaxterRegion("Orb Cache Cliff", player, multiworld, level_name, 15)
     orb_cache_cliff.add_cache_locations([10344])
@@ -53,16 +57,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     oracle_platforms.add_fly_locations([393291], access_rule=lambda state:
                                        world.can_free_scout_flies_crouch_trick(state, player))
 
-    if options.sandover_village_cliff_orb_cache_climb:
-        # It is possible to reach this cliff (and the blue Eco next to it) with a single jump.
-        # However, the orbs (in the cache) can only be collected if Jak can use Blue Eco.
-        main_area.connect(orb_cache_cliff, rule=lambda state: state.has("Blue Eco", player))
-    else:
-        main_area.connect(orb_cache_cliff, rule=lambda state:
-                          state.has_all(("Blue Eco", "Double Jump"), player)
-                          or state.has_all(("Blue Eco", "Crouch", "Crouch Jump"), player)
-                          or world.can_high_jump_or_roll_jump(state, player)
-                               or state.has_all(("Blue Eco", "Crouch", "Crouch Uppercut", "Jump Kick"), player))
+    main_area.connect(orb_cache_cliff, rule=lambda state: can_get_orb_cache_cliff_blue_eco(state, player))
 
     if options.crouch_trick:
         main_area.connect(yakow_cliff, rule=lambda state:
