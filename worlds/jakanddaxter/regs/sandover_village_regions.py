@@ -56,7 +56,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         main_area.connect(orb_cache_cliff, rule=lambda state:
                           state.has_all(("Blue Eco", "Double Jump"), player)
                           or state.has_all(("Blue Eco", "Crouch", "Crouch Jump"), player)
-                          or state.has_all(("Blue Eco", "Crouch", "Crouch Uppercut", "Jump Kick"), player))
+                          or state.has_all(("Blue Eco", "Crouch", "Crouch Uppercut", "Jump Kick"))
 
     if options.crouch_trick:
         main_area.connect(yakow_cliff, rule=lambda state:
