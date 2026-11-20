@@ -24,6 +24,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     def can_jump_stairs(state: CollectionState, p: int) -> bool:
         return (state.has("Double Jump", p)
                 or state.has_all(("Crouch", "Crouch Jump"), p)
+                or world.can_high_jump_dive(state, p)
                 or state.has_all(("Crouch", "Crouch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)

@@ -67,6 +67,20 @@ def set_option_driven_rules(world: "JakAndDaxterWorld"):
         world.can_do_boosted = lambda state, p: False
         world.can_do_boosted_extended = lambda state, p: False
 
+    if options.high_jump_dive:
+        world.can_high_jump_dive = lambda state, p: (
+            state.has("Jump Dive", p)
+        )
+    else:
+        world.can_high_jump_dive = lambda state, p: False
+
+    if options.high_roll_jump:
+        world.can_high_jump_or_roll_jump = lambda state, p: (
+            state.has_all(("Roll", "Roll Jump"), p) or world.can_high_jump_dive(state, p)
+        )
+    else:
+        world.can_high_jump_or_roll_jump = world.can_high_jump_dive
+
 
 def recalculate_reachable_orbs(state: CollectionState, player: int, world: "JakAndDaxterWorld") -> None:
 

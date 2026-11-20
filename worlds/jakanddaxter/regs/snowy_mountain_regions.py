@@ -23,6 +23,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         def can_cross_first_gap(state: CollectionState, p: int) -> bool:
             return (state.has("Double Jump", p) # Includes Double Jump + Jump Kick from default logic.
                     or state.has_all(("Crouch", "Crouch Jump"), p)
+                    or world.can_high_jump_dive(state, p)
                     or state.has_all(("Roll", "Roll Jump"), p)
                     or world.can_do_boosted(state, p))
     else:
@@ -49,6 +50,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     def can_jump_blockers(state: CollectionState, p: int) -> bool:
         return (state.has_any(("Double Jump", "Jump Kick"), p)
                 or state.has_all(("Crouch", "Crouch Jump"), p)
+                or world.can_high_jump_dive(state, p) # Roll Jump is possible but very hard.
                 or state.has_all(("Punch", "Punch Uppercut"), p))
 
     main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 0)
@@ -235,11 +237,15 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     fort_interior.connect(fort_interior_tower, rule=lambda state:              # Just need a little height.
                           state.has("Double Jump", player)
                           or state.has_all(("Crouch", "Crouch Jump"), player)
+                          or world.can_high_jump_or_roll_jump(state, player)
                           or can_free_flut_flut(state, player))
     fort_interior_tower.connect(fort_interior_caches, rule=lambda state: state.has("Blue Eco", player))
     fort_interior.connect(fort_interior_base, rule=lambda state:                # Just need a little height.
                           state.has("Double Jump", player)
                           or state.has_all(("Crouch", "Crouch Jump"), player)
+                          # Roll Jump over the gap with the wooden pillar to reach the platform.
+                          # Then, Roll Jump to the other platform, turn 90° in the air, to ledge grab.
+                          or world.can_high_jump_or_roll_jump(state, player)
                           or can_free_flut_flut(state, player))
     fort_interior.connect(fort_interior_course_end, rule=lambda state:          # Just need a little distance.
                           state.has_any(("Double Jump", "Jump Kick"), player)
@@ -250,6 +256,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     fort_gate_button.connect(fort_exterior)                              # Ride the elevator.
 
     # Must fight way through cave, but there is also a grab-less ledge we must jump over.
+    # The last gap is larger - it can either be crossed using the can_cross_first_gap moves or alternatively by
+    # zoomwalking if the first gap was crossed with only Single Jump.
     bunny_cave_start.connect(bunny_cave_end, rule=lambda state:
                              can_free_flut_flut(state, player)
                              or (can_fight(state, player)

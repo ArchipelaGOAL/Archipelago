@@ -27,6 +27,7 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     behind_door.connect(behind_door_high, rule=lambda state:
                       state.has_any(("Blue Eco", "Double Jump", "Jump Kick"), player)
                       or state.has_all(("Crouch", "Crouch Jump"), player)
+                      or world.can_high_jump_or_roll_jump(state, player)
                       or state.has_all(("Crouch", "Crouch Uppercut"), player))
 
     # The last 2 orbs are barely gettable with the blue eco vent, but it's pushing accessibility. So I moved them here.
@@ -49,6 +50,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         behind_door.connect(cliff, rule=lambda state:
                           state.has("Double Jump", player)
                           or state.has_all(("Crouch", "Crouch Jump"), player)
+                          # Roll Jump on the lower platform, then jump directly up.
+                          or world.can_high_jump_or_roll_jump(state, player)
                           or state.has_all(("Crouch", "Crouch Uppercut"), player))
 
     cliff.connect(main_area)  # Jump down or ride blue eco elevator.
