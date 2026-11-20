@@ -24,32 +24,40 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
                 or state.has_all(("Crouch", "Crouch Uppercut"), p)
                 or state.has_all(("Punch", "Punch Uppercut"), p))
 
-    # Orb crates and fly box in this area can be gotten with yellow eco and goggles.
-    # Start with the first yellow eco cluster near first_bats and work your way backward toward the entrance.
-    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 23)
-    main_area.add_fly_locations([43])
+    main_area = JakAndDaxterRegion("Main Area", player, multiworld, level_name, 5)
+    # The scout fly box can be broken with either blue or yellow eco.
+    main_area.add_fly_locations([43], access_rule=lambda state:
+                                world.can_free_scout_flies(state, player)
+                                or state.has_any(("Blue Eco", "Yellow Eco"), player))
 
-    # Includes 4 orbs collectable with the blue eco vent.
-    first_bats = JakAndDaxterRegion("First Bats Area", player, multiworld, level_name, 4)
+    # These boxes can only be broken with yellow eco (or Flut Flut).
+    main_area_boxes = JakAndDaxterRegion("Main Area Boxes", player, multiworld, level_name, 18)
+
+    first_bats = JakAndDaxterRegion("First Bats Area", player, multiworld, level_name, 0)
+    # 4 orbs collectable with the blue eco vent.
+    first_bats_orbs = JakAndDaxterRegion("First Bats Area (Orbs)", player, multiworld, level_name, 4)
 
     first_jump_pad = JakAndDaxterRegion("First Jump Pad", player, multiworld, level_name, 0)
-    first_jump_pad.add_fly_locations([393259])
+    first_jump_pad.add_fly_locations([393259], access_rule=lambda state:
+                                     world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
 
     # The tethers in this level are all out of order... a casual playthrough has the following order for the cell ID's:
     # 42, 39, 40, 41. So that is the order we're calling "first, second, third, fourth".
 
     # First tether cell is collectable with yellow eco and goggles.
     first_tether = JakAndDaxterRegion("First Tether", player, multiworld, level_name, 7)
-    first_tether.add_cell_locations([42])
+    first_tether.add_cell_locations([42], access_rule=lambda state: state.has("Yellow Eco", player))
 
     # This rat colony has 3 orbs on top of it, requires special movement.
     first_tether_rat_colony = JakAndDaxterRegion("First Tether Rat Colony", player, multiworld, level_name, 3)
 
     # If quick enough, combat not required.
     second_jump_pad = JakAndDaxterRegion("Second Jump Pad", player, multiworld, level_name, 0)
-    second_jump_pad.add_fly_locations([65579])
+    second_jump_pad.add_fly_locations([65579], access_rule=lambda state:
+                                      world.can_free_scout_flies(state, player) or state.has("Blue Eco", player))
 
-    first_pole_course = JakAndDaxterRegion("First Pole Course", player, multiworld, level_name, 28)
+    first_pole_course = JakAndDaxterRegion("First Pole Course", player, multiworld, level_name, 20)
+    first_pole_course_boxes = JakAndDaxterRegion("First Pole Course Boxes", player, multiworld, level_name, 8)
 
     # You can break this tether with a yellow eco vent and goggles,
     # but you can't reach the platform unless you can jump high.
@@ -57,71 +65,107 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     if options.boggy_swamp_precise_movement:
         # Jump Kick is enough to reach the power cell.
         second_tether.add_cell_locations([39], access_rule=lambda state:
-                                         can_jump_higher(state, player) or state.has("Jump Kick", player))
+                                         state.has("Yellow Eco", player)
+                                         and (can_jump_higher(state, player) or state.has("Jump Kick", player)))
     else:
-        second_tether.add_cell_locations([39], access_rule=lambda state: can_jump_higher(state, player))
+        second_tether.add_cell_locations([39], access_rule=lambda state:
+                                         state.has("Yellow Eco", player) and can_jump_higher(state, player))
 
-    # Fly and orbs are collectable with nearby blue eco cluster.
-    second_bats = JakAndDaxterRegion("Second Bats Area", player, multiworld, level_name, 27)
+    second_bats = JakAndDaxterRegion("Second Bats Area", player, multiworld, level_name, 5)
+    second_bats_boxes = JakAndDaxterRegion("Second Bats Area Boxes", player, multiworld, level_name, 10)
+    # Orbs for the boxes in the water with the blue eco.
+    second_bats_water_boxes = JakAndDaxterRegion("Second Bats Area Water Boxes", player, multiworld, level_name, 12)
 
     if options.boggy_swamp_precise_movement:
         # By taking damage once, this fly is easily reachable with blue eco. It can also be destroyed using yellow eco.
-        second_bats.add_fly_locations([262187])
+        second_bats.add_fly_locations([262187], access_rule=lambda state:
+                                      world.can_free_scout_flies(state, player)
+                                      or state.has_any(("Yellow Eco", "Blue Eco"), player))
     else:
-        second_bats.add_fly_locations([262187], access_rule=lambda state: can_jump_farther(state, player))
+        second_bats.add_fly_locations([262187], access_rule=lambda state:
+                                      world.can_free_scout_flies(state, player)
+                                      or (can_jump_farther(state, player)
+                                          and state.has_any(("Yellow Eco", "Blue Eco"), player)))
 
     third_jump_pad = JakAndDaxterRegion("Third Jump Pad (Arena)", player, multiworld, level_name, 0)
 
     # We have to choose our access rule depending on our Flut Flut escape option.
     # We want to make that decision while we are creating regions, NOT INSIDE the access rule itself.
+    if options.boggy_swamp_flut_flut_escape:
+        def can_use_flut_flut_to_fight(state, p):
+            return state.has("Flut Flut", p)
+    else:
+        def can_use_flut_flut_to_fight(state, p):
+            return False
+
     if options.boggy_swamp_attackless_ambush:
         # It is possible (but annoying/hard) to beat the ambush by shooting yellow eco through the goggles.
-        third_jump_pad.add_cell_locations([38])
-    elif options.boggy_swamp_flut_flut_escape:
         third_jump_pad.add_cell_locations([38], access_rule=lambda state:
-                                          (state.has("Flut Flut", player) or can_fight(state, player)))
+                                          state.has("Yellow Eco", player)
+                                          or can_fight(state, player)
+                                          or can_use_flut_flut_to_fight(state, player))
     else:
-        third_jump_pad.add_cell_locations([38], access_rule=lambda state: can_fight(state, player))
+        third_jump_pad.add_cell_locations([38], access_rule=lambda state:
+                                          can_fight(state, player)
+                                          or can_use_flut_flut_to_fight(state, player))
 
     # The platform for the third tether might look high, but you can get a boost from the yellow eco vent.
     fourth_jump_pad = JakAndDaxterRegion("Fourth Jump Pad (Third Tether)", player, multiworld, level_name, 9)
-    fourth_jump_pad.add_cell_locations([40])
+    fourth_jump_pad.add_cell_locations([40], access_rule=lambda state: state.has("Yellow Eco", player))
 
-    # Orbs collectable here with yellow eco and goggles.
-    flut_flut_pad = JakAndDaxterRegion("Flut Flut Pad", player, multiworld, level_name, 36)
+    flut_flut_pad = JakAndDaxterRegion("Flut Flut Pad", player, multiworld, level_name, 0)
+    # Orbs collectable here with yellow eco and goggles or Flut Flut.
+    flut_flut_pad_boxes = JakAndDaxterRegion("Flut Flut Pad Boxes", player, multiworld, level_name, 36)
 
     # This region contains the first scout fly + orbs, when going towards the region entrance.
     early_flut_flut_course = JakAndDaxterRegion("Early Flut Flut Course", player, multiworld, level_name, 6)
     # This scout fly box can be broken using yellow eco.
-    early_flut_flut_course.add_fly_locations([327723])
+    early_flut_flut_course.add_fly_locations([327723], access_rule=lambda state:
+                                             world.can_free_scout_flies(state, player)
+                                             or state.has("Yellow Eco", player))
 
     flut_flut_course = JakAndDaxterRegion("Flut Flut Course", player, multiworld, level_name, 17)
     flut_flut_course.add_cell_locations([37])
     # This scout fly box can be broken using yellow eco.
-    flut_flut_course.add_fly_locations([131115])
+    flut_flut_course.add_fly_locations([131115], access_rule=lambda state:
+                                       world.can_free_scout_flies(state, player)
+                                       or state.has("Yellow Eco", player))
 
-    # Includes some orbs on the way to the cabin, blue+yellow eco to collect.
-    farthy_snacks = JakAndDaxterRegion("Farthy's Snacks", player, multiworld, level_name, 7)
-    farthy_snacks.add_cell_locations([36])
+    farthy_snacks = JakAndDaxterRegion("Farthy's Snacks", player, multiworld, level_name, 0)
+    # Orbs on the way to the cabin, blue+yellow eco to collect.
+    farthy_snacks_water_boxes = JakAndDaxterRegion("Farthy's Snacks Water Boxes", player, multiworld, level_name, 7)
+    farthy_snacks.add_cell_locations([36], access_rule=lambda state: state.has("Yellow Eco", player))
 
-    # Scout fly in this field can be broken with yellow eco.
-    box_field = JakAndDaxterRegion("Field of Boxes", player, multiworld, level_name, 10)
+    # Scout fly in this field can be broken by running into an explosive box next to it, which also grants 3 orbs.
+    box_field = JakAndDaxterRegion("Field of Boxes", player, multiworld, level_name, 3)
     box_field.add_fly_locations([196651])
 
-    last_tar_pit = JakAndDaxterRegion("Last Tar Pit", player, multiworld, level_name, 12)
+    # These boxes can only be destroyed using yellow eco.
+    box_field_boxes = JakAndDaxterRegion("Field of Boxes Boxes", player, multiworld, level_name, 7)
 
-    fourth_tether = JakAndDaxterRegion("Fourth Tether", player, multiworld, level_name, 11)
+    last_tar_pit = JakAndDaxterRegion("Last Tar Pit", player, multiworld, level_name, 2)
+    last_tar_pit_boxes = JakAndDaxterRegion("Last Tar Pit Boxes", player, multiworld, level_name, 10)
+
+    fourth_tether = JakAndDaxterRegion("Fourth Tether", player, multiworld, level_name, 8)
+    # Only the last box cannot be destroyed by running into nearby explosive boxes.
+    fourth_tether_boxes = JakAndDaxterRegion("Fourth Tether Boxes", player, multiworld, level_name, 3)
 
     if options.boggy_swamp_precise_movement:
         # This power cell can be reached with a single jump.
-        fourth_tether.add_cell_locations([41])
+        fourth_tether.add_cell_locations([41], access_rule=lambda state: state.has("Yellow Eco", player))
         main_area.connect(first_bats)
+        # These orbs can be collected by taking damage.
+        first_bats.connect(first_bats_orbs)
     else:
-        fourth_tether.add_cell_locations([41], access_rule=lambda state: can_jump_higher(state, player))
+        fourth_tether.add_cell_locations([41], access_rule=lambda state:
+                                         can_jump_higher(state, player) and state.has("Yellow Eco", player))
         main_area.connect(first_bats, rule=lambda state: can_jump_farther(state, player))
+        first_bats.connect(first_bats_orbs, rule=lambda state: state.has("Blue Eco", player))
+
+    main_area.connect(main_area_boxes, rule=lambda state: state.has("Yellow Eco", player))
 
     first_bats.connect(main_area)
-    first_bats.connect(first_jump_pad)
+    first_bats.connect(first_jump_pad, rule=lambda state: state.has("Blue Eco", player))
     first_bats.connect(first_tether)
 
     first_jump_pad.connect(first_bats)
@@ -135,7 +179,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         first_tether.connect(first_tether_rat_colony, rule=lambda state:
                              (state.has_all(("Roll", "Roll Jump"), player)
                               or state.has_all(("Double Jump", "Jump Kick"), player)))
-    first_tether.connect(second_jump_pad)
+
+    # Requires yellow eco to destroy the rat colony which unlocks the blue eco for the jump pad.
+    first_tether.connect(second_jump_pad, rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))
     first_tether.connect(first_pole_course)
 
     first_tether_rat_colony.connect(first_tether)
@@ -144,19 +190,39 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
     first_pole_course.connect(first_tether)
     first_pole_course.connect(second_tether)
+    # Yellow Eco to break the boxes, Blue Eco to collect it.
+    if options.boggy_swamp_precise_movement:
+        # By taking damage, the orbs can be collected without Blue Eco.
+        first_pole_course.connect(first_pole_course_boxes, rule=lambda state: state.has("Yellow Eco", player))
+    else:
+        first_pole_course.connect(first_pole_course_boxes, rule=lambda state:
+                                  state.has_all(("Yellow Eco", "Blue Eco"), player))
 
     second_tether.connect(first_pole_course, rule=lambda state: can_jump_higher(state, player))
     second_tether.connect(second_bats)
 
     second_bats.connect(second_tether)
-    second_bats.connect(third_jump_pad)
-    second_bats.connect(fourth_jump_pad)
+    if options.boggy_swamp_precise_movement:
+        # It is possible to use the launch pad without destroying the rock.
+        second_bats.connect(third_jump_pad, rule=lambda state: state.has("Blue Eco", player))
+    else:
+        second_bats.connect(third_jump_pad, rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))
+
+    second_bats.connect(fourth_jump_pad, rule=lambda state: state.has("Blue Eco", player))
     second_bats.connect(flut_flut_pad)
+    second_bats.connect(second_bats_boxes, rule=lambda state: state.has("Yellow Eco", player))
+    if options.boggy_swamp_precise_movement:
+        second_bats.connect(second_bats_water_boxes, rule=lambda state: state.has("Yellow Eco", player))
+    else:
+        second_bats.connect(second_bats_water_boxes, rule=lambda state:
+                            state.has_all(("Yellow Eco", "Blue Eco"), player))
 
     third_jump_pad.connect(second_bats)
     fourth_jump_pad.connect(second_bats)
 
     flut_flut_pad.connect(second_bats)
+    # The boxes can be collected either by using yellow eco or with Flut Flut.
+    flut_flut_pad.connect(flut_flut_pad_boxes, rule=lambda state: state.has_any(("Yellow Eco", "Flut Flut"), player))
 
     if options.boggy_swamp_flut_flut_skip:
         # The course is doable with only Roll Jump, or by using boosteds with Jump Kick.
@@ -187,6 +253,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
     farthy_snacks.connect(flut_flut_pad)
 
     if options.boggy_swamp_precise_movement:
+        # Orbs can be collected by taking damage.
+        farthy_snacks.connect(farthy_snacks_water_boxes, rule=lambda state: state.has("Yellow Eco", player))
+
         # These can all be reached with Single Jump only by taking damage, and using invincibility after taking damage
         # when required.
         farthy_snacks.connect(box_field)
@@ -202,6 +271,9 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
 
         fourth_tether.connect(last_tar_pit)
     else:
+        farthy_snacks.connect(farthy_snacks_water_boxes, rule=lambda state:
+                              state.has_all(("Yellow Eco", "Blue Eco"), player))
+
         farthy_snacks.connect(box_field, rule=lambda state: can_jump_higher(state, player))
 
         box_field.connect(farthy_snacks, rule=lambda state: can_jump_higher(state, player))
@@ -211,26 +283,42 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         last_tar_pit.connect(fourth_tether, rule=lambda state: can_jump_farther(state, player))
 
         fourth_tether.connect(last_tar_pit, rule=lambda state: can_jump_farther(state, player))
+
+    box_field.connect(box_field_boxes, rule=lambda state: state.has("Yellow Eco", player))
+    # Always require blue eco for these orbs as the runback is long, and it's hard enough already to get through
+    # without taking additional damage.
+    last_tar_pit.connect(last_tar_pit_boxes, rule=lambda state: state.has_all(("Yellow Eco", "Blue Eco"), player))
+    fourth_tether.connect(fourth_tether_boxes, rule=lambda state: state.has("Yellow Eco", player))
     fourth_tether.connect(main_area)  # Fall down.
 
     world.level_to_regions[level_name].append(main_area)
+    world.level_to_regions[level_name].append(main_area_boxes)
     world.level_to_regions[level_name].append(first_bats)
+    world.level_to_regions[level_name].append(first_bats_orbs)
     world.level_to_regions[level_name].append(first_jump_pad)
     world.level_to_regions[level_name].append(first_tether)
     world.level_to_regions[level_name].append(first_tether_rat_colony)
     world.level_to_regions[level_name].append(second_jump_pad)
     world.level_to_regions[level_name].append(first_pole_course)
+    world.level_to_regions[level_name].append(first_pole_course_boxes)
     world.level_to_regions[level_name].append(second_tether)
     world.level_to_regions[level_name].append(second_bats)
+    world.level_to_regions[level_name].append(second_bats_boxes)
+    world.level_to_regions[level_name].append(second_bats_water_boxes)
     world.level_to_regions[level_name].append(third_jump_pad)
     world.level_to_regions[level_name].append(fourth_jump_pad)
     world.level_to_regions[level_name].append(flut_flut_pad)
+    world.level_to_regions[level_name].append(flut_flut_pad_boxes)
     world.level_to_regions[level_name].append(early_flut_flut_course)
     world.level_to_regions[level_name].append(flut_flut_course)
     world.level_to_regions[level_name].append(farthy_snacks)
+    world.level_to_regions[level_name].append(farthy_snacks_water_boxes)
     world.level_to_regions[level_name].append(box_field)
+    world.level_to_regions[level_name].append(box_field_boxes)
     world.level_to_regions[level_name].append(last_tar_pit)
+    world.level_to_regions[level_name].append(last_tar_pit_boxes)
     world.level_to_regions[level_name].append(fourth_tether)
+    world.level_to_regions[level_name].append(fourth_tether_boxes)
 
     # If Per-Level Orbsanity is enabled, build the special Orbsanity Region. This is a virtual region always
     # accessible to Main Area. The Locations within are automatically checked when you collect enough orbs.
