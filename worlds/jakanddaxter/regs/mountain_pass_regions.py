@@ -1,11 +1,11 @@
 from .region_base import JakAndDaxterRegion
-from ..options import EnableOrbsanity
+from ..game_id import Jak1Level
+from ..options import EnableOrbsanity, KlawwFightSkip
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import JakAndDaxterWorld
 from ..rules import can_reach_orbs_level
 from ..locs import scout_locations as scouts
-from worlds.generic.Rules import add_rule
 
 
 def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDaxterRegion, ...]:
@@ -33,12 +33,18 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
     shortcut.add_cell_locations([110])
 
     # Of course, in order to make it to the race region, you must defeat Klaww. He's not optional.
-    # So we need to set up this inter-region rule as well (or make it free if the setting is off).
+    # So we need to set up this inter-region rule as well.
 
-    if options.klaww_fight_skip:
-        # Actually, Klaww is optional with this setting and can be skipped using lava walking or idle deload.
+    if (options.klaww_fight_skip >= KlawwFightSkip.option_medium
+            and world.randomized_levels[Jak1Level.BOGGY_SWAMP] == Jak1Level.BOGGY_SWAMP):
+        # Actually, Klaww is optional with this setting and can be skipped using idle deload.
+        # This requires BS to be where it normally is.
         main_area.connect(race)
+    elif options.klaww_fight_skip == KlawwFightSkip.option_hard:
+        # Klaww skip is also possible by lava walking, but Jak must be able to get close to Klaww.
+        main_area.connect(race, rule=lambda state: state.has("Blue Eco", player))
     elif world.options.require_punch_for_klaww:
+        # If Klaww can not be skipped, both Blue and Yellow Eco are required.
         main_area.connect(race, rule=lambda state: state.has_all(("Punch", "Blue Eco", "Yellow Eco"), player))
     else:
         main_area.connect(race, rule=lambda state: state.has_all(("Blue Eco", "Yellow Eco"), player))

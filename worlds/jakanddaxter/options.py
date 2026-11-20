@@ -3,7 +3,8 @@ from functools import cached_property
 from typing import Any
 
 from Options import PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Range, DefaultOnToggle, OptionCounter, \
-    AssembleOptions
+    AssembleOptions, PlandoConnections
+from .game_id import Jak1Level
 from .items import trap_item_table
 
 
@@ -377,14 +378,20 @@ class GeyserRockDoorSkip(Toggle):
     display_name = "Geyser Rock Door Skip"
 
 
-class KlawwFightSkip(Toggle):
+class KlawwFightSkip(Choice):
     """
     Create an alternative path to Mountain Pass without having to fight Klaww.
 
     Enabling this setting may require Jak to reach Mountain Pass by skipping the Klaww fight, without *Blue Eco* or
     *Yellow Eco* unlocked.
+
+    **Hard** may require lava walking with *Blue Eco* unlocked if "Level Randomizer" is ON.
     """
     display_name = "Klaww Fight Skip"
+
+    option_no = 0
+    option_medium = 1
+    option_hard = 2
 
 
 class LavaTubeOrangesSkip(Toggle):
@@ -563,6 +570,8 @@ class ForbiddenJungleElevatorSkip(Toggle):
     Create an alternative path to the temple interior in Forbidden Jungle without having *Jungle Elevator* unlocked.
 
     Enabling this setting may require Jak to get inside the temple with only *Jump Kick*.
+
+    Does not apply if Forbidden Jungle has been randomized into a different level.
     """
     display_name = "Forbidden Jungle Elevator Skip"
 
@@ -770,6 +779,54 @@ class CrouchTrick(Toggle):
 
 # endregion
 
+class RandomizeLevels(Toggle):
+    """
+    Randomize all non-hub levels.
+    """
+    display_name = "Randomize Levels"
+
+
+class CitadelRandomization(Choice):
+    """
+    This setting controls the randomization of Gol and Maia's Citadel (GMC) if "Randomize Levels" is ON.
+
+    **Final Level**: GMC is always the last level.
+    **Boss Requires Power Cells*: GMC is randomly placed, but the final boss elevator requires Jak to have collected
+    enough power cells to traverse Lava Tube.
+    """
+    display_name = "Citadel Randomization"
+
+    option_final_level = 0
+    option_boss_requires_power_cells = 1
+
+    default = option_boss_requires_power_cells
+
+
+class JakAndDaxterPlandoConnections(PlandoConnections):
+    """
+    Connections plando to set specific level randomization. Requires "Randomize Levels" to be ON.
+    Format is:
+    - entrance: "Sentinel Beach"
+      exit: "Precursor Basin"
+      percentage: 100
+
+    (when going to Sentinel Beach, Jak will end up in Precursor Basin instead)
+    Percentage is an integer from 1 to 100, and defaults to 100 when omitted.
+
+    Allowed levels are:
+    "Forbidden Jungle"
+    "Sentinel Beach"
+    "Misty Island"
+    "Precursor Basin"
+    "Lost Precursor City"
+    "Boggy Swamp"
+    "Spider Cave"
+    "Snowy Mountain"
+    "Gol and Maias Citadel"
+    """
+    display_name = "Entrance Plando"
+    entrances = exits = [str(level) for level in Jak1Level]
+
 class CompletionCondition(Choice):
     """Set the goal for completing the game."""
     display_name = "Completion Condition"
@@ -835,6 +892,9 @@ class JakAndDaxterOptions(PerGameCommonOptions):
     sentinel_beach_blue_eco_switch_skip: SentinelBeachBlueEcoSwitchSkip
     zoomer_escape: ZoomerEscape
     crouch_trick: CrouchTrick
+    randomize_levels: RandomizeLevels
+    citadel_randomization: CitadelRandomization
+    plando_connections: JakAndDaxterPlandoConnections
     jak_completion_condition: CompletionCondition
     start_inventory_from_pool: StartInventoryPool
 

@@ -1,7 +1,7 @@
 # Python standard libraries
 from collections import defaultdict
 from math import ceil
-from typing import Any, ClassVar, Callable, Union, cast
+from typing import Any, ClassVar, Callable, Union, cast, TextIO
 
 # Archipelago imports
 import settings
@@ -15,7 +15,7 @@ from Options import OptionGroup
 
 # Jak imports
 from . import options
-from .game_id import jak1_id, jak1_name, jak1_max
+from .game_id import jak1_id, jak1_name, jak1_max, Jak1Level
 from .items import (JakAndDaxterItem,
                     OrbAssoc,
                     item_table,
@@ -34,7 +34,7 @@ from .locations import (JakAndDaxterLocation,
                         special_location_table,
                         cache_location_table,
                         orb_location_table)
-from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove
+from .options import jakanddaxter_option_presets, EnableOrbsanity, RandomStartingMove, CitadelRandomization
 from .regions import create_regions
 from .rules import (enforce_mp_absolute_limits,
                     enforce_mp_friendly_limits,
@@ -306,6 +306,10 @@ class JakAndDaxterWorld(World):
     level_to_regions: dict[str, list[JakAndDaxterRegion]]  # Contains all levels and regions.
     level_to_orb_regions: dict[str, list[JakAndDaxterRegion]]  # Contains only regions which contain orbs.
 
+    # Level replacement IDs for level randomizer (by default, every level maps to itself):
+    # randomized_levels[original_id] = replaced_level_id
+    randomized_levels: list[Jak1Level] = [Jak1Level(i) for i in range(len(Jak1Level))]
+
     # Handles various options validation, rules enforcement, and caching of important information.
     def generate_early(self) -> None:
 
@@ -402,6 +406,47 @@ class JakAndDaxterWorld(World):
 
         # Options drive which trade rules to use and advanced logic, so they need to be setup before we create_regions.
         set_option_driven_rules(self)
+
+        # Level Randomizer
+        if self.options.randomize_levels:
+            randomized_levels = self.randomized_levels
+            self.random.shuffle(randomized_levels)
+
+            if self.options.citadel_randomization == CitadelRandomization.option_final_level:
+                citadel_idx = randomized_levels.index(Jak1Level.GOL_AND_MAIAS_CITADEL)
+                # Swap the current level in GMC with the actual GMC to make sure it's the final level.
+                randomized_levels[Jak1Level.GOL_AND_MAIAS_CITADEL], randomized_levels[citadel_idx] = (
+                    randomized_levels[citadel_idx],
+                    randomized_levels[Jak1Level.GOL_AND_MAIAS_CITADEL]
+                )
+
+            # If connection plando is used, swap the randomized levels to match it.
+            # Later entries win if multiple choose the same level.
+            if self.options.plando_connections:
+                level_by_name = {str(level).lower(): level for level in Jak1Level}
+                for connection in self.options.plando_connections:
+                    # If the plando connection has a chance, check it first to see if we skip it.
+                    if (connection.percentage < 100) and 100 * self.random.random() >= connection.percentage:
+                        continue
+
+                    # Find entrance/exit level ID using the (case-insensitive) plando name.
+                    # The generic plando option already prints a nice error message before if an entrance/exit does not
+                    # exist (but it uses a case-insensitive comparison).
+                    entrance_level = level_by_name[connection.entrance.lower()]
+                    exit_level = level_by_name[connection.exit.lower()]
+
+                    # Determine where the exit level is currently.
+                    exit_idx = randomized_levels.index(exit_level)
+
+                    # Swap the exit level with the level at entrance_level.
+                    randomized_levels[entrance_level], randomized_levels[exit_idx] = (
+                        randomized_levels[exit_idx],
+                        randomized_levels[entrance_level]
+                    )
+
+        if hasattr(self.multiworld, "re_gen_passthrough"):
+            if jak1_name in self.multiworld.re_gen_passthrough and 'randomized_levels' in self.multiworld.re_gen_passthrough[jak1_name]:
+                self.randomized_levels = self.multiworld.re_gen_passthrough[jak1_name]['randomized_levels']
 
     # This will also set Locations, Location access rules, Region access rules, etc.
     def create_regions(self) -> None:
@@ -636,6 +681,7 @@ class JakAndDaxterWorld(World):
                                             "filler_orb_bundles_replaced_with_traps",
                                             "trap_effect_duration",
                                             "trap_weights",
+                                            "randomize_levels",
                                             "jak_completion_condition",
                                             "require_punch_for_klaww",
                                             # Eco Randomizer
@@ -674,5 +720,16 @@ class JakAndDaxterWorld(World):
                                             "sentinel_beach_blue_eco_switch_skip",
                                             "zoomer_escape",
                                             "crouch_trick",
+                                            # Level Randomizer
+                                            "randomize_levels",
+                                            "citadel_randomization",
                                             )
+        options_dict["randomized_levels"] = self.randomized_levels
         return options_dict
+
+    def write_spoiler(self, spoiler_handle: TextIO) -> None:
+        if self.options.randomize_levels:
+            spoiler_handle.write("\nLevel Connections:\n")
+            width = max(len(str(level)) for level in Jak1Level) + 1
+            for level in Jak1Level:
+                spoiler_handle.write(f"\n-> {str(level) + ':':<{width}} {Jak1Level(self.randomized_levels[level])}")

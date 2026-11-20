@@ -113,8 +113,10 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> tuple[JakAndDa
 
     # Final elevator. Need to break boxes at summit to get blue eco for platform.
     # Blue eco is required for the jump pad, yellow eco to shoot the boss.
+    lt_cell_count = options.lava_tube_cell_count.value
     rotating_tower.connect(final_boss, rule=lambda state:
                            can_fight(state, player)
+                           and state.has("Power Cell", player, lt_cell_count) # Normally 72. Important for level rando.
                            and state.has_all(("Blue Eco", "Yellow Eco", "Freed The Green Sage"), player))
 
     final_boss.connect(rotating_tower)  # Take elevator back down.
