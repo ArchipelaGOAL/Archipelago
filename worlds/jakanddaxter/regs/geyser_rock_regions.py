@@ -38,9 +38,8 @@ def build_regions(level_name: str, world: "JakAndDaxterWorld") -> JakAndDaxterRe
         # Door skip always requires Jump Kick + either Crouch Jump or Jump Dive + Double Jump.
         main_area.connect(behind_door, rule=lambda state:
                           state.has("Blue Eco", player)
-                          or (state.has("Jump Kick", player)
-                              and (state.has_all(("Crouch", "Crouch Jump"), player)
-                                   or state.has_all(("Jump Dive", "Double Jump"), player))))
+                          or state.has_all(("Jump Kick", "Crouch", "Crouch Jump"), player)
+                          or state.has_all(("Jump Kick", "Jump Dive", "Double Jump"), player))
     else:
         main_area.connect(behind_door, rule=lambda state: state.has("Blue Eco", player))
 
